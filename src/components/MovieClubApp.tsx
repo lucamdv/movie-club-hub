@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { tmdbProxy, omdbProxy, streamingProxy } from "@/lib/movie-api.functions";
 
 // ─────────────────────────────────────────────
 //  DESIGN TOKENS
