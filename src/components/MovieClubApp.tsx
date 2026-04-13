@@ -1894,6 +1894,24 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
               ))}
             </div>
 
+            {/* Favorite Genres */}
+            {favGenres.length > 0 && (
+              <div style={{ width: "100%", maxWidth: 400, marginBottom: 20 }}>
+                <p style={{ fontSize: 12, fontWeight: 600, color: C.textMuted, marginBottom: 10, textTransform: "uppercase", letterSpacing: 0.5 }}>Gêneros Favoritos</p>
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  {favGenres.map(g => (
+                    <div key={g.name} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <span style={{ fontSize: 12, color: C.text, fontWeight: 500, width: 90, textAlign: "right", flexShrink: 0 }}>{g.name}</span>
+                      <div style={{ flex: 1, height: 6, background: C.bgDeep, borderRadius: 3, overflow: "hidden" }}>
+                        <div style={{ width: `${g.pct}%`, height: "100%", background: `linear-gradient(90deg, ${C.goldDim}, ${C.gold})`, borderRadius: 3, transition: "width 0.5s ease" }} />
+                      </div>
+                      <span style={{ fontSize: 11, color: C.textDim, width: 20, flexShrink: 0 }}>{g.count}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Actions */}
             <div style={{ display: "flex", gap: 10 }}>
               <Btn variant="gold" size="sm" onClick={() => setShowEditModal(true)}>✏️ Editar Perfil</Btn>
