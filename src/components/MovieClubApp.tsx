@@ -2883,52 +2883,94 @@ function LoginPage({ onLogin, onSignup, error }) {
 //  QUICK RATE PAGE (Tinder-style)
 // ─────────────────────────────────────────────
 function QuickRatePage({ setPage, setSelectedMovie, auth }) {
+  const [mode, setMode] = useState(null); // null = setup, "random" | "recommended"
   const [movies, setMovies] = useState([]);
   const [idx, setIdx] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [hoverStar, setHoverStar] = useState(0);
   const [dragStartX, setDragStartX] = useState(null);
   const [swipeX, setSwipeX] = useState(0);
   const [animating, setAnimating] = useState(false);
-  const [direction, setDirection] = useState(null); // 'left' | 'right'
+  const [direction, setDirection] = useState(null);
   const { ratings, upsertRating, getRating } = useRatings(auth?.user?.id);
   const { items: wl, add: addWl, remove: removeWl, isInList: inWl } = useWatchlist(auth?.user?.id);
   const containerRef = useRef(null);
+  const loadingMoreRef = useRef(false);
+  const recPageRef = useRef(0);
 
-  // Load a batch of random movies
-  const loadMovies = useCallback(async () => {
+  // Load random movies
+  const loadRandom = useCallback(async (append = false) => {
     setLoading(true);
     try {
-      const randomPage = Math.floor(Math.random() * 20) + 1;
-      const sources = [
-        tmdb.popular(randomPage),
+      const rp = Math.floor(Math.random() * 20) + 1;
+      const [pop, top, trend] = await Promise.all([
+        tmdb.popular(rp),
         tmdb.topRated(Math.floor(Math.random() * 10) + 1),
         tmdb.trending(Math.floor(Math.random() * 5) + 1),
-      ];
-      const [pop, top, trend] = await Promise.all(sources);
+      ]);
       const all = [...(pop?.results || []), ...(top?.results || []), ...(trend?.results || [])];
-      // Deduplicate and shuffle
-      const unique = [];
-      const seen = new Set();
-      for (const m of all) {
-        if (!seen.has(m.id) && m.poster_path) {
-          seen.add(m.id);
-          unique.push(m);
-        }
-      }
-      for (let i = unique.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [unique[i], unique[j]] = [unique[j], unique[i]];
-      }
-      setMovies(unique);
-      setIdx(0);
-    } catch (e) {
-      toast.error("Erro ao carregar filmes");
-    }
+      const unique = []; const seen = new Set();
+      for (const m of all) { if (!seen.has(m.id) && m.poster_path) { seen.add(m.id); unique.push(m); } }
+      for (let i = unique.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [unique[i], unique[j]] = [unique[j], unique[i]]; }
+      if (append) setMovies(prev => [...prev, ...unique.filter(u => !prev.some(p => p.id === u.id))]);
+      else { setMovies(unique); setIdx(0); }
+    } catch { toast.error("Erro ao carregar filmes"); }
     setLoading(false);
   }, []);
 
-  useEffect(() => { loadMovies(); }, [loadMovies]);
+  // Load recommended movies (infinite)
+  const loadRecommended = useCallback(async (append = false) => {
+    if (loadingMoreRef.current) return;
+    loadingMoreRef.current = true;
+    setLoading(true);
+    try {
+      const topRated = ratings.filter(r => Number(r.rating) >= 3).sort((a, b) => Number(b.rating) - Number(a.rating));
+      if (!topRated.length) {
+        // Fallback: use popular if no ratings
+        await loadRandom(append);
+        loadingMoreRef.current = false;
+        return;
+      }
+      const ratedIds = new Set(ratings.map(r => r.tmdb_id));
+      const page = recPageRef.current;
+      // Pick different seed movies each page
+      const seedMovies = [];
+      for (let i = 0; i < 5; i++) {
+        const pick = topRated[(page * 5 + i) % topRated.length];
+        if (pick) seedMovies.push(pick);
+      }
+      const results = await Promise.all(seedMovies.map(r =>
+        tmdb.get(`/movie/${r.tmdb_id}/recommendations`, { page: String((page % 3) + 1) }).catch(() => null)
+      ));
+      const allRecs = results.filter(Boolean).flatMap(r => r.results || []).filter(m => m.poster_path && !ratedIds.has(m.id));
+      const seen = new Set();
+      const unique = allRecs.filter(m => { if (seen.has(m.id)) return false; seen.add(m.id); return true; });
+      // Shuffle
+      for (let i = unique.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [unique[i], unique[j]] = [unique[j], unique[i]]; }
+      recPageRef.current = page + 1;
+      if (append) setMovies(prev => { const existIds = new Set(prev.map(p => p.id)); return [...prev, ...unique.filter(u => !existIds.has(u.id))]; });
+      else { setMovies(unique); setIdx(0); }
+    } catch { toast.error("Erro ao carregar recomendações"); }
+    setLoading(false);
+    loadingMoreRef.current = false;
+  }, [ratings, loadRandom]);
+
+  // Start session
+  const startSession = (m) => {
+    setMode(m);
+    recPageRef.current = 0;
+    if (m === "random") loadRandom();
+    else loadRecommended();
+  };
+
+  // Auto-load more when nearing end
+  useEffect(() => {
+    if (!mode || loading) return;
+    if (idx >= movies.length - 3) {
+      if (mode === "random") loadRandom(true);
+      else loadRecommended(true);
+    }
+  }, [idx, movies.length, mode, loading]);
 
   const current = movies[idx];
   const existingRating = current ? getRating(current.id) : null;
@@ -2945,25 +2987,19 @@ function QuickRatePage({ setPage, setSelectedMovie, auth }) {
     try {
       await upsertRating(current.id, stars, null, current.title, tmdb.poster(current.poster_path));
       toast.success(`${stars} estrela${stars !== 1 ? "s" : ""} para ${current.title}`);
-    } catch (e) {
-      toast.error("Erro ao avaliar");
-    }
+    } catch { toast.error("Erro ao avaliar"); }
   };
 
   const goNext = () => {
     if (idx < movies.length - 1) {
-      setDirection("left");
-      setAnimating(true);
+      setDirection("left"); setAnimating(true);
       setTimeout(() => { setIdx(i => i + 1); setAnimating(false); setDirection(null); setSwipeX(0); }, 250);
-    } else {
-      loadMovies();
     }
   };
 
   const goPrev = () => {
     if (idx > 0) {
-      setDirection("right");
-      setAnimating(true);
+      setDirection("right"); setAnimating(true);
       setTimeout(() => { setIdx(i => i - 1); setAnimating(false); setDirection(null); setSwipeX(0); }, 250);
     }
   };
@@ -2974,32 +3010,90 @@ function QuickRatePage({ setPage, setSelectedMovie, auth }) {
     setPage("movie");
   };
 
-  // Touch/drag handlers
   const onPointerDown = (e) => { setDragStartX(e.clientX); };
   const onPointerMove = (e) => { if (dragStartX !== null) setSwipeX(e.clientX - dragStartX); };
   const onPointerUp = () => {
     if (dragStartX !== null) {
-      if (swipeX < -80) goNext();
-      else if (swipeX > 80) goPrev();
-      else setSwipeX(0);
+      if (swipeX < -80) goNext(); else if (swipeX > 80) goPrev(); else setSwipeX(0);
       setDragStartX(null);
     }
   };
 
-  // Keyboard
   useEffect(() => {
-    const fn = (e) => {
-      if (e.key === "ArrowRight") goNext();
-      if (e.key === "ArrowLeft") goPrev();
-    };
+    if (!mode) return;
+    const fn = (e) => { if (e.key === "ArrowRight") goNext(); if (e.key === "ArrowLeft") goPrev(); };
     window.addEventListener("keydown", fn);
     return () => window.removeEventListener("keydown", fn);
-  }, [idx, movies.length]);
+  }, [idx, movies.length, mode]);
 
-  if (loading) return (
+  // ── SETUP SCREEN ──
+  if (!mode) {
+    const hasRatings = ratings.length > 0;
+    return (
+      <div style={{ paddingTop: 80, minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ maxWidth: 480, width: "100%", padding: "0 24px" }}>
+          <div style={{ textAlign: "center", marginBottom: 40 }}>
+            <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 64, height: 64, borderRadius: 20, background: `linear-gradient(135deg, ${C.gold}22, ${C.gold}08)`, border: `1px solid ${C.gold}33`, marginBottom: 16 }}>
+              <Zap size={28} style={{ color: C.gold }} />
+            </div>
+            <h1 style={{ color: C.text, fontSize: 26, fontWeight: 800, margin: "0 0 8px", fontFamily: "'Outfit', sans-serif" }}>Avaliação Rápida</h1>
+            <p style={{ color: C.textMuted, fontSize: 14, margin: 0, lineHeight: 1.5 }}>Escolha como quer descobrir filmes nesta sessão</p>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            {/* Random option */}
+            <button
+              onClick={() => startSession("random")}
+              style={{
+                padding: 24, borderRadius: 16, background: C.bgCard, border: `1px solid ${C.border}`,
+                cursor: "pointer", textAlign: "left", transition: "all 0.2s", display: "flex", gap: 20, alignItems: "center",
+              }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = C.gold; e.currentTarget.style.background = C.bgCardHover; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.background = C.bgCard; }}
+            >
+              <div style={{ width: 52, height: 52, borderRadius: 14, background: "rgba(99,102,241,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <Film size={24} style={{ color: "#818CF8" }} />
+              </div>
+              <div>
+                <h3 style={{ color: C.text, fontSize: 16, fontWeight: 700, margin: "0 0 4px", fontFamily: "'DM Sans', sans-serif" }}>Aleatório</h3>
+                <p style={{ color: C.textMuted, fontSize: 13, margin: 0, lineHeight: 1.4 }}>Filmes populares, em alta e bem avaliados misturados aleatoriamente</p>
+              </div>
+            </button>
+
+            {/* Recommended option */}
+            <button
+              onClick={() => startSession("recommended")}
+              style={{
+                padding: 24, borderRadius: 16, background: C.bgCard, border: `1px solid ${C.border}`,
+                cursor: "pointer", textAlign: "left", transition: "all 0.2s", display: "flex", gap: 20, alignItems: "center",
+                opacity: 1,
+              }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = C.gold; e.currentTarget.style.background = C.bgCardHover; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.background = C.bgCard; }}
+            >
+              <div style={{ width: 52, height: 52, borderRadius: 14, background: `${C.gold}18`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <Target size={24} style={{ color: C.gold }} />
+              </div>
+              <div>
+                <h3 style={{ color: C.text, fontSize: 16, fontWeight: 700, margin: "0 0 4px", fontFamily: "'DM Sans', sans-serif" }}>Recomendados</h3>
+                <p style={{ color: C.textMuted, fontSize: 13, margin: 0, lineHeight: 1.4 }}>
+                  {hasRatings
+                    ? "Baseado nos filmes que você já avaliou — sessão infinita de descobertas"
+                    : "Avalie alguns filmes primeiro para desbloquear recomendações personalizadas (usaremos populares enquanto isso)"}
+                </p>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── LOADING ──
+  if (loading && movies.length === 0) return (
     <div style={{ paddingTop: 100, minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 16 }}>
       <Spinner size={36} />
-      <p style={{ color: C.textMuted, fontSize: 14 }}>Preparando sessão de avaliação...</p>
+      <p style={{ color: C.textMuted, fontSize: 14 }}>Preparando sessão{mode === "recommended" ? " personalizada" : ""}...</p>
     </div>
   );
 
@@ -3007,7 +3101,7 @@ function QuickRatePage({ setPage, setSelectedMovie, auth }) {
     <div style={{ paddingTop: 100, minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 16 }}>
       <Film size={48} style={{ color: C.textDim }} />
       <p style={{ color: C.textMuted, fontSize: 14 }}>Nenhum filme encontrado</p>
-      <Btn variant="gold" onClick={loadMovies}>Carregar novos filmes</Btn>
+      <Btn variant="gold" onClick={() => setMode(null)}>Voltar</Btn>
     </div>
   );
 
@@ -3020,7 +3114,6 @@ function QuickRatePage({ setPage, setSelectedMovie, auth }) {
 
   return (
     <div style={{ paddingTop: 80, minHeight: "100vh", position: "relative", overflow: "hidden" }}>
-      {/* Backdrop */}
       {backdropUrl && (
         <div style={{ position: "fixed", inset: 0, zIndex: 0 }}>
           <img src={backdropUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.15, filter: "blur(30px)" }} />
@@ -3032,59 +3125,34 @@ function QuickRatePage({ setPage, setSelectedMovie, auth }) {
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <Zap size={20} style={{ color: C.gold }} />
-            <span style={{ color: C.text, fontWeight: 700, fontSize: 18, fontFamily: "'DM Sans', sans-serif" }}>Avaliação Rápida</span>
+            <button onClick={() => setMode(null)} style={{ background: "none", border: "none", cursor: "pointer", color: C.textMuted, display: "flex", alignItems: "center", padding: 4, borderRadius: 8, transition: "color 0.2s" }}
+              onMouseEnter={e => e.currentTarget.style.color = C.text} onMouseLeave={e => e.currentTarget.style.color = C.textMuted}>
+              <ChevronLeft size={20} />
+            </button>
+            {mode === "recommended" ? <Target size={18} style={{ color: C.gold }} /> : <Film size={18} style={{ color: "#818CF8" }} />}
+            <span style={{ color: C.text, fontWeight: 700, fontSize: 16, fontFamily: "'DM Sans', sans-serif" }}>
+              {mode === "recommended" ? "Recomendados" : "Aleatório"}
+            </span>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ color: C.textDim, fontSize: 12 }}>{idx + 1} / {movies.length}</span>
-            <Btn variant="outline" size="sm" onClick={loadMovies} style={{ fontSize: 11 }}>
-              <SkipForward size={13} /> Nova sessão
-            </Btn>
-          </div>
+          <span style={{ color: C.textDim, fontSize: 12 }}>{idx + 1} / {movies.length}{mode === "recommended" ? "+" : ""}</span>
         </div>
 
         {/* Movie Card */}
-        <div
-          ref={containerRef}
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-          onPointerLeave={onPointerUp}
-          style={{
-            touchAction: "pan-y",
-            userSelect: "none",
-          }}
-        >
+        <div ref={containerRef} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerLeave={onPointerUp}
+          style={{ touchAction: "pan-y", userSelect: "none" }}>
           <div style={{
             transform: cardTransform,
             transition: animating ? "transform 0.25s ease-out, opacity 0.25s" : dragStartX ? "none" : "transform 0.2s ease-out",
             opacity: animating ? 0 : 1,
           }}>
-            {/* Poster */}
-            <div
-              onClick={handleOpenMovie}
-              style={{
-                cursor: "pointer",
-                borderRadius: 20,
-                overflow: "hidden",
-                position: "relative",
-                aspectRatio: "2/3",
-                width: "100%",
-                boxShadow: "0 20px 60px rgba(0,0,0,0.6)",
-                border: `1px solid ${C.border}`,
-              }}
-            >
+            <div onClick={handleOpenMovie} style={{
+              cursor: "pointer", borderRadius: 20, overflow: "hidden", position: "relative",
+              aspectRatio: "2/3", width: "100%", boxShadow: "0 20px 60px rgba(0,0,0,0.6)", border: `1px solid ${C.border}`,
+            }}>
               <img src={posterUrl} alt={current.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              {/* Gradient overlay at bottom */}
-              <div style={{
-                position: "absolute", bottom: 0, left: 0, right: 0, height: "50%",
-                background: "linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%)",
-              }} />
-              {/* Movie info on poster */}
+              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "50%", background: "linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%)" }} />
               <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "20px 24px" }}>
-                <h2 style={{ color: "#fff", fontSize: 22, fontWeight: 800, margin: 0, lineHeight: 1.2, fontFamily: "'DM Sans', sans-serif", textShadow: "0 2px 8px rgba(0,0,0,0.5)" }}>
-                  {current.title}
-                </h2>
+                <h2 style={{ color: "#fff", fontSize: 22, fontWeight: 800, margin: 0, lineHeight: 1.2, fontFamily: "'DM Sans', sans-serif", textShadow: "0 2px 8px rgba(0,0,0,0.5)" }}>{current.title}</h2>
                 <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 8 }}>
                   {year && <span style={{ color: "rgba(255,255,255,0.7)", fontSize: 13, fontWeight: 500 }}>{year}</span>}
                   {current.vote_average > 0 && (
@@ -3093,97 +3161,58 @@ function QuickRatePage({ setPage, setSelectedMovie, auth }) {
                     </span>
                   )}
                 </div>
-                {/* Tap hint */}
-                <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 11, marginTop: 8 }}>
-                  Toque para ver detalhes
-                </p>
+                <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 11, marginTop: 8 }}>Toque para ver detalhes</p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Navigation arrows */}
+        {/* Navigation + Stars */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 20 }}>
           <button onClick={goPrev} disabled={idx === 0} style={{
             width: 44, height: 44, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
             background: idx > 0 ? "rgba(255,255,255,0.08)" : "transparent",
             border: `1px solid ${idx > 0 ? C.border : "transparent"}`,
-            color: idx > 0 ? C.text : C.textDim, cursor: idx > 0 ? "pointer" : "default",
-            transition: "all 0.2s",
+            color: idx > 0 ? C.text : C.textDim, cursor: idx > 0 ? "pointer" : "default", transition: "all 0.2s",
           }}>
             <ChevronLeft size={22} />
           </button>
 
-          {/* Star rating */}
           <div style={{ display: "flex", gap: 6 }}>
             {[1, 2, 3, 4, 5].map(s => {
               const filled = s <= (hoverStar || localRating);
               const half = !filled && s - 0.5 === (hoverStar || localRating);
               return (
-                <button
-                  key={s}
-                  onClick={() => handleRate(s === localRating ? s - 0.5 : s)}
-                  onMouseEnter={() => setHoverStar(s)}
-                  onMouseLeave={() => setHoverStar(0)}
-                  style={{
-                    background: "none", border: "none", cursor: "pointer", padding: 4,
-                    transform: filled || half ? "scale(1.15)" : "scale(1)",
-                    transition: "all 0.15s",
-                  }}
-                >
-                  <Star
-                    size={28}
-                    fill={filled ? C.gold : half ? `url(#halfGrad)` : "transparent"}
-                    stroke={filled || half ? C.gold : C.textDim}
-                    strokeWidth={1.5}
-                  />
+                <button key={s} onClick={() => handleRate(s === localRating ? s - 0.5 : s)}
+                  onMouseEnter={() => setHoverStar(s)} onMouseLeave={() => setHoverStar(0)}
+                  style={{ background: "none", border: "none", cursor: "pointer", padding: 4, transform: filled || half ? "scale(1.15)" : "scale(1)", transition: "all 0.15s" }}>
+                  <Star size={28} fill={filled ? C.gold : half ? `url(#halfGrad)` : "transparent"} stroke={filled || half ? C.gold : C.textDim} strokeWidth={1.5} />
                 </button>
               );
             })}
-            <svg width="0" height="0">
-              <defs>
-                <linearGradient id="halfGrad">
-                  <stop offset="50%" stopColor={C.gold} />
-                  <stop offset="50%" stopColor="transparent" />
-                </linearGradient>
-              </defs>
-            </svg>
+            <svg width="0" height="0"><defs><linearGradient id="halfGrad"><stop offset="50%" stopColor={C.gold} /><stop offset="50%" stopColor="transparent" /></linearGradient></defs></svg>
           </div>
 
           <button onClick={goNext} style={{
             width: 44, height: 44, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
-            background: "rgba(255,255,255,0.08)", border: `1px solid ${C.border}`,
-            color: C.text, cursor: "pointer", transition: "all 0.2s",
+            background: "rgba(255,255,255,0.08)", border: `1px solid ${C.border}`, color: C.text, cursor: "pointer", transition: "all 0.2s",
           }}>
             <ChevronRight size={22} />
           </button>
         </div>
 
-        {/* Watchlist + Skip row */}
+        {/* Watchlist + Skip */}
         <div style={{ display: "flex", justifyContent: "center", gap: 12, marginTop: 16 }}>
-          <Btn
-            variant={inWl(current.id) ? "gold" : "outline"}
-            size="sm"
-            onClick={async () => {
-              if (inWl(current.id)) {
-                await removeWl(current.id);
-                toast.success("Removido da watchlist");
-              } else {
-                await addWl(current.id, current.title, tmdb.poster(current.poster_path));
-                toast.success("Adicionado à watchlist");
-              }
-            }}
-          >
+          <Btn variant={inWl(current.id) ? "gold" : "outline"} size="sm" onClick={async () => {
+            if (inWl(current.id)) { await removeWl(current.id); toast.success("Removido da watchlist"); }
+            else { await addWl(current.id, current.title, tmdb.poster(current.poster_path)); toast.success("Adicionado à watchlist"); }
+          }}>
             <Bookmark size={14} fill={inWl(current.id) ? C.gold : "none"} />
             {inWl(current.id) ? "Na Watchlist" : "Watchlist"}
           </Btn>
-
-          <Btn variant="ghost" size="sm" onClick={goNext}>
-            Pular <ChevronRight size={14} />
-          </Btn>
+          <Btn variant="ghost" size="sm" onClick={goNext}>Pular <ChevronRight size={14} /></Btn>
         </div>
 
-        {/* Swipe hint */}
         <p style={{ textAlign: "center", color: C.textDim, fontSize: 11, marginTop: 20 }}>
           Arraste para os lados ou use as setas ← → para navegar
         </p>
