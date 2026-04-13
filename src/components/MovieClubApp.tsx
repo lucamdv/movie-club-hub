@@ -2200,22 +2200,19 @@ function useFriendships(userId) {
 // ─────────────────────────────────────────────
 //  FRIENDS PAGE
 // ─────────────────────────────────────────────
-function FriendsPage({ setPage, setSelectedMovie, auth: authCtx }) {
+function FriendsPage({ setPage, setSelectedMovie, auth: authCtx, onViewProfile }) {
   const userId = authCtx?.user?.id;
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [tab, setTab] = useState("search"); // search | following | followers | friends
-  const [friendCode, setFriendCode] = useState("");
-  const [generatedLink, setGeneratedLink] = useState(null);
   const [followingProfiles, setFollowingProfiles] = useState([]);
   const [followerProfiles, setFollowerProfiles] = useState([]);
   const [friendProfiles, setFriendProfiles] = useState([]);
   const debRef = useRef(null);
 
   const { following, followers, follow, unfollow, isFollowing, loading: followsLoading } = useFollows(userId);
-  const { links, createLink, deleteLink } = useFriendLinks(userId);
-  const { friends, isFriend, acceptLink } = useFriendships(userId);
+  const { friends, isFriend } = useFriendships(userId);
 
   // Search users
   useEffect(() => {
