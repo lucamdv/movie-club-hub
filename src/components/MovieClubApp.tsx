@@ -1767,10 +1767,20 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
 
             {/* Actions */}
             <div style={{ display: "flex", gap: 10 }}>
+              <Btn variant="gold" size="sm" onClick={() => setShowEditModal(true)}>✏️ Editar Perfil</Btn>
               <Btn variant="ghost" size="sm" onClick={() => authCtx?.signOut?.()}>Sair da conta</Btn>
             </div>
           </div>
         </div>
+
+        {showEditModal && (
+          <ProfileEditModal
+            profile={profile}
+            user={authCtx?.user}
+            onClose={() => setShowEditModal(false)}
+            onSave={authCtx?.updateProfile}
+          />
+        )}
 
         {/* Tabs + View Controls */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 32, marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
