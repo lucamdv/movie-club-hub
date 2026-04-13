@@ -1330,6 +1330,8 @@ function SearchPage({ setPage, setSelectedMovie }) {
   const [ratingMin, setRatingMin] = useState("");
   const [lang, setLang] = useState("");
   const [showFilters, setShowFilters] = useState(false);
+  const [viewMode, setViewMode] = useState("grid");
+  const [perPage, setPerPage] = useState(20);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalResults, setTotalResults] = useState(0);
