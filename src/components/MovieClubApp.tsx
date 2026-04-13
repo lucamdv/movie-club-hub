@@ -2271,8 +2271,9 @@ function FriendsPage({ setPage, setSelectedMovie, auth: authCtx, onViewProfile }
     return (
       <div style={{
         background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 16,
-        padding: 20, display: "flex", alignItems: "center", gap: 16, transition: "all 0.2s"
-      }} className="card-hover">
+        padding: 20, display: "flex", alignItems: "center", gap: 16, transition: "all 0.2s",
+        cursor: "pointer"
+      }} className="card-hover" onClick={() => onViewProfile?.(profile.user_id)}>
         {/* Avatar */}
         <div style={{
           width: 52, height: 52, borderRadius: "50%", flexShrink: 0, overflow: "hidden",
