@@ -846,6 +846,11 @@ function HomePage({ setPage, setSelectedMovie }) {
           <PaginationBar page={top.page} totalPages={top.totalPages} totalResults={top.totalResults} onPageChange={top.goTo} />
         </Section>
       </div>
+
+      {/* Branding footer */}
+      <div style={{ display: "flex", justifyContent: "center", padding: "40px 0 20px", opacity: 0.15 }}>
+        <img src={mascotsNav} alt="MovieClub Mascots" style={{ width: 200, filter: "grayscale(0.3)" }} />
+      </div>
       <FilmStripBg />
     </div>
   );
