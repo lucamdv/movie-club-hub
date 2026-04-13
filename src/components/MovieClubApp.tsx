@@ -1806,6 +1806,30 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
   const bio = profile?.bio || "";
   const avgRating = ratings.length > 0 ? (ratings.reduce((s, r) => s + Number(r.rating), 0) / ratings.length).toFixed(1) : "—";
 
+  // Favorite genres based on ratings
+  const [favGenres, setFavGenres] = useState([]);
+  useEffect(() => {
+    if (!ratings.length) { setFavGenres([]); return; }
+    let alive = true;
+    // Fetch details for top-rated movies to extract genres
+    const toFetch = ratings.slice(0, 20);
+    Promise.all(toFetch.map(r =>
+      cachedFetch(`mini_${r.tmdb_id}`, () => tmdbProxy({ data: { path: `/movie/${r.tmdb_id}`, params: {} } })).catch(() => null)
+    )).then(results => {
+      if (!alive) return;
+      const genreCount = {};
+      results.filter(Boolean).forEach(m => {
+        (m.genres || []).forEach(g => {
+          genreCount[g.name] = (genreCount[g.name] || 0) + 1;
+        });
+      });
+      const sorted = Object.entries(genreCount).sort((a, b) => b[1] - a[1]).slice(0, 6);
+      const maxCount = sorted[0]?.[1] || 1;
+      setFavGenres(sorted.map(([name, count]) => ({ name, count, pct: Math.round((count / maxCount) * 100) })));
+    });
+    return () => { alive = false; };
+  }, [ratings]);
+
   // Top 3 recent posters for banner collage
   const bannerPosters = ratings.filter(r => r.poster_url).slice(0, 4).map(r => r.poster_url);
 
