@@ -1396,12 +1396,15 @@ function SearchPage({ setPage, setSelectedMovie }) {
   return (
     <div style={{ paddingTop: 80, paddingBottom: 60 }}>
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 32px" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
           <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 26, fontWeight: 700, color: C.text }}>Buscar <span style={{ color: C.gold }}>Filmes</span></h1>
-          <button onClick={() => setShowFilters(!showFilters)}
-            style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 8, background: showFilters ? C.gold : C.bgCard, color: showFilters ? C.bgDeep : C.textMuted, border: `1px solid ${showFilters ? C.gold : C.border}`, fontSize: 13, fontWeight: 500, cursor: "pointer", transition: "all 0.2s" }}>
-            Filtros {hasFilters && <span style={{ background: showFilters ? C.bgDeep : C.gold, color: showFilters ? C.gold : C.bgDeep, borderRadius: 10, padding: "1px 6px", fontSize: 10, fontWeight: 700 }}>●</span>}
-          </button>
+          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+            <ViewToolbar viewMode={viewMode} setViewMode={setViewMode} perPage={perPage} setPerPage={setPerPage} />
+            <button onClick={() => setShowFilters(!showFilters)}
+              style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 8, background: showFilters ? C.gold : C.bgCard, color: showFilters ? C.bgDeep : C.textMuted, border: `1px solid ${showFilters ? C.gold : C.border}`, fontSize: 13, fontWeight: 500, cursor: "pointer", transition: "all 0.2s" }}>
+              Filtros {hasFilters && <span style={{ background: showFilters ? C.bgDeep : C.gold, color: showFilters ? C.gold : C.bgDeep, borderRadius: 10, padding: "1px 6px", fontSize: 10, fontWeight: 700 }}>●</span>}
+            </button>
+          </div>
         </div>
 
         <div style={{ position: "relative", marginBottom: 16 }}>
