@@ -700,6 +700,27 @@ const KeyIcon = () => <svg width={14} height={14} viewBox="0 0 24 24" fill="none
 const PlayIcon = () => <svg width={14} height={14} viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5,3 19,12 5,21" /></svg>;
 const HeartIcon = ({ f }) => <svg width={14} height={14} viewBox="0 0 24 24" fill={f ? C.red : "none"} stroke={f ? C.red : "currentColor"} strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></svg>;
 const ChevronLeft = () => <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6" /></svg>;
+const GridIcon = () => <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>;
+const ListIcon = () => <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>;
+
+const PER_PAGE_OPTIONS = [20, 40, 60, 80];
+
+function ViewToolbar({ viewMode, setViewMode, perPage, setPerPage, showPerPage = true }) {
+  return (
+    <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+      {showPerPage && (
+        <select value={perPage} onChange={e => setPerPage(Number(e.target.value))}
+          style={{ padding: "6px 10px", borderRadius: 8, background: C.bgCard, border: `1px solid ${C.border}`, color: C.textMuted, fontSize: 12, outline: "none", cursor: "pointer" }}>
+          {PER_PAGE_OPTIONS.map(n => <option key={n} value={n}>{n} por pág.</option>)}
+        </select>
+      )}
+      <div style={{ display: "flex", background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 8, overflow: "hidden" }}>
+        <button onClick={() => setViewMode("grid")} style={{ padding: "6px 10px", background: viewMode === "grid" ? C.gold : "transparent", color: viewMode === "grid" ? C.bgDeep : C.textDim, transition: "all 0.2s", cursor: "pointer", display: "flex", alignItems: "center" }}><GridIcon /></button>
+        <button onClick={() => setViewMode("list")} style={{ padding: "6px 10px", background: viewMode === "list" ? C.gold : "transparent", color: viewMode === "list" ? C.bgDeep : C.textDim, transition: "all 0.2s", cursor: "pointer", display: "flex", alignItems: "center" }}><ListIcon /></button>
+      </div>
+    </div>
+  );
+}
 const ChevronRight = () => <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 6 15 12 9 18" /></svg>;
 
 // ─────────────────────────────────────────────
