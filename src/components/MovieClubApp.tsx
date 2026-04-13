@@ -1467,11 +1467,7 @@ function LoginPage({ onLogin }) {
       <div style={{ width: 440, position: "relative", zIndex: 1 }}>
         {/* Logo area */}
         <div style={{ textAlign: "center", marginBottom: 36, animation: "staggerUp 0.6s ease 0.1s both" }}>
-          <svg width={36} height={36} viewBox="0 0 24 24" fill={C.gold} style={{ marginBottom: 16 }}>
-            <path d="M12 0L14.5 9.5L24 12L14.5 14.5L12 24L9.5 14.5L0 12L9.5 9.5Z" />
-          </svg>
-          <h1 style={{ fontFamily: "'Playfair Display',serif", fontSize: 32, fontWeight: 900, color: C.gold, letterSpacing: "0.12em", marginBottom: 4 }}>MOVIECLUB</h1>
-          <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 10, color: C.goldDim, textTransform: "uppercase", letterSpacing: "0.25em" }}>Shared Film Platform</p>
+          <img src={logoMain} alt="MovieClub" style={{ width: 220, marginBottom: 8, filter: "drop-shadow(0 0 20px rgba(201,168,76,0.2))" }} />
         </div>
 
         {/* Card */}
