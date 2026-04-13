@@ -2839,6 +2839,33 @@ export default function MovieClubApp() {
     tmdb.popular().then(d => { if (d?.results) setApiStatus(s => ({ ...s, tmdb: true })); }).catch(() => { });
   }, []);
 
+  // Auto-detect friend link in URL
+  useEffect(() => {
+    if (!authCtx.user) return;
+    const params = new URLSearchParams(window.location.search);
+    const friendCode = params.get("friend");
+    if (friendCode) {
+      setPage("friends");
+      // Clean URL
+      window.history.replaceState({}, "", window.location.pathname);
+      // Auto-accept after short delay
+      setTimeout(async () => {
+        try {
+          const [a, b] = [authCtx.user.id, ""].sort();
+          // Find the link first
+          const { data: linkData } = await supabase.from("friend_links").select("*").eq("code", friendCode).single();
+          if (!linkData) { toast.error("Link de amizade inválido"); return; }
+          if (linkData.user_id === authCtx.user.id) { toast.error("Você não pode adicionar a si mesmo"); return; }
+          const [ua, ub] = [authCtx.user.id, linkData.user_id].sort();
+          const { data: existing } = await supabase.from("friendships").select("id").eq("user_a_id", ua).eq("user_b_id", ub).maybeSingle();
+          if (existing) { toast.info("Vocês já são amigos!"); return; }
+          await supabase.from("friendships").insert({ user_a_id: ua, user_b_id: ub });
+          toast.success("Amizade aceita! 🎉");
+        } catch (e) { toast.error("Erro ao aceitar amizade"); }
+      }, 500);
+    }
+  }, [authCtx.user]);
+
   const handleSplashDone = useCallback(() => setShowSplash(false), []);
 
   const handleLogin = async (email, password) => {
