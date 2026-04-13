@@ -57,26 +57,38 @@ const tmdb = {
     const cacheKey = `tmdb:${path}:${JSON.stringify(params)}`;
     return cachedFetch(cacheKey, () => tmdbProxy({ data: { path, params } }));
   },
-  async getPages(path, params = {}, pages = 5) {
-    const fetches = Array.from({ length: pages }, (_, i) =>
-      this.get(path, { ...params, page: String(i + 1) })
-    );
-    const responses = await Promise.all(fetches);
+  async getAllPages(path, params = {}) {
+    // Fetch page 1 to discover total_pages
+    const first = await this.get(path, { ...params, page: "1" });
+    const totalPages = Math.min(first?.total_pages || 1, 500); // TMDb caps at 500
+    let allResults = [...(first?.results || [])];
+
+    // Fetch remaining pages in batches of 20 to avoid overwhelming the API
+    const batchSize = 20;
+    for (let start = 2; start <= totalPages; start += batchSize) {
+      const end = Math.min(start + batchSize - 1, totalPages);
+      const batch = Array.from({ length: end - start + 1 }, (_, i) =>
+        this.get(path, { ...params, page: String(start + i) })
+      );
+      const responses = await Promise.all(batch);
+      allResults = allResults.concat(responses.flatMap(r => r?.results || []));
+    }
+
     return {
-      results: responses.flatMap(r => r?.results || []),
-      total_pages: responses[0]?.total_pages || 1,
-      total_results: responses[0]?.total_results || 0,
+      results: allResults,
+      total_pages: totalPages,
+      total_results: first?.total_results || allResults.length,
     };
   },
   poster(path, size = "w300") { return path ? `${TMDB_IMG}/${size}${path}` : null; },
   backdrop(path, size = "w1280") { return path ? `${TMDB_IMG}/${size}${path}` : null; },
-  async trending()          { return this.getPages("/trending/movie/week", {}, 5); },
-  async popular()           { return this.getPages("/movie/popular", {}, 5); },
-  async topRated()          { return this.getPages("/movie/top_rated", {}, 5); },
+  async trending()          { return this.getAllPages("/trending/movie/week"); },
+  async popular()           { return this.getAllPages("/movie/popular"); },
+  async topRated()          { return this.getAllPages("/movie/top_rated"); },
   async details(id)         { return this.get(`/movie/${id}`, { append_to_response: "credits,videos,similar,recommendations" }); },
   async search(q, page = 1) { return this.get("/search/movie", { query: q, page: String(page) }); },
   async genres()            { return this.get("/genre/movie/list"); },
-  async byGenre(gid, pages = 3) { return this.getPages("/discover/movie", { with_genres: String(gid), sort_by: "popularity.desc" }, pages); },
+  async byGenre(gid)        { return this.getAllPages("/discover/movie", { with_genres: String(gid), sort_by: "popularity.desc" }); },
 };
 
 const omdb = {
