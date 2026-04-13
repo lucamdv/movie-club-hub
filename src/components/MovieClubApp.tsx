@@ -2877,8 +2877,319 @@ function LoginPage({ onLogin, onSignup, error }) {
 }
 
 // ─────────────────────────────────────────────
-//  ROOT APP
+//  QUICK RATE PAGE (Tinder-style)
 // ─────────────────────────────────────────────
+function QuickRatePage({ setPage, setSelectedMovie, auth }) {
+  const [movies, setMovies] = useState([]);
+  const [idx, setIdx] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [hoverStar, setHoverStar] = useState(0);
+  const [dragStartX, setDragStartX] = useState(null);
+  const [swipeX, setSwipeX] = useState(0);
+  const [animating, setAnimating] = useState(false);
+  const [direction, setDirection] = useState(null); // 'left' | 'right'
+  const { ratings, upsertRating, getRating } = useRatings(auth?.user?.id);
+  const { items: wl, add: addWl, remove: removeWl, isInList: inWl } = useWatchlist(auth?.user?.id);
+  const containerRef = useRef(null);
+
+  // Load a batch of random movies
+  const loadMovies = useCallback(async () => {
+    setLoading(true);
+    try {
+      const randomPage = Math.floor(Math.random() * 20) + 1;
+      const sources = [
+        tmdb.popular(randomPage),
+        tmdb.topRated(Math.floor(Math.random() * 10) + 1),
+        tmdb.trending(Math.floor(Math.random() * 5) + 1),
+      ];
+      const [pop, top, trend] = await Promise.all(sources);
+      const all = [...(pop?.results || []), ...(top?.results || []), ...(trend?.results || [])];
+      // Deduplicate and shuffle
+      const unique = [];
+      const seen = new Set();
+      for (const m of all) {
+        if (!seen.has(m.id) && m.poster_path) {
+          seen.add(m.id);
+          unique.push(m);
+        }
+      }
+      for (let i = unique.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [unique[i], unique[j]] = [unique[j], unique[i]];
+      }
+      setMovies(unique);
+      setIdx(0);
+    } catch (e) {
+      toast.error("Erro ao carregar filmes");
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { loadMovies(); }, [loadMovies]);
+
+  const current = movies[idx];
+  const existingRating = current ? getRating(current.id) : null;
+  const [localRating, setLocalRating] = useState(0);
+
+  useEffect(() => {
+    if (existingRating) setLocalRating(existingRating.rating);
+    else setLocalRating(0);
+  }, [idx, existingRating?.rating]);
+
+  const handleRate = async (stars) => {
+    if (!current || !auth?.user) return;
+    setLocalRating(stars);
+    try {
+      await upsertRating(current.id, stars, null, current.title, tmdb.poster(current.poster_path));
+      toast.success(`${stars} estrela${stars !== 1 ? "s" : ""} para ${current.title}`);
+    } catch (e) {
+      toast.error("Erro ao avaliar");
+    }
+  };
+
+  const goNext = () => {
+    if (idx < movies.length - 1) {
+      setDirection("left");
+      setAnimating(true);
+      setTimeout(() => { setIdx(i => i + 1); setAnimating(false); setDirection(null); setSwipeX(0); }, 250);
+    } else {
+      loadMovies();
+    }
+  };
+
+  const goPrev = () => {
+    if (idx > 0) {
+      setDirection("right");
+      setAnimating(true);
+      setTimeout(() => { setIdx(i => i - 1); setAnimating(false); setDirection(null); setSwipeX(0); }, 250);
+    }
+  };
+
+  const handleOpenMovie = () => {
+    if (!current) return;
+    setSelectedMovie({ tmdbId: current.id, title: current.title, poster: tmdb.poster(current.poster_path) });
+    setPage("movie");
+  };
+
+  // Touch/drag handlers
+  const onPointerDown = (e) => { setDragStartX(e.clientX); };
+  const onPointerMove = (e) => { if (dragStartX !== null) setSwipeX(e.clientX - dragStartX); };
+  const onPointerUp = () => {
+    if (dragStartX !== null) {
+      if (swipeX < -80) goNext();
+      else if (swipeX > 80) goPrev();
+      else setSwipeX(0);
+      setDragStartX(null);
+    }
+  };
+
+  // Keyboard
+  useEffect(() => {
+    const fn = (e) => {
+      if (e.key === "ArrowRight") goNext();
+      if (e.key === "ArrowLeft") goPrev();
+    };
+    window.addEventListener("keydown", fn);
+    return () => window.removeEventListener("keydown", fn);
+  }, [idx, movies.length]);
+
+  if (loading) return (
+    <div style={{ paddingTop: 100, minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 16 }}>
+      <Spinner size={36} />
+      <p style={{ color: C.textMuted, fontSize: 14 }}>Preparando sessão de avaliação...</p>
+    </div>
+  );
+
+  if (!current) return (
+    <div style={{ paddingTop: 100, minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 16 }}>
+      <Film size={48} style={{ color: C.textDim }} />
+      <p style={{ color: C.textMuted, fontSize: 14 }}>Nenhum filme encontrado</p>
+      <Btn variant="gold" onClick={loadMovies}>Carregar novos filmes</Btn>
+    </div>
+  );
+
+  const posterUrl = tmdb.poster(current.poster_path, "w500");
+  const backdropUrl = tmdb.backdrop(current.backdrop_path);
+  const year = current.release_date?.slice(0, 4);
+  const cardTransform = animating
+    ? direction === "left" ? "translateX(-120%) rotate(-8deg)" : "translateX(120%) rotate(8deg)"
+    : `translateX(${swipeX}px) rotate(${swipeX * 0.04}deg)`;
+
+  return (
+    <div style={{ paddingTop: 80, minHeight: "100vh", position: "relative", overflow: "hidden" }}>
+      {/* Backdrop */}
+      {backdropUrl && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 0 }}>
+          <img src={backdropUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.15, filter: "blur(30px)" }} />
+          <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to bottom, ${C.bg}dd, ${C.bg})` }} />
+        </div>
+      )}
+
+      <div style={{ position: "relative", zIndex: 1, maxWidth: 500, margin: "0 auto", padding: "20px 20px 40px" }}>
+        {/* Header */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <Zap size={20} style={{ color: C.gold }} />
+            <span style={{ color: C.text, fontWeight: 700, fontSize: 18, fontFamily: "'DM Sans', sans-serif" }}>Avaliação Rápida</span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ color: C.textDim, fontSize: 12 }}>{idx + 1} / {movies.length}</span>
+            <Btn variant="outline" size="sm" onClick={loadMovies} style={{ fontSize: 11 }}>
+              <SkipForward size={13} /> Nova sessão
+            </Btn>
+          </div>
+        </div>
+
+        {/* Movie Card */}
+        <div
+          ref={containerRef}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerLeave={onPointerUp}
+          style={{
+            touchAction: "pan-y",
+            userSelect: "none",
+          }}
+        >
+          <div style={{
+            transform: cardTransform,
+            transition: animating ? "transform 0.25s ease-out, opacity 0.25s" : dragStartX ? "none" : "transform 0.2s ease-out",
+            opacity: animating ? 0 : 1,
+          }}>
+            {/* Poster */}
+            <div
+              onClick={handleOpenMovie}
+              style={{
+                cursor: "pointer",
+                borderRadius: 20,
+                overflow: "hidden",
+                position: "relative",
+                aspectRatio: "2/3",
+                width: "100%",
+                boxShadow: "0 20px 60px rgba(0,0,0,0.6)",
+                border: `1px solid ${C.border}`,
+              }}
+            >
+              <img src={posterUrl} alt={current.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              {/* Gradient overlay at bottom */}
+              <div style={{
+                position: "absolute", bottom: 0, left: 0, right: 0, height: "50%",
+                background: "linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%)",
+              }} />
+              {/* Movie info on poster */}
+              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "20px 24px" }}>
+                <h2 style={{ color: "#fff", fontSize: 22, fontWeight: 800, margin: 0, lineHeight: 1.2, fontFamily: "'DM Sans', sans-serif", textShadow: "0 2px 8px rgba(0,0,0,0.5)" }}>
+                  {current.title}
+                </h2>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 8 }}>
+                  {year && <span style={{ color: "rgba(255,255,255,0.7)", fontSize: 13, fontWeight: 500 }}>{year}</span>}
+                  {current.vote_average > 0 && (
+                    <span style={{ display: "flex", alignItems: "center", gap: 4, color: C.gold, fontSize: 13, fontWeight: 600 }}>
+                      <Star size={13} fill={C.gold} /> {current.vote_average.toFixed(1)}
+                    </span>
+                  )}
+                </div>
+                {/* Tap hint */}
+                <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 11, marginTop: 8 }}>
+                  Toque para ver detalhes
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Navigation arrows */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 20 }}>
+          <button onClick={goPrev} disabled={idx === 0} style={{
+            width: 44, height: 44, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
+            background: idx > 0 ? "rgba(255,255,255,0.08)" : "transparent",
+            border: `1px solid ${idx > 0 ? C.border : "transparent"}`,
+            color: idx > 0 ? C.text : C.textDim, cursor: idx > 0 ? "pointer" : "default",
+            transition: "all 0.2s",
+          }}>
+            <ChevronLeft size={22} />
+          </button>
+
+          {/* Star rating */}
+          <div style={{ display: "flex", gap: 6 }}>
+            {[1, 2, 3, 4, 5].map(s => {
+              const filled = s <= (hoverStar || localRating);
+              const half = !filled && s - 0.5 === (hoverStar || localRating);
+              return (
+                <button
+                  key={s}
+                  onClick={() => handleRate(s === localRating ? s - 0.5 : s)}
+                  onMouseEnter={() => setHoverStar(s)}
+                  onMouseLeave={() => setHoverStar(0)}
+                  style={{
+                    background: "none", border: "none", cursor: "pointer", padding: 4,
+                    transform: filled || half ? "scale(1.15)" : "scale(1)",
+                    transition: "all 0.15s",
+                  }}
+                >
+                  <Star
+                    size={28}
+                    fill={filled ? C.gold : half ? `url(#halfGrad)` : "transparent"}
+                    stroke={filled || half ? C.gold : C.textDim}
+                    strokeWidth={1.5}
+                  />
+                </button>
+              );
+            })}
+            <svg width="0" height="0">
+              <defs>
+                <linearGradient id="halfGrad">
+                  <stop offset="50%" stopColor={C.gold} />
+                  <stop offset="50%" stopColor="transparent" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+
+          <button onClick={goNext} style={{
+            width: 44, height: 44, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
+            background: "rgba(255,255,255,0.08)", border: `1px solid ${C.border}`,
+            color: C.text, cursor: "pointer", transition: "all 0.2s",
+          }}>
+            <ChevronRight size={22} />
+          </button>
+        </div>
+
+        {/* Watchlist + Skip row */}
+        <div style={{ display: "flex", justifyContent: "center", gap: 12, marginTop: 16 }}>
+          <Btn
+            variant={inWl(current.id) ? "gold" : "outline"}
+            size="sm"
+            onClick={async () => {
+              if (inWl(current.id)) {
+                await removeWl(current.id);
+                toast.success("Removido da watchlist");
+              } else {
+                await addWl(current.id, current.title, tmdb.poster(current.poster_path));
+                toast.success("Adicionado à watchlist");
+              }
+            }}
+          >
+            <Bookmark size={14} fill={inWl(current.id) ? C.gold : "none"} />
+            {inWl(current.id) ? "Na Watchlist" : "Watchlist"}
+          </Btn>
+
+          <Btn variant="ghost" size="sm" onClick={goNext}>
+            Pular <ChevronRight size={14} />
+          </Btn>
+        </div>
+
+        {/* Swipe hint */}
+        <p style={{ textAlign: "center", color: C.textDim, fontSize: 11, marginTop: 20 }}>
+          Arraste para os lados ou use as setas ← → para navegar
+        </p>
+      </div>
+    </div>
+  );
+}
+
+//
 export default function MovieClubApp() {
   const [showSplash, setShowSplash] = useState(true);
   const [page, setPage] = useState("home");
