@@ -1970,8 +1970,6 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
             onSave={authCtx?.updateProfile}
           />
         )}
-          />
-        )}
 
         {/* Tabs + View Controls */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 32, marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
