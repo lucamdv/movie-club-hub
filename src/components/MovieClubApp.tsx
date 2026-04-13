@@ -1,6 +1,9 @@
 // @ts-nocheck
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { tmdbProxy, omdbProxy, streamingProxy } from "@/lib/movie-api.functions";
+import logoMain from "@/assets/logo-main.png";
+import mascotsNav from "@/assets/mascots-nav.png";
+import logoText from "@/assets/logo-text.png";
 
 // ─────────────────────────────────────────────
 //  DESIGN TOKENS
@@ -324,7 +327,7 @@ function Section({ title, children, action }) {
   return (
     <div style={{ marginBottom: 40 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, padding: "0 4px" }}>
-        <h2 style={{ fontFamily: "'Cinzel',serif", fontSize: 18, fontWeight: 700, color: C.text, display: "flex", alignItems: "center", gap: 10 }}>
+        <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 18, fontWeight: 700, color: C.text, display: "flex", alignItems: "center", gap: 10 }}>
           {title}
         </h2>
         {action && <button onClick={action.onClick} style={{ fontSize: 12, color: C.gold, fontWeight: 500, transition: "opacity 0.2s" }}
@@ -407,7 +410,7 @@ function RatingsRow({ movie }) {
         <div key={i} style={{ background: C.bgDeep, border: `1px solid ${C.border}`, borderRadius: 12, padding: "10px 16px", minWidth: 78, position: "relative", overflow: "hidden" }}>
           <div style={{ position: "absolute", bottom: 0, left: 0, height: 3, width: `${Math.min(b.pct, 100)}%`, background: b.color, borderRadius: "0 2px 2px 0", opacity: 0.5 }} />
           <p style={{ fontSize: 10, color: C.textDim, marginBottom: 4, fontWeight: 500 }}>{b.src}</p>
-          <p style={{ fontSize: 20, fontWeight: 700, color: b.color, fontFamily: "'Cinzel',serif", lineHeight: 1 }}>
+          <p style={{ fontSize: 20, fontWeight: 700, color: b.color, fontFamily: "'Playfair Display',serif", lineHeight: 1 }}>
             {b.val}<span style={{ fontSize: 11, fontWeight: 400, opacity: 0.7 }}>{b.suffix}</span>
           </p>
           {b.sub && <p style={{ fontSize: 9, color: C.textDim, marginTop: 3 }}>{b.sub}</p>}
@@ -531,7 +534,13 @@ function Carousel({ children, movies, onMovieClick }) {
 //  NAVBAR (transparent + blur)
 // ─────────────────────────────────────────────
 function Navbar({ page, setPage, hasKeys, apiStatus }) {
-  const items = [["home", "Discover"], ["profile", "Perfil"], ["groups", "Clubs"], ["search", "Buscar"]];
+  // Monkey mascots: wizard=discover, speak-no-evil=profile, see-no-evil=clubs
+  const items = [
+    ["home", "Discover", "🙈"],
+    ["profile", "Perfil", "🙊"],
+    ["groups", "Clubs", "🙉"],
+    ["search", "Buscar", "🔍"],
+  ];
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 40);
@@ -549,23 +558,21 @@ function Navbar({ page, setPage, hasKeys, apiStatus }) {
       padding: "0 32px", height: 64, transition: "all 0.35s ease",
     }}>
       <button onClick={() => setPage("home")} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        {/* 4-point star */}
-        <svg width={24} height={24} viewBox="0 0 24 24" fill={C.gold}>
-          <path d="M12 0L14.5 9.5L24 12L14.5 14.5L12 24L9.5 14.5L0 12L9.5 9.5Z" />
-        </svg>
-        <span style={{ fontFamily: "'Cinzel',serif", fontSize: 18, fontWeight: 800, color: C.gold, letterSpacing: "0.1em" }}>MOVIECLUB</span>
+        <img src={logoText} alt="MovieClub" style={{ height: 32, filter: "drop-shadow(0 0 8px rgba(201,168,76,0.2))" }} />
       </button>
 
-      <div style={{ display: "flex", gap: 0 }}>
-        {items.map(([id, label]) => (
+      <div style={{ display: "flex", gap: 4 }}>
+        {items.map(([id, label, icon]) => (
           <button key={id} onClick={() => setPage(id)} style={{
-            padding: "8px 20px", fontSize: 13, fontWeight: 500,
+            padding: "8px 18px", fontSize: 13, fontWeight: 600,
             color: page === id ? C.gold : C.textMuted,
             borderBottom: page === id ? `2px solid ${C.gold}` : "2px solid transparent",
             transition: "all 0.2s", background: "transparent",
+            display: "flex", alignItems: "center", gap: 6,
           }}
             onMouseEnter={e => { if (page !== id) e.currentTarget.style.color = C.text; }}
             onMouseLeave={e => { if (page !== id) e.currentTarget.style.color = C.textMuted; }}>
+            <span style={{ fontSize: 15 }}>{icon}</span>
             {label}
           </button>
         ))}
@@ -611,7 +618,7 @@ function SettingsPage({ apiStatus }) {
   return (
     <div style={{ paddingTop: 80, paddingBottom: 80 }}>
       <div style={{ maxWidth: 720, margin: "0 auto", padding: "0 28px" }}>
-        <h1 style={{ fontFamily: "'Cinzel',serif", fontSize: 26, fontWeight: 700, color: C.text, marginBottom: 8 }}>Status das <span style={{ color: C.gold }}>APIs</span></h1>
+        <h1 style={{ fontFamily: "'Playfair Display',serif", fontSize: 26, fontWeight: 700, color: C.text, marginBottom: 8 }}>Status das <span style={{ color: C.gold }}>APIs</span></h1>
         <p style={{ color: C.textMuted, fontSize: 14, lineHeight: 1.7, marginBottom: 28 }}>As chaves de API estão configuradas no <strong style={{ color: C.text }}>servidor</strong>.</p>
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           {APIS.map(api => {
@@ -708,7 +715,7 @@ function HeroBanner({ movies, onSelect }) {
           <Badge color="rgba(201,168,76,0.15)" textColor={C.gold}>✦ Em Alta Esta Semana</Badge>
           {hero.rating && <Badge color="rgba(201,168,76,0.1)" textColor={C.goldLight}>★ {hero.rating}/10</Badge>}
         </div>
-        <h1 style={{ fontFamily: "'Cinzel',serif", fontSize: 42, fontWeight: 900, color: C.text, marginBottom: 8, lineHeight: 1.1, textShadow: "0 2px 20px rgba(0,0,0,0.5)" }}>{hero.title}</h1>
+        <h1 style={{ fontFamily: "'Playfair Display',serif", fontSize: 42, fontWeight: 900, color: C.text, marginBottom: 8, lineHeight: 1.1, textShadow: "0 2px 20px rgba(0,0,0,0.5)" }}>{hero.title}</h1>
         {hero.overview && (
           <p style={{ color: C.textMuted, fontSize: 14, lineHeight: 1.7, marginBottom: 24, display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{hero.overview}</p>
         )}
@@ -801,7 +808,7 @@ function HomePage({ setPage, setSelectedMovie }) {
         {/* Genre explorer */}
         {genres.length > 0 && (
           <div style={{ marginBottom: 40 }}>
-            <h3 style={{ fontFamily: "'Cinzel',serif", fontSize: 18, fontWeight: 700, color: C.text, marginBottom: 16 }}>Explorar por Gênero</h3>
+            <h3 style={{ fontFamily: "'Playfair Display',serif", fontSize: 18, fontWeight: 700, color: C.text, marginBottom: 16 }}>Explorar por Gênero</h3>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 20 }}>
               {genres.map(g => (
                 <button key={g.id} onClick={() => setActiveG(activeG?.id === g.id ? null : g)}
@@ -838,6 +845,11 @@ function HomePage({ setPage, setSelectedMovie }) {
           }
           <PaginationBar page={top.page} totalPages={top.totalPages} totalResults={top.totalResults} onPageChange={top.goTo} />
         </Section>
+      </div>
+
+      {/* Branding footer */}
+      <div style={{ display: "flex", justifyContent: "center", padding: "40px 0 20px", opacity: 0.15 }}>
+        <img src={mascotsNav} alt="MovieClub Mascots" style={{ width: 200, filter: "grayscale(0.3)" }} />
       </div>
       <FilmStripBg />
     </div>
@@ -888,7 +900,7 @@ function MoviePage({ movieInit, setPage, setSelectedMovie }) {
               {m.year && <Badge color={C.bgCard} textColor={C.textDim}>{m.year}</Badge>}
               {m.runtime && <Badge color={C.bgCard} textColor={C.textDim}>{m.runtime} min</Badge>}
             </div>
-            <h1 style={{ fontFamily: "'Cinzel',serif", fontSize: 36, fontWeight: 900, color: C.text, marginBottom: 4, lineHeight: 1.15 }}>{m.title}</h1>
+            <h1 style={{ fontFamily: "'Playfair Display',serif", fontSize: 36, fontWeight: 900, color: C.text, marginBottom: 4, lineHeight: 1.15 }}>{m.title}</h1>
             {m.tagline && <p style={{ color: C.gold, fontSize: 13, fontStyle: "italic", marginBottom: 14 }}>"{m.tagline}"</p>}
             <div style={{ display: "flex", gap: 20, marginBottom: 14, flexWrap: "wrap" }}>
               {m.director && <div><span style={{ fontSize: 10, color: C.textDim, display: "block" }}>Direção</span><span style={{ fontSize: 13, color: C.textMuted }}>{m.director}</span></div>}
@@ -1096,7 +1108,7 @@ function SearchPage({ setPage, setSelectedMovie }) {
     <div style={{ paddingTop: 80, paddingBottom: 60 }}>
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 32px" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
-          <h1 style={{ fontFamily: "'Cinzel',serif", fontSize: 26, fontWeight: 700, color: C.text }}>Buscar <span style={{ color: C.gold }}>Filmes</span></h1>
+          <h1 style={{ fontFamily: "'Playfair Display',serif", fontSize: 26, fontWeight: 700, color: C.text }}>Buscar <span style={{ color: C.gold }}>Filmes</span></h1>
           <button onClick={() => setShowFilters(!showFilters)}
             style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 8, background: showFilters ? C.gold : C.bgCard, color: showFilters ? C.bgDeep : C.textMuted, border: `1px solid ${showFilters ? C.gold : C.border}`, fontSize: 13, fontWeight: 500, cursor: "pointer", transition: "all 0.2s" }}>
             Filtros {hasFilters && <span style={{ background: showFilters ? C.bgDeep : C.gold, color: showFilters ? C.gold : C.bgDeep, borderRadius: 10, padding: "1px 6px", fontSize: 10, fontWeight: 700 }}>●</span>}
@@ -1209,9 +1221,9 @@ function ProfilePage({ user, setPage, isOwnProfile = true }) {
         <div style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderTop: "none", borderRadius: "0 0 16px 16px", padding: "0 28px 24px", marginBottom: 28 }}>
           <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 14 }}>
             <div style={{ display: "flex", alignItems: "flex-end", gap: 14, marginTop: -36 }}>
-              <div style={{ width: 86, height: 86, borderRadius: "50%", background: u.color, border: `3px solid ${C.bgCard}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 700, color: "#fff", fontFamily: "'Cinzel',serif" }}>{u.initials}</div>
+              <div style={{ width: 86, height: 86, borderRadius: "50%", background: u.color, border: `3px solid ${C.bgCard}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 700, color: "#fff", fontFamily: "'Playfair Display',serif" }}>{u.initials}</div>
               <div style={{ paddingBottom: 4 }}>
-                <h1 style={{ fontFamily: "'Cinzel',serif", fontSize: 21, fontWeight: 700, color: C.text }}>{u.name}</h1>
+                <h1 style={{ fontFamily: "'Playfair Display',serif", fontSize: 21, fontWeight: 700, color: C.text }}>{u.name}</h1>
                 <p style={{ color: C.textMuted, fontSize: 13 }}>@{u.username}</p>
               </div>
             </div>
@@ -1219,7 +1231,7 @@ function ProfilePage({ user, setPage, isOwnProfile = true }) {
           </div>
           <div style={{ display: "flex", gap: 28 }}>
             {[["Reviews", u.reviews], ["Amigos", u.friends], ["Clubs", MOCK_GROUPS.filter(g => g.members.includes(u.id)).length]].map(([l, v]) => (
-              <div key={l}><p style={{ fontSize: 21, fontWeight: 700, color: C.gold, fontFamily: "'Cinzel',serif" }}>{v}</p><p style={{ fontSize: 12, color: C.textMuted }}>{l}</p></div>
+              <div key={l}><p style={{ fontSize: 21, fontWeight: 700, color: C.gold, fontFamily: "'Playfair Display',serif" }}>{v}</p><p style={{ fontSize: 12, color: C.textMuted }}>{l}</p></div>
             ))}
           </div>
         </div>
@@ -1273,14 +1285,14 @@ function GroupsPage({ setPage, setSelectedGroup }) {
       <div style={{ maxWidth: 960, margin: "0 auto", padding: "0 32px" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 30 }}>
           <div>
-            <h1 style={{ fontFamily: "'Cinzel',serif", fontSize: 26, fontWeight: 700, color: C.text, marginBottom: 6 }}>Meus <span style={{ color: C.gold }}>Clubs</span></h1>
+            <h1 style={{ fontFamily: "'Playfair Display',serif", fontSize: 26, fontWeight: 700, color: C.text, marginBottom: 6 }}>Meus <span style={{ color: C.gold }}>Clubs</span></h1>
             <p style={{ color: C.textMuted, fontSize: 13 }}>Listas colaborativas com seus amigos</p>
           </div>
           <Btn variant="gold" onClick={() => setShowCreate(true)}><PlusIcon /> Criar Club</Btn>
         </div>
         {showCreate && (
           <div style={{ background: C.bgCard, border: `1px solid ${C.gold}`, borderRadius: 16, padding: 24, marginBottom: 22, animation: "fadeIn 0.2s ease" }}>
-            <h3 style={{ fontFamily: "'Cinzel',serif", fontSize: 15, color: C.text, marginBottom: 16 }}>Novo Club</h3>
+            <h3 style={{ fontFamily: "'Playfair Display',serif", fontSize: 15, color: C.text, marginBottom: 16 }}>Novo Club</h3>
             <div style={{ display: "flex", gap: 12 }}>
               <TextInput label="Nome do Club" value={name} onChange={setName} placeholder="Ex: Cinéphiles de Sexta" style={{ flex: 1 }} />
               <TextInput label="Convidar (username)" value="" onChange={() => { }} placeholder="@username" style={{ flex: 1 }} />
@@ -1300,7 +1312,7 @@ function GroupsPage({ setPage, setSelectedGroup }) {
                 style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 16, padding: 22, cursor: "pointer" }}>
                 <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 14 }}>
                   <div>
-                    <h3 style={{ fontFamily: "'Cinzel',serif", fontSize: 15, fontWeight: 600, color: C.text, marginBottom: 4 }}>{group.name}</h3>
+                    <h3 style={{ fontFamily: "'Playfair Display',serif", fontSize: 15, fontWeight: 600, color: C.text, marginBottom: 4 }}>{group.name}</h3>
                     <p style={{ fontSize: 12, color: C.textDim }}>{members.length} membros · {allIds.length} filmes</p>
                   </div>
                   <div style={{ display: "flex" }}>{members.slice(0, 3).map((m, i) => <div key={m.id} style={{ marginLeft: i > 0 ? -8 : 0, zIndex: 3 - i }}><Avatar user={m} size={28} /></div>)}</div>
@@ -1358,7 +1370,7 @@ function GroupPage({ group, setPage, setSelectedMovie }) {
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 32px" }}>
         <div style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 20, padding: "26px 28px", marginBottom: 26 }}>
           <button onClick={() => setPage("groups")} style={{ display: "flex", alignItems: "center", gap: 6, color: C.textMuted, fontSize: 13, marginBottom: 14 }}><BackIcon /> Meus Clubs</button>
-          <h1 style={{ fontFamily: "'Cinzel',serif", fontSize: 24, fontWeight: 700, color: C.text, marginBottom: 8 }}>{g.name}</h1>
+          <h1 style={{ fontFamily: "'Playfair Display',serif", fontSize: 24, fontWeight: 700, color: C.text, marginBottom: 8 }}>{g.name}</h1>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
             {members.map(m => <div key={m.id} style={{ display: "flex", alignItems: "center", gap: 6 }}><Avatar user={m} size={22} /><span style={{ fontSize: 12, color: C.textMuted }}>{m.name}</span></div>)}
           </div>
@@ -1403,7 +1415,7 @@ function GroupPage({ group, setPage, setSelectedMovie }) {
                   <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16, paddingBottom: 14, borderBottom: `1px solid ${C.border}` }}>
                     <Avatar user={member} size={46} />
                     <div>
-                      <h3 style={{ fontFamily: "'Cinzel',serif", fontSize: 15, fontWeight: 600, color: C.text, marginBottom: 2 }}>{member.name}</h3>
+                      <h3 style={{ fontFamily: "'Playfair Display',serif", fontSize: 15, fontWeight: 600, color: C.text, marginBottom: 2 }}>{member.name}</h3>
                       <p style={{ fontSize: 12, color: C.textMuted }}>@{member.username} · {movies.length} recomendaç{movies.length === 1 ? "ão" : "ões"}</p>
                     </div>
                   </div>
@@ -1422,43 +1434,25 @@ function GroupPage({ group, setPage, setSelectedMovie }) {
 //  SPLASH SCREEN
 // ─────────────────────────────────────────────
 function SplashScreen({ onFinish }) {
-  const [phase, setPhase] = useState("in"); // in -> out
+  const [phase, setPhase] = useState("in");
 
   useEffect(() => {
-    const t1 = setTimeout(() => setPhase("out"), 2000);
-    const t2 = setTimeout(() => onFinish(), 2500);
+    const t1 = setTimeout(() => setPhase("out"), 2200);
+    const t2 = setTimeout(() => onFinish(), 2700);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [onFinish]);
 
   return (
     <div style={{
       position: "fixed", inset: 0, zIndex: 9999,
-      background: `radial-gradient(ellipse at center, ${C.bgCardHover}, ${C.bg})`,
+      background: `radial-gradient(ellipse at center, #1B2838, ${C.bg})`,
       display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
       animation: phase === "out" ? "splashFadeOut 0.5s ease forwards" : undefined,
     }}>
-      {/* 4-point star */}
-      <svg width={48} height={48} viewBox="0 0 24 24" fill={C.gold}
-        style={{ animation: "splashStarSpin 1s ease-out forwards", marginBottom: 24 }}>
-        <path d="M12 0L14.5 9.5L24 12L14.5 14.5L12 24L9.5 14.5L0 12L9.5 9.5Z" />
-      </svg>
-
-      {/* Logo */}
-      <h1 style={{
-        fontFamily: "'Cinzel',serif", fontSize: 48, fontWeight: 900, color: C.gold,
-        letterSpacing: "0.15em", animation: "splashFadeIn 0.8s ease 0.3s both",
-      }}>
-        MOVIECLUB
-      </h1>
-
-      {/* Subtitle */}
-      <p style={{
-        fontFamily: "'Cinzel',serif", fontSize: 12, color: C.goldDim,
-        textTransform: "uppercase", marginTop: 12,
-        animation: "splashSubtitle 1s ease 0.6s both",
-      }}>
-        Shared Film Platform
-      </p>
+      <img src={logoMain} alt="MovieClub Logo" style={{
+        width: 320, maxWidth: "80vw", animation: "splashFadeIn 1s ease 0.2s both",
+        filter: "drop-shadow(0 0 40px rgba(201,168,76,0.3))",
+      }} />
     </div>
   );
 }
@@ -1478,11 +1472,7 @@ function LoginPage({ onLogin }) {
       <div style={{ width: 440, position: "relative", zIndex: 1 }}>
         {/* Logo area */}
         <div style={{ textAlign: "center", marginBottom: 36, animation: "staggerUp 0.6s ease 0.1s both" }}>
-          <svg width={36} height={36} viewBox="0 0 24 24" fill={C.gold} style={{ marginBottom: 16 }}>
-            <path d="M12 0L14.5 9.5L24 12L14.5 14.5L12 24L9.5 14.5L0 12L9.5 9.5Z" />
-          </svg>
-          <h1 style={{ fontFamily: "'Cinzel',serif", fontSize: 32, fontWeight: 900, color: C.gold, letterSpacing: "0.12em", marginBottom: 4 }}>MOVIECLUB</h1>
-          <p style={{ fontFamily: "'Cinzel',serif", fontSize: 10, color: C.goldDim, textTransform: "uppercase", letterSpacing: "0.25em" }}>Shared Film Platform</p>
+          <img src={logoMain} alt="MovieClub" style={{ width: 220, marginBottom: 8, filter: "drop-shadow(0 0 20px rgba(201,168,76,0.2))" }} />
         </div>
 
         {/* Card */}
@@ -1528,7 +1518,7 @@ function LoginPage({ onLogin }) {
             style={{
               width: "100%", marginTop: 24, padding: "13px", color: C.bgDeep,
               borderRadius: 12, fontSize: 14, fontWeight: 700,
-              fontFamily: "'Cinzel',serif", letterSpacing: "0.06em",
+              fontFamily: "'Playfair Display',serif", letterSpacing: "0.06em",
               transition: "transform 0.15s, box-shadow 0.2s",
               boxShadow: "0 4px 20px rgba(201,168,76,0.25)",
             }}
