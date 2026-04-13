@@ -866,6 +866,8 @@ function Navbar({ page, setPage, hasKeys, apiStatus }) {
                 }}>
                   <img src={icon} alt="" style={{ width: 30, height: 30, objectFit: "cover", borderRadius: "50%" }} />
                 </div>
+              ) : id === "quickrate" ? (
+                <Zap size={16} />
               ) : id === "friends" ? (
                 <Users size={16} />
               ) : (
