@@ -1445,66 +1445,83 @@ function SearchPage({ setPage, setSelectedMovie }) {
 // ─────────────────────────────────────────────
 //  PROFILE PAGE
 // ─────────────────────────────────────────────
-function ProfilePage({ user, setPage, isOwnProfile = true }) {
-  const u = user || MOCK_USERS[3];
-  const [tab, setTab] = useState("reviews");
-  const reviews = MOCK_REVIEWS.filter(r => r.userId === u.id).map(r => ({ ...r, user: u }));
+function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSelectedMovie }) {
+  const userId = authCtx?.user?.id;
+  const profile = authCtx?.profile;
+  const { ratings, loading: ratingsLoading } = useRatings(userId);
+  const { items: watchlistItems, loading: wlLoading, remove: removeFromWl } = useWatchlist(userId);
+  const [tab, setTab] = useState("ratings");
+
+  const displayName = profile?.display_name || authCtx?.user?.email || "Usuário";
+  const initials = displayName.slice(0, 2).toUpperCase();
+  const uname = profile?.username || authCtx?.user?.email?.split("@")[0] || "user";
+
   return (
     <div style={{ paddingTop: 80, paddingBottom: 60 }}>
       <div style={{ maxWidth: 960, margin: "0 auto", padding: "0 32px" }}>
         <div style={{ height: 170, borderRadius: "16px 16px 0 0", background: `linear-gradient(135deg,${C.bgDeep},${C.bgCardHover})`, border: `1px solid ${C.border}`, position: "relative", overflow: "hidden" }}>
           <div style={{ position: "absolute", inset: 0, backgroundImage: `repeating-linear-gradient(45deg,transparent,transparent 30px,rgba(201,168,76,0.03) 30px,rgba(201,168,76,0.03) 31px)` }} />
-          {!isOwnProfile && <button onClick={() => setPage("home")} style={{ position: "absolute", top: 16, left: 16, display: "flex", alignItems: "center", gap: 6, padding: "7px 14px", borderRadius: 8, background: "rgba(9,21,35,0.6)", color: C.textMuted, border: `1px solid ${C.border}`, fontSize: 13 }}><BackIcon /> Voltar</button>}
         </div>
         <div style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderTop: "none", borderRadius: "0 0 16px 16px", padding: "0 28px 24px", marginBottom: 28 }}>
           <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 14 }}>
             <div style={{ display: "flex", alignItems: "flex-end", gap: 14, marginTop: -36 }}>
-              <div style={{ width: 86, height: 86, borderRadius: "50%", background: u.color, border: `3px solid ${C.bgCard}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 700, color: "#fff", fontFamily: "'Outfit', sans-serif" }}>{u.initials}</div>
+              <div style={{ width: 86, height: 86, borderRadius: "50%", background: C.gold, border: `3px solid ${C.bgCard}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 700, color: "#fff", fontFamily: "'Outfit', sans-serif" }}>{initials}</div>
               <div style={{ paddingBottom: 4 }}>
-                <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 21, fontWeight: 700, color: C.text }}>{u.name}</h1>
-                <p style={{ color: C.textMuted, fontSize: 13 }}>@{u.username}</p>
+                <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 21, fontWeight: 700, color: C.text }}>{displayName}</h1>
+                <p style={{ color: C.textMuted, fontSize: 13 }}>@{uname}</p>
               </div>
             </div>
-            {isOwnProfile ? <Btn variant="ghost" style={{ marginBottom: 4 }}>Editar Perfil</Btn> : <Btn variant="gold" style={{ marginBottom: 4 }}><PlusIcon /> Seguir</Btn>}
+            <Btn variant="ghost" style={{ marginBottom: 4 }} onClick={() => authCtx?.signOut?.()}>Sair</Btn>
           </div>
           <div style={{ display: "flex", gap: 28 }}>
-            {[["Reviews", u.reviews], ["Amigos", u.friends], ["Clubs", MOCK_GROUPS.filter(g => g.members.includes(u.id)).length]].map(([l, v]) => (
+            {[["Avaliações", ratings.length], ["Watchlist", watchlistItems.length]].map(([l, v]) => (
               <div key={l}><p style={{ fontSize: 21, fontWeight: 700, color: C.gold, fontFamily: "'Outfit', sans-serif" }}>{v}</p><p style={{ fontSize: 12, color: C.textMuted }}>{l}</p></div>
             ))}
           </div>
         </div>
+
+        {/* Tabs */}
         <div style={{ display: "flex", borderBottom: `1px solid ${C.border}`, marginBottom: 28 }}>
-          {[["reviews", "Reviews"], ["friends", "Amigos"]].map(([id, label]) => (
+          {[["ratings", "Minhas Avaliações"], ["watchlist", "Minha Lista"]].map(([id, label]) => (
             <button key={id} onClick={() => setTab(id)} style={{ padding: "10px 22px", fontSize: 13, fontWeight: 500, color: tab === id ? C.gold : C.textMuted, borderBottom: `2px solid ${tab === id ? C.gold : "transparent"}`, transition: "all 0.2s", marginBottom: -1 }}>{label}</button>
           ))}
         </div>
-        {tab === "reviews" && (
+
+        {/* Ratings tab */}
+        {tab === "ratings" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {reviews.length > 0 ? reviews.map((r, i) => (
-              <div key={i} style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 14, padding: 20 }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-                  <p style={{ fontSize: 13, fontWeight: 600, color: C.gold }}>TMDb #{r.movieTmdbId}</p>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}><StarRating value={r.rating} size={13} /><span style={{ fontSize: 11, color: C.textDim }}>{r.date}</span></div>
+            {ratingsLoading ? <Spinner /> : ratings.length > 0 ? ratings.map((r) => (
+              <div key={r.id} style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 14, padding: 20, display: "flex", gap: 16, alignItems: "flex-start", cursor: "pointer" }}
+                onClick={() => { setSelectedMovie?.({ tmdbId: r.tmdb_id, title: r.title, poster: r.poster_url }); setPage("movie"); }}>
+                {r.poster_url && <img src={r.poster_url} alt={r.title} style={{ width: 50, height: 75, borderRadius: 6, objectFit: "cover", flexShrink: 0 }} />}
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+                    <p style={{ fontSize: 15, fontWeight: 600, color: C.text }}>{r.title || `TMDb #${r.tmdb_id}`}</p>
+                    <StarRating value={Number(r.rating)} size={14} />
+                  </div>
+                  {r.review && <p style={{ fontSize: 13, color: C.textMuted, lineHeight: 1.6, fontStyle: "italic" }}>"{r.review}"</p>}
+                  <p style={{ fontSize: 11, color: C.textDim, marginTop: 4 }}>{new Date(r.updated_at).toLocaleDateString("pt-BR")}</p>
                 </div>
-                <p style={{ fontSize: 14, color: C.textMuted, lineHeight: 1.6 }}>"{r.text}"</p>
               </div>
-            )) : <p style={{ color: C.textDim, textAlign: "center", padding: 40 }}>Nenhuma review ainda.</p>}
+            )) : <p style={{ color: C.textDim, textAlign: "center", padding: 40 }}>Nenhuma avaliação ainda. Avalie filmes para ver aqui!</p>}
           </div>
         )}
-        {tab === "friends" && (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(190px, 1fr))", gap: 14 }}>
-            {MOCK_USERS.filter(u2 => u2.id !== u.id).map(friend => (
-              <div key={friend.id} className="card-hover" onClick={() => setPage("friend")}
-                style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 14, padding: 20, cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
-                <Avatar user={friend} size={54} />
-                <div style={{ textAlign: "center" }}><p style={{ fontSize: 14, fontWeight: 600, color: C.text }}>{friend.name}</p><p style={{ fontSize: 12, color: C.textMuted }}>@{friend.username}</p></div>
-                <div style={{ display: "flex", gap: 20 }}>
-                  {[["reviews", friend.reviews], ["amigos", friend.friends]].map(([l, v]) => (
-                    <div key={l} style={{ textAlign: "center" }}><p style={{ fontSize: 14, fontWeight: 600, color: C.gold }}>{v}</p><p style={{ fontSize: 11, color: C.textDim }}>{l}</p></div>
-                  ))}
+
+        {/* Watchlist tab */}
+        {tab === "watchlist" && (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 16 }}>
+            {wlLoading ? <Spinner /> : watchlistItems.length > 0 ? watchlistItems.map((item) => (
+              <div key={item.id} style={{ position: "relative" }}>
+                <div style={{ cursor: "pointer" }} onClick={() => { setSelectedMovie?.({ tmdbId: item.tmdb_id, title: item.title, poster: item.poster_url }); setPage("movie"); }}>
+                  <div style={{ width: "100%", aspectRatio: "2/3", borderRadius: 10, overflow: "hidden", background: C.bgCard, border: `1px solid ${C.border}` }}>
+                    {item.poster_url ? <img src={item.poster_url} alt={item.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 28, opacity: 0.3 }}>🎬</div>}
+                  </div>
+                  <p style={{ fontSize: 12, fontWeight: 500, color: C.text, marginTop: 6, lineHeight: 1.3 }}>{item.title}</p>
                 </div>
+                <button onClick={(e) => { e.stopPropagation(); removeFromWl(item.tmdb_id); }}
+                  style={{ position: "absolute", top: 6, right: 6, width: 24, height: 24, borderRadius: "50%", background: "rgba(239,68,68,0.85)", color: "#fff", fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center", border: "none", cursor: "pointer" }}>✕</button>
               </div>
-            ))}
+            )) : <p style={{ color: C.textDim, textAlign: "center", padding: 40, gridColumn: "1/-1" }}>Sua lista está vazia. Adicione filmes para assistir depois!</p>}
           </div>
         )}
       </div>
