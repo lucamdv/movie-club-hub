@@ -1162,24 +1162,6 @@ function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx }) {
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 290px", gap: 28 }}>
           <div>
-            <Section title="Sinopse">
-              <p style={{ color: C.textMuted, fontSize: 14, lineHeight: 1.8 }}>{m.plot || m.overview}</p>
-            </Section>
-            {m.cast?.length > 0 && (
-              <Section title="Elenco Principal">
-                <div style={{ display: "flex", gap: 10, overflowX: "auto", paddingBottom: 8 }}>
-                  {m.cast.map(actor => (
-                    <div key={actor.id} style={{ textAlign: "center", flexShrink: 0, width: 78 }}>
-                      <div style={{ width: 66, height: 66, borderRadius: "50%", overflow: "hidden", margin: "0 auto 6px", background: C.bgCard, border: `2px solid ${C.border}` }}>
-                        {actor.photo ? <img src={actor.photo} alt={actor.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={e => e.target.style.display = "none"} /> : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, opacity: 0.4 }}>👤</div>}
-                      </div>
-                      <p style={{ fontSize: 11, fontWeight: 500, color: C.text, lineHeight: 1.2 }}>{actor.name}</p>
-                      <p style={{ fontSize: 10, color: C.textDim, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 78 }}>{actor.character}</p>
-                    </div>
-                  ))}
-                </div>
-              </Section>
-            )}
             <Section title="Sua Avaliação">
               <div style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 14, padding: 20, marginBottom: 16 }}>
                 <p style={{ fontSize: 13, color: C.textMuted, marginBottom: 10 }}>
@@ -1200,6 +1182,24 @@ function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx }) {
                 </div>
               </div>
             </Section>
+            <Section title="Sinopse">
+              <p style={{ color: C.textMuted, fontSize: 14, lineHeight: 1.8 }}>{m.plot || m.overview}</p>
+            </Section>
+            {m.cast?.length > 0 && (
+              <Section title="Elenco Principal">
+                <div style={{ display: "flex", gap: 10, overflowX: "auto", paddingBottom: 8 }}>
+                  {m.cast.map(actor => (
+                    <div key={actor.id} style={{ textAlign: "center", flexShrink: 0, width: 78 }}>
+                      <div style={{ width: 66, height: 66, borderRadius: "50%", overflow: "hidden", margin: "0 auto 6px", background: C.bgCard, border: `2px solid ${C.border}` }}>
+                        {actor.photo ? <img src={actor.photo} alt={actor.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={e => e.target.style.display = "none"} /> : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, opacity: 0.4 }}>👤</div>}
+                      </div>
+                      <p style={{ fontSize: 11, fontWeight: 500, color: C.text, lineHeight: 1.2 }}>{actor.name}</p>
+                      <p style={{ fontSize: 10, color: C.textDim, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 78 }}>{actor.character}</p>
+                    </div>
+                  ))}
+                </div>
+              </Section>
+            )}
             <Section title="Reviews da Comunidade">
               {reviews.map((r, i) => (
                 <div key={i} style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 14, padding: 20, marginBottom: 12 }}>
