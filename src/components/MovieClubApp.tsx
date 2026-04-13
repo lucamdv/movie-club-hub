@@ -9,6 +9,21 @@ import logoText from "@/assets/logo-text.png";
 import mascotWizard from "@/assets/mascot-wizard.png";
 import mascotSpeak from "@/assets/mascot-speak.png";
 import mascotSee from "@/assets/mascot-see.png";
+import monkeyDirector from "@/assets/monkey-director.png";
+import monkeyPopcorn from "@/assets/monkey-popcorn.png";
+import monkeyWizard from "@/assets/monkey-wizard.png";
+import monkeyDetective from "@/assets/monkey-detective.png";
+import monkeyStar from "@/assets/monkey-star.png";
+import monkeyAstronaut from "@/assets/monkey-astronaut.png";
+
+const MONKEY_AVATARS = [
+  { id: "director", src: monkeyDirector, label: "Diretor" },
+  { id: "popcorn", src: monkeyPopcorn, label: "Pipoca" },
+  { id: "wizard", src: monkeyWizard, label: "Mago" },
+  { id: "detective", src: monkeyDetective, label: "Detetive" },
+  { id: "star", src: monkeyStar, label: "Estrela" },
+  { id: "astronaut", src: monkeyAstronaut, label: "Astronauta" },
+];
 
 // ─────────────────────────────────────────────
 //  DESIGN TOKENS
