@@ -1,6 +1,9 @@
 // @ts-nocheck
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { tmdbProxy, omdbProxy, streamingProxy } from "@/lib/movie-api.functions";
+import logoMain from "@/assets/logo-main.png";
+import mascotsNav from "@/assets/mascots-nav.png";
+import logoText from "@/assets/logo-text.png";
 
 // ─────────────────────────────────────────────
 //  DESIGN TOKENS
