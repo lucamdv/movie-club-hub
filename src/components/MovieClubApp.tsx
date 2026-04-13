@@ -1447,8 +1447,6 @@ function SplashScreen({ onFinish }) {
     </div>
   );
 }
-  );
-}
 
 // ─────────────────────────────────────────────
 //  LOGIN PAGE (redesigned)
