@@ -1962,12 +1962,14 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
           </div>
         </div>
 
-        {showEditModal && (
+        {showEditModal && !isViewingOther && (
           <ProfileEditModal
             profile={profile}
             user={authCtx?.user}
             onClose={() => setShowEditModal(false)}
             onSave={authCtx?.updateProfile}
+          />
+        )}
           />
         )}
 
