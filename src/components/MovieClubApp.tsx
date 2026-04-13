@@ -1819,8 +1819,8 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
   const [perPage, setPerPage] = useState(20);
   const [showEditModal, setShowEditModal] = useState(false);
 
-  // Follow hooks for viewing other profiles
-  const { isFollowing, follow, unfollow } = useFollows(currentUserId);
+  // Follow hooks - use targetUserId for counts, currentUserId for actions
+  const { following: targetFollowing, followers: targetFollowers, isFollowing, follow, unfollow } = useFollows(targetUserId);
   const { isFriend } = useFriendships(currentUserId);
 
   const displayName = profile?.display_name || (isViewingOther ? "Usuário" : authCtx?.user?.email || "Usuário");
