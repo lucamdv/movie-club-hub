@@ -1936,9 +1936,28 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
             )}
 
             {/* Actions */}
-            <div style={{ display: "flex", gap: 10 }}>
-              <Btn variant="gold" size="sm" onClick={() => setShowEditModal(true)}>✏️ Editar Perfil</Btn>
-              <Btn variant="ghost" size="sm" onClick={() => authCtx?.signOut?.()}>Sair da conta</Btn>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center" }}>
+              {isViewingOther ? (
+                <>
+                  <Btn variant="ghost" size="sm" onClick={() => { setPage("profile"); }}>← Voltar</Btn>
+                  {isFriend(viewUserId) && <Badge color="rgba(34,197,94,0.15)" textColor={C.success}>Amigo</Badge>}
+                  <Btn variant={isFollowing(viewUserId) ? "ghost" : "gold"} size="sm" onClick={() => {
+                    if (isFollowing(viewUserId)) unfollow(viewUserId);
+                    else follow(viewUserId);
+                  }}>
+                    {isFollowing(viewUserId) ? <><UserCheckIcon /> Seguindo</> : <><UserPlusIcon /> Seguir</>}
+                  </Btn>
+                </>
+              ) : (
+                <>
+                  <Btn variant="gold" size="sm" onClick={() => setShowEditModal(true)}>✏️ Editar Perfil</Btn>
+                  <Btn variant="ghost" size="sm" onClick={() => {
+                    const url = `${window.location.origin}?profile=${currentUserId}`;
+                    navigator.clipboard.writeText(url).then(() => toast.success("Link do perfil copiado!")).catch(() => toast.error("Erro ao copiar"));
+                  }}>🔗 Compartilhar Perfil</Btn>
+                  <Btn variant="ghost" size="sm" onClick={() => authCtx?.signOut?.()}>Sair da conta</Btn>
+                </>
+              )}
             </div>
           </div>
         </div>
