@@ -1459,73 +1459,151 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
   const displayName = profile?.display_name || authCtx?.user?.email || "Usuário";
   const initials = displayName.slice(0, 2).toUpperCase();
   const uname = profile?.username || authCtx?.user?.email?.split("@")[0] || "user";
+  const bio = profile?.bio || "Cinéfilo apaixonado por boas histórias 🎬";
+  const avgRating = ratings.length > 0 ? (ratings.reduce((s, r) => s + Number(r.rating), 0) / ratings.length).toFixed(1) : "—";
+
+  // Top 3 recent posters for banner collage
+  const bannerPosters = ratings.filter(r => r.poster_url).slice(0, 4).map(r => r.poster_url);
 
   return (
-    <div style={{ paddingTop: 80, paddingBottom: 60 }}>
-      <div style={{ maxWidth: 960, margin: "0 auto", padding: "0 32px" }}>
-        <div style={{ height: 170, borderRadius: "16px 16px 0 0", background: `linear-gradient(135deg,${C.bgDeep},${C.bgCardHover})`, border: `1px solid ${C.border}`, position: "relative", overflow: "hidden" }}>
-          <div style={{ position: "absolute", inset: 0, backgroundImage: `repeating-linear-gradient(45deg,transparent,transparent 30px,rgba(201,168,76,0.03) 30px,rgba(201,168,76,0.03) 31px)` }} />
-        </div>
-        <div style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderTop: "none", borderRadius: "0 0 16px 16px", padding: "0 28px 24px", marginBottom: 28 }}>
-          <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 14 }}>
-            <div style={{ display: "flex", alignItems: "flex-end", gap: 14, marginTop: -36 }}>
-              <div style={{ width: 86, height: 86, borderRadius: "50%", background: C.gold, border: `3px solid ${C.bgCard}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 700, color: "#fff", fontFamily: "'Outfit', sans-serif" }}>{initials}</div>
-              <div style={{ paddingBottom: 4 }}>
-                <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 21, fontWeight: 700, color: C.text }}>{displayName}</h1>
-                <p style={{ color: C.textMuted, fontSize: 13 }}>@{uname}</p>
+    <div style={{ paddingTop: 64, paddingBottom: 80, minHeight: "100vh" }}>
+      {/* Cover / Banner */}
+      <div style={{ position: "relative", height: 220, overflow: "hidden" }}>
+        {bannerPosters.length > 0 ? (
+          <div style={{ display: "flex", width: "100%", height: "100%", position: "absolute", inset: 0 }}>
+            {bannerPosters.map((p, i) => (
+              <div key={i} style={{ flex: 1, overflow: "hidden" }}>
+                <img src={p} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", filter: "brightness(0.4) saturate(1.2)" }} />
               </div>
-            </div>
-            <Btn variant="ghost" style={{ marginBottom: 4 }} onClick={() => authCtx?.signOut?.()}>Sair</Btn>
-          </div>
-          <div style={{ display: "flex", gap: 28 }}>
-            {[["Avaliações", ratings.length], ["Watchlist", watchlistItems.length]].map(([l, v]) => (
-              <div key={l}><p style={{ fontSize: 21, fontWeight: 700, color: C.gold, fontFamily: "'Outfit', sans-serif" }}>{v}</p><p style={{ fontSize: 12, color: C.textMuted }}>{l}</p></div>
             ))}
+          </div>
+        ) : (
+          <div style={{ position: "absolute", inset: 0, background: `linear-gradient(135deg, ${C.bgDeep} 0%, ${C.bgCardHover} 50%, ${C.gold}22 100%)` }} />
+        )}
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 30%, #0F1923 100%)" }} />
+        <div style={{ position: "absolute", inset: 0, backgroundImage: `repeating-linear-gradient(45deg,transparent,transparent 40px,rgba(201,168,76,0.04) 40px,rgba(201,168,76,0.04) 41px)` }} />
+      </div>
+
+      <div style={{ maxWidth: 900, margin: "0 auto", padding: "0 24px" }}>
+        {/* Profile Header Card */}
+        <div style={{ marginTop: -72, position: "relative", zIndex: 10 }}>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
+            {/* Avatar */}
+            <div style={{
+              width: 110, height: 110, borderRadius: "50%",
+              background: `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`,
+              border: `4px solid ${C.bgDeep}`, boxShadow: `0 4px 24px rgba(201,168,76,0.3)`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 32, fontWeight: 800, color: C.bgDeep, fontFamily: "'Outfit', sans-serif",
+              marginBottom: 14
+            }}>{initials}</div>
+
+            <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 26, fontWeight: 700, color: C.text, marginBottom: 2 }}>{displayName}</h1>
+            <p style={{ color: C.gold, fontSize: 14, fontWeight: 500, marginBottom: 8 }}>@{uname}</p>
+            <p style={{ color: C.textMuted, fontSize: 13, maxWidth: 380, lineHeight: 1.5, marginBottom: 20 }}>{bio}</p>
+
+            {/* Stats Row */}
+            <div style={{
+              display: "flex", gap: 0, background: C.bgCard, border: `1px solid ${C.border}`,
+              borderRadius: 16, overflow: "hidden", marginBottom: 20
+            }}>
+              {[
+                ["Avaliações", ratings.length, "🎬"],
+                ["Watchlist", watchlistItems.length, "📋"],
+                ["Nota Média", avgRating, "⭐"],
+              ].map(([label, val, icon], i) => (
+                <div key={label} style={{
+                  padding: "16px 32px", textAlign: "center",
+                  borderRight: i < 2 ? `1px solid ${C.border}` : "none",
+                  minWidth: 120
+                }}>
+                  <p style={{ fontSize: 11, marginBottom: 4 }}>{icon}</p>
+                  <p style={{ fontSize: 22, fontWeight: 700, color: C.gold, fontFamily: "'Outfit', sans-serif" }}>{val}</p>
+                  <p style={{ fontSize: 11, color: C.textMuted, marginTop: 2 }}>{label}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Actions */}
+            <div style={{ display: "flex", gap: 10 }}>
+              <Btn variant="ghost" size="sm" onClick={() => authCtx?.signOut?.()}>Sair da conta</Btn>
+            </div>
           </div>
         </div>
 
         {/* Tabs */}
-        <div style={{ display: "flex", borderBottom: `1px solid ${C.border}`, marginBottom: 28 }}>
-          {[["ratings", "Minhas Avaliações"], ["watchlist", "Minha Lista"]].map(([id, label]) => (
-            <button key={id} onClick={() => setTab(id)} style={{ padding: "10px 22px", fontSize: 13, fontWeight: 500, color: tab === id ? C.gold : C.textMuted, borderBottom: `2px solid ${tab === id ? C.gold : "transparent"}`, transition: "all 0.2s", marginBottom: -1 }}>{label}</button>
+        <div style={{
+          display: "flex", justifyContent: "center", gap: 4,
+          marginTop: 32, marginBottom: 24,
+          background: C.bgCard, borderRadius: 12, padding: 4,
+          border: `1px solid ${C.border}`, maxWidth: 400, margin: "32px auto 24px"
+        }}>
+          {[["ratings", "⭐ Avaliações"], ["watchlist", "📋 Watchlist"]].map(([id, label]) => (
+            <button key={id} onClick={() => setTab(id)} style={{
+              flex: 1, padding: "10px 16px", fontSize: 13, fontWeight: 600,
+              color: tab === id ? C.bgDeep : C.textMuted,
+              background: tab === id ? C.gold : "transparent",
+              borderRadius: 9, transition: "all 0.25s ease",
+              fontFamily: "'DM Sans', sans-serif"
+            }}>{label}</button>
           ))}
         </div>
 
-        {/* Ratings tab */}
+        {/* Ratings Tab */}
         {tab === "ratings" && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             {ratingsLoading ? <Spinner /> : ratings.length > 0 ? ratings.map((r) => (
-              <div key={r.id} style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 14, padding: 20, display: "flex", gap: 16, alignItems: "flex-start", cursor: "pointer" }}
+              <div key={r.id} style={{
+                background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 16,
+                padding: 18, display: "flex", gap: 16, alignItems: "center",
+                cursor: "pointer", transition: "all 0.2s ease"
+              }}
+                className="card-hover"
                 onClick={() => { setSelectedMovie?.({ tmdbId: r.tmdb_id, title: r.title, poster: r.poster_url }); setPage("movie"); }}>
-                {r.poster_url && <img src={r.poster_url} alt={r.title} style={{ width: 50, height: 75, borderRadius: 6, objectFit: "cover", flexShrink: 0 }} />}
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
-                    <p style={{ fontSize: 15, fontWeight: 600, color: C.text }}>{r.title || `TMDb #${r.tmdb_id}`}</p>
-                    <StarRating value={Number(r.rating)} size={14} />
-                  </div>
-                  {r.review && <p style={{ fontSize: 13, color: C.textMuted, lineHeight: 1.6, fontStyle: "italic" }}>"{r.review}"</p>}
-                  <p style={{ fontSize: 11, color: C.textDim, marginTop: 4 }}>{new Date(r.updated_at).toLocaleDateString("pt-BR")}</p>
+                <div style={{
+                  width: 56, height: 84, borderRadius: 10, overflow: "hidden",
+                  flexShrink: 0, background: C.bgDeep, border: `1px solid ${C.border}`
+                }}>
+                  {r.poster_url && <img src={r.poster_url} alt={r.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
                 </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontSize: 15, fontWeight: 600, color: C.text, marginBottom: 4 }}>{r.title || `TMDb #${r.tmdb_id}`}</p>
+                  <StarRating value={Number(r.rating)} size={14} />
+                  {r.review && <p style={{ fontSize: 12, color: C.textMuted, lineHeight: 1.5, fontStyle: "italic", marginTop: 6, overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>"{r.review}"</p>}
+                </div>
+                <p style={{ fontSize: 11, color: C.textDim, whiteSpace: "nowrap", flexShrink: 0 }}>{new Date(r.updated_at).toLocaleDateString("pt-BR")}</p>
               </div>
-            )) : <p style={{ color: C.textDim, textAlign: "center", padding: 40 }}>Nenhuma avaliação ainda. Avalie filmes para ver aqui!</p>}
+            )) : (
+              <div style={{ textAlign: "center", padding: "60px 20px" }}>
+                <p style={{ fontSize: 40, marginBottom: 12 }}>🎬</p>
+                <p style={{ color: C.textMuted, fontSize: 15, fontWeight: 500 }}>Nenhuma avaliação ainda</p>
+                <p style={{ color: C.textDim, fontSize: 13, marginTop: 4 }}>Avalie filmes para construir seu histórico!</p>
+              </div>
+            )}
           </div>
         )}
 
-        {/* Watchlist tab */}
+        {/* Watchlist Tab */}
         {tab === "watchlist" && (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 16 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: 18 }}>
             {wlLoading ? <Spinner /> : watchlistItems.length > 0 ? watchlistItems.map((item) => (
-              <div key={item.id} style={{ position: "relative" }}>
+              <div key={item.id} style={{ position: "relative" }} className="movie-card-netflix">
                 <div style={{ cursor: "pointer" }} onClick={() => { setSelectedMovie?.({ tmdbId: item.tmdb_id, title: item.title, poster: item.poster_url }); setPage("movie"); }}>
-                  <div style={{ width: "100%", aspectRatio: "2/3", borderRadius: 10, overflow: "hidden", background: C.bgCard, border: `1px solid ${C.border}` }}>
-                    {item.poster_url ? <img src={item.poster_url} alt={item.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 28, opacity: 0.3 }}>🎬</div>}
+                  <div style={{ width: "100%", aspectRatio: "2/3", borderRadius: 12, overflow: "hidden", background: C.bgCard, border: `1px solid ${C.border}` }}>
+                    {item.poster_url ? <img src={item.poster_url} alt={item.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 32, opacity: 0.3 }}>🎬</div>}
                   </div>
-                  <p style={{ fontSize: 12, fontWeight: 500, color: C.text, marginTop: 6, lineHeight: 1.3 }}>{item.title}</p>
+                  <p style={{ fontSize: 12, fontWeight: 500, color: C.text, marginTop: 8, lineHeight: 1.3 }}>{item.title}</p>
                 </div>
                 <button onClick={(e) => { e.stopPropagation(); removeFromWl(item.tmdb_id); }}
-                  style={{ position: "absolute", top: 6, right: 6, width: 24, height: 24, borderRadius: "50%", background: "rgba(239,68,68,0.85)", color: "#fff", fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center", border: "none", cursor: "pointer" }}>✕</button>
+                  style={{ position: "absolute", top: 8, right: 8, width: 26, height: 26, borderRadius: "50%", background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)", color: "#ef4444", fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid rgba(239,68,68,0.3)", cursor: "pointer", transition: "all 0.2s" }}>✕</button>
               </div>
-            )) : <p style={{ color: C.textDim, textAlign: "center", padding: 40, gridColumn: "1/-1" }}>Sua lista está vazia. Adicione filmes para assistir depois!</p>}
+            )) : (
+              <div style={{ textAlign: "center", padding: "60px 20px", gridColumn: "1/-1" }}>
+                <p style={{ fontSize: 40, marginBottom: 12 }}>📋</p>
+                <p style={{ color: C.textMuted, fontSize: 15, fontWeight: 500 }}>Sua lista está vazia</p>
+                <p style={{ color: C.textDim, fontSize: 13, marginTop: 4 }}>Adicione filmes para assistir depois!</p>
+              </div>
+            )}
           </div>
         )}
       </div>
