@@ -2067,6 +2067,417 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
 }
 
 // ─────────────────────────────────────────────
+//  SOCIAL HOOKS
+// ─────────────────────────────────────────────
+function useFollows(userId) {
+  const [following, setFollowing] = useState([]);
+  const [followers, setFollowers] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const load = useCallback(async () => {
+    if (!userId) return;
+    setLoading(true);
+    const [{ data: fing }, { data: fers }] = await Promise.all([
+      supabase.from("follows").select("*").eq("follower_id", userId),
+      supabase.from("follows").select("*").eq("following_id", userId),
+    ]);
+    setFollowing(fing || []);
+    setFollowers(fers || []);
+    setLoading(false);
+  }, [userId]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const follow = async (targetId) => {
+    if (!userId) return;
+    await supabase.from("follows").insert({ follower_id: userId, following_id: targetId });
+    await load();
+  };
+
+  const unfollow = async (targetId) => {
+    if (!userId) return;
+    await supabase.from("follows").delete().eq("follower_id", userId).eq("following_id", targetId);
+    await load();
+  };
+
+  const isFollowing = (targetId) => following.some(f => f.following_id === targetId);
+
+  return { following, followers, loading, follow, unfollow, isFollowing, reload: load };
+}
+
+function useFriendLinks(userId) {
+  const [links, setLinks] = useState([]);
+
+  const load = useCallback(async () => {
+    if (!userId) return;
+    const { data } = await supabase.from("friend_links").select("*").eq("user_id", userId).order("created_at", { ascending: false });
+    setLinks(data || []);
+  }, [userId]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const createLink = async () => {
+    if (!userId) return null;
+    const { data, error } = await supabase.from("friend_links").insert({ user_id: userId }).select().single();
+    if (error) throw error;
+    await load();
+    return data;
+  };
+
+  const deleteLink = async (id) => {
+    await supabase.from("friend_links").delete().eq("id", id);
+    await load();
+  };
+
+  return { links, createLink, deleteLink, reload: load };
+}
+
+function useFriendships(userId) {
+  const [friends, setFriends] = useState([]);
+
+  const load = useCallback(async () => {
+    if (!userId) return;
+    const { data } = await supabase.from("friendships").select("*").or(`user_a_id.eq.${userId},user_b_id.eq.${userId}`);
+    setFriends(data || []);
+  }, [userId]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const isFriend = (targetId) => friends.some(f => (f.user_a_id === targetId || f.user_b_id === targetId));
+
+  const acceptLink = async (code) => {
+    if (!userId) return;
+    // Find the link
+    const { data: linkData } = await supabase.from("friend_links").select("*").eq("code", code).single();
+    if (!linkData) throw new Error("Link inválido");
+    if (linkData.user_id === userId) throw new Error("Você não pode adicionar a si mesmo");
+    if (linkData.expires_at && new Date(linkData.expires_at) < new Date()) throw new Error("Link expirado");
+    // Check if already friends
+    if (isFriend(linkData.user_id)) throw new Error("Vocês já são amigos");
+    // Create friendship (order by smallest first to avoid duplicates)
+    const [a, b] = [userId, linkData.user_id].sort();
+    await supabase.from("friendships").insert({ user_a_id: a, user_b_id: b });
+    await load();
+  };
+
+  return { friends, isFriend, acceptLink, reload: load };
+}
+
+// ─────────────────────────────────────────────
+//  FRIENDS PAGE
+// ─────────────────────────────────────────────
+function FriendsPage({ setPage, setSelectedMovie, auth: authCtx }) {
+  const userId = authCtx?.user?.id;
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [tab, setTab] = useState("search"); // search | following | followers | friends
+  const [friendCode, setFriendCode] = useState("");
+  const [generatedLink, setGeneratedLink] = useState(null);
+  const [followingProfiles, setFollowingProfiles] = useState([]);
+  const [followerProfiles, setFollowerProfiles] = useState([]);
+  const [friendProfiles, setFriendProfiles] = useState([]);
+  const debRef = useRef(null);
+
+  const { following, followers, follow, unfollow, isFollowing, loading: followsLoading } = useFollows(userId);
+  const { links, createLink, deleteLink } = useFriendLinks(userId);
+  const { friends, isFriend, acceptLink } = useFriendships(userId);
+
+  // Search users
+  useEffect(() => {
+    if (debRef.current) clearTimeout(debRef.current);
+    if (!searchQuery.trim()) { setSearchResults([]); return; }
+    debRef.current = setTimeout(async () => {
+      setSearchLoading(true);
+      const q = searchQuery.trim().toLowerCase();
+      const { data } = await supabase.from("profiles").select("*")
+        .or(`display_name.ilike.%${q}%,username.ilike.%${q}%`)
+        .neq("user_id", userId)
+        .limit(20);
+      setSearchResults(data || []);
+      setSearchLoading(false);
+    }, 400);
+    return () => { if (debRef.current) clearTimeout(debRef.current); };
+  }, [searchQuery, userId]);
+
+  // Load following profiles
+  useEffect(() => {
+    if (!following.length) { setFollowingProfiles([]); return; }
+    const ids = following.map(f => f.following_id);
+    supabase.from("profiles").select("*").in("user_id", ids).then(({ data }) => setFollowingProfiles(data || []));
+  }, [following]);
+
+  // Load follower profiles
+  useEffect(() => {
+    if (!followers.length) { setFollowerProfiles([]); return; }
+    const ids = followers.map(f => f.follower_id);
+    supabase.from("profiles").select("*").in("user_id", ids).then(({ data }) => setFollowerProfiles(data || []));
+  }, [followers]);
+
+  // Load friend profiles
+  useEffect(() => {
+    if (!friends.length) { setFriendProfiles([]); return; }
+    const ids = friends.map(f => f.user_a_id === userId ? f.user_b_id : f.user_a_id);
+    supabase.from("profiles").select("*").in("user_id", ids).then(({ data }) => setFriendProfiles(data || []));
+  }, [friends, userId]);
+
+  const handleGenerateLink = async () => {
+    try {
+      const link = await createLink();
+      const url = `${window.location.origin}?friend=${link.code}`;
+      setGeneratedLink(url);
+      toast.success("Link de amizade gerado!");
+    } catch (e) { toast.error("Erro ao gerar link"); }
+  };
+
+  const handleAcceptCode = async () => {
+    if (!friendCode.trim()) return;
+    try {
+      // Extract code from URL or raw code
+      let code = friendCode.trim();
+      if (code.includes("friend=")) code = new URL(code).searchParams.get("friend") || code;
+      await acceptLink(code);
+      toast.success("Amizade aceita! 🎉");
+      setFriendCode("");
+    } catch (e) { toast.error(e.message || "Erro ao aceitar link"); }
+  };
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text).then(() => toast.success("Link copiado!")).catch(() => toast.error("Erro ao copiar"));
+  };
+
+  const getAvatarForProfile = (profile) => {
+    if (profile?.avatar_url) return profile.avatar_url;
+    return null;
+  };
+
+  const UserCard = ({ profile, showActions = true }) => {
+    const avatarUrl = getAvatarForProfile(profile);
+    const initials = (profile?.display_name || "?").slice(0, 2).toUpperCase();
+    const isFollowingUser = isFollowing(profile.user_id);
+    const isFriendUser = isFriend(profile.user_id);
+
+    return (
+      <div style={{
+        background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 16,
+        padding: 20, display: "flex", alignItems: "center", gap: 16, transition: "all 0.2s"
+      }} className="card-hover">
+        {/* Avatar */}
+        <div style={{
+          width: 52, height: 52, borderRadius: "50%", flexShrink: 0, overflow: "hidden",
+          background: avatarUrl ? "transparent" : `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`,
+          border: `2px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: 16, fontWeight: 700, color: C.bgDeep, fontFamily: "'Outfit', sans-serif"
+        }}>
+          {avatarUrl ? <img src={avatarUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : initials}
+        </div>
+
+        {/* Info */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p style={{ fontSize: 15, fontWeight: 600, color: C.text, marginBottom: 2 }}>{profile.display_name || "Sem nome"}</p>
+          {profile.username && <p style={{ fontSize: 12, color: C.gold }}>@{profile.username}</p>}
+          {profile.bio && <p style={{ fontSize: 12, color: C.textMuted, marginTop: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{profile.bio}</p>}
+        </div>
+
+        {/* Actions */}
+        {showActions && profile.user_id !== userId && (
+          <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+            {isFriendUser && (
+              <Badge color="rgba(34,197,94,0.15)" textColor={C.success}>Amigo</Badge>
+            )}
+            <Btn variant={isFollowingUser ? "ghost" : "gold"} size="sm" onClick={(e) => {
+              e.stopPropagation();
+              if (isFollowingUser) unfollow(profile.user_id);
+              else follow(profile.user_id);
+            }}>
+              {isFollowingUser ? <><UserCheckIcon /> Seguindo</> : <><UserPlusIcon /> Seguir</>}
+            </Btn>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div style={{ paddingTop: 80, paddingBottom: 60 }}>
+      <div style={{ maxWidth: 800, margin: "0 auto", padding: "0 28px" }}>
+        {/* Header */}
+        <div style={{ marginBottom: 28 }}>
+          <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 26, fontWeight: 700, color: C.text, marginBottom: 6 }}>
+            <span style={{ color: C.gold }}>Amigos</span> & Social
+          </h1>
+          <p style={{ color: C.textMuted, fontSize: 13 }}>Encontre pessoas, siga e adicione amigos</p>
+        </div>
+
+        {/* Friendship Link Section */}
+        <div style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 16, padding: 22, marginBottom: 24 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+            <LinkIcon />
+            <h3 style={{ fontSize: 14, fontWeight: 600, color: C.text }}>Link de Amizade</h3>
+          </div>
+
+          <div style={{ display: "flex", gap: 12, marginBottom: 14, flexWrap: "wrap" }}>
+            <Btn variant="gold" size="sm" onClick={handleGenerateLink}><PlusIcon /> Gerar Link</Btn>
+            {generatedLink && (
+              <div style={{ flex: 1, display: "flex", gap: 8, alignItems: "center", minWidth: 200 }}>
+                <div style={{
+                  flex: 1, padding: "8px 12px", borderRadius: 8, background: C.bgDeep,
+                  border: `1px solid ${C.gold}30`, fontSize: 12, color: C.goldLight,
+                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap"
+                }}>{generatedLink}</div>
+                <button onClick={() => copyToClipboard(generatedLink)} style={{
+                  padding: "8px 12px", borderRadius: 8, background: C.bgDeep,
+                  border: `1px solid ${C.border}`, color: C.textMuted, cursor: "pointer", display: "flex", alignItems: "center", gap: 4, fontSize: 11
+                }}><CopyIcon /> Copiar</button>
+              </div>
+            )}
+          </div>
+
+          {/* Accept a friend link */}
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <input value={friendCode} onChange={e => setFriendCode(e.target.value)}
+              placeholder="Cole o link ou código de amizade aqui..."
+              style={{
+                flex: 1, padding: "10px 14px", borderRadius: 8, background: C.bgDeep,
+                border: `1px solid ${C.border}`, color: C.text, fontSize: 13, outline: "none"
+              }}
+              onFocus={e => e.target.style.borderColor = C.gold}
+              onBlur={e => e.target.style.borderColor = C.border}
+              onKeyDown={e => { if (e.key === "Enter") handleAcceptCode(); }} />
+            <Btn variant="gold" size="sm" onClick={handleAcceptCode} disabled={!friendCode.trim()}>Aceitar</Btn>
+          </div>
+
+          {/* Active links */}
+          {links.length > 0 && (
+            <div style={{ marginTop: 14, borderTop: `1px solid ${C.border}`, paddingTop: 12 }}>
+              <p style={{ fontSize: 11, color: C.textDim, marginBottom: 8 }}>Seus links ativos ({links.length})</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {links.slice(0, 3).map(l => (
+                  <div key={l.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 10px", borderRadius: 8, background: C.bgDeep }}>
+                    <span style={{ flex: 1, fontSize: 11, color: C.textMuted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{l.code}</span>
+                    <button onClick={() => copyToClipboard(`${window.location.origin}?friend=${l.code}`)} style={{ fontSize: 10, color: C.gold, cursor: "pointer" }}>copiar</button>
+                    <button onClick={() => deleteLink(l.id)} style={{ fontSize: 10, color: C.red, cursor: "pointer" }}>×</button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Tabs */}
+        <div style={{ display: "flex", gap: 4, marginBottom: 20, background: C.bgCard, borderRadius: 12, padding: 3, border: `1px solid ${C.border}` }}>
+          {[
+            ["search", "🔍 Buscar"],
+            ["following", `Seguindo (${following.length})`],
+            ["followers", `Seguidores (${followers.length})`],
+            ["friends", `Amigos (${friends.length})`],
+          ].map(([id, label]) => (
+            <button key={id} onClick={() => setTab(id)} style={{
+              flex: 1, padding: "9px 14px", borderRadius: 10, fontSize: 12, fontWeight: 600,
+              color: tab === id ? C.bgDeep : C.textMuted,
+              background: tab === id ? C.gold : "transparent",
+              transition: "all 0.2s", whiteSpace: "nowrap"
+            }}>{label}</button>
+          ))}
+        </div>
+
+        {/* Search Tab */}
+        {tab === "search" && (
+          <div>
+            <div style={{ position: "relative", marginBottom: 20 }}>
+              <div style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}><SearchSVG size={15} /></div>
+              <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+                placeholder="Buscar por nome ou username..."
+                style={{
+                  width: "100%", padding: "14px 14px 14px 40px", borderRadius: 12,
+                  background: C.bgCard, border: `1px solid ${C.border}`, color: C.text,
+                  fontSize: 14, outline: "none", transition: "border-color 0.2s"
+                }}
+                onFocus={e => e.target.style.borderColor = C.gold}
+                onBlur={e => e.target.style.borderColor = C.border} />
+            </div>
+
+            {searchLoading ? (
+              <div style={{ display: "flex", justifyContent: "center", padding: "40px 0" }}><Spinner size={28} /></div>
+            ) : searchResults.length > 0 ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {searchResults.map(p => <UserCard key={p.id} profile={p} />)}
+              </div>
+            ) : searchQuery ? (
+              <div style={{ textAlign: "center", padding: "60px 0", color: C.textDim }}>
+                <p style={{ fontSize: 32, marginBottom: 12 }}>🔍</p>
+                <p style={{ fontSize: 14 }}>Nenhum usuário encontrado</p>
+              </div>
+            ) : (
+              <div style={{ textAlign: "center", padding: "60px 0", color: C.textDim }}>
+                <p style={{ fontSize: 40, marginBottom: 12 }}>👥</p>
+                <p style={{ fontSize: 14, marginBottom: 4 }}>Busque por nome ou username</p>
+                <p style={{ fontSize: 12 }}>para encontrar e seguir outros cinéfilos</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Following Tab */}
+        {tab === "following" && (
+          <div>
+            {followsLoading ? (
+              <div style={{ display: "flex", justifyContent: "center", padding: "40px 0" }}><Spinner size={28} /></div>
+            ) : followingProfiles.length > 0 ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {followingProfiles.map(p => <UserCard key={p.id} profile={p} />)}
+              </div>
+            ) : (
+              <div style={{ textAlign: "center", padding: "60px 0", color: C.textDim }}>
+                <p style={{ fontSize: 40, marginBottom: 12 }}>🫥</p>
+                <p style={{ fontSize: 14 }}>Você ainda não segue ninguém</p>
+                <p style={{ fontSize: 12, marginTop: 4 }}>Busque usuários e comece a seguir!</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Followers Tab */}
+        {tab === "followers" && (
+          <div>
+            {followsLoading ? (
+              <div style={{ display: "flex", justifyContent: "center", padding: "40px 0" }}><Spinner size={28} /></div>
+            ) : followerProfiles.length > 0 ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {followerProfiles.map(p => <UserCard key={p.id} profile={p} />)}
+              </div>
+            ) : (
+              <div style={{ textAlign: "center", padding: "60px 0", color: C.textDim }}>
+                <p style={{ fontSize: 40, marginBottom: 12 }}>🫥</p>
+                <p style={{ fontSize: 14 }}>Nenhum seguidor ainda</p>
+                <p style={{ fontSize: 12, marginTop: 4 }}>Compartilhe seu perfil para ganhar seguidores!</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Friends Tab */}
+        {tab === "friends" && (
+          <div>
+            {friendProfiles.length > 0 ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {friendProfiles.map(p => <UserCard key={p.id} profile={p} />)}
+              </div>
+            ) : (
+              <div style={{ textAlign: "center", padding: "60px 0", color: C.textDim }}>
+                <p style={{ fontSize: 40, marginBottom: 12 }}>🤝</p>
+                <p style={{ fontSize: 14 }}>Nenhum amigo ainda</p>
+                <p style={{ fontSize: 12, marginTop: 4 }}>Gere um link de amizade e envie para seus amigos!</p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
 //  GROUPS PAGE
 // ─────────────────────────────────────────────
 function GroupsPage({ setPage, setSelectedGroup }) {
