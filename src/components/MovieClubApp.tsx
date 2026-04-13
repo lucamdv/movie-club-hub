@@ -4,6 +4,9 @@ import { tmdbProxy, omdbProxy, streamingProxy } from "@/lib/movie-api.functions"
 import logoMain from "@/assets/logo-main.png";
 import mascotsNav from "@/assets/mascots-nav.png";
 import logoText from "@/assets/logo-text.png";
+import mascotWizard from "@/assets/mascot-wizard.png";
+import mascotSpeak from "@/assets/mascot-speak.png";
+import mascotSee from "@/assets/mascot-see.png";
 
 // ─────────────────────────────────────────────
 //  DESIGN TOKENS
@@ -536,10 +539,10 @@ function Carousel({ children, movies, onMovieClick }) {
 function Navbar({ page, setPage, hasKeys, apiStatus }) {
   // Monkey mascots: wizard=discover, speak-no-evil=profile, see-no-evil=clubs
   const items = [
-    ["home", "Discover", "🙈"],
-    ["profile", "Perfil", "🙊"],
-    ["groups", "Clubs", "🙉"],
-    ["search", "Buscar", "🔍"],
+    ["home", "Discover", mascotWizard],
+    ["profile", "Perfil", mascotSpeak],
+    ["groups", "Clubs", mascotSee],
+    ["search", "Buscar", null],
   ];
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
@@ -572,7 +575,7 @@ function Navbar({ page, setPage, hasKeys, apiStatus }) {
           }}
             onMouseEnter={e => { if (page !== id) e.currentTarget.style.color = C.text; }}
             onMouseLeave={e => { if (page !== id) e.currentTarget.style.color = C.textMuted; }}>
-            <span style={{ fontSize: 15 }}>{icon}</span>
+            {icon ? <img src={icon} alt="" style={{ width: 22, height: 22, objectFit: "contain" }} /> : <span style={{ fontSize: 15 }}>🔍</span>}
             {label}
           </button>
         ))}
