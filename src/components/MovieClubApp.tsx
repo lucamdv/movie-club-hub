@@ -416,8 +416,14 @@ function useAuth() {
     await supabase.auth.signOut();
   };
 
-  return { user, profile, loading, signUp, signIn, signOut };
-}
+  const updateProfile = async (updates) => {
+    if (!user) return;
+    const { error } = await supabase.from("profiles").update(updates).eq("user_id", user.id);
+    if (error) throw error;
+    fetchProfile(user.id);
+  };
+
+  return { user, profile, loading, signUp, signIn, signOut, updateProfile, fetchProfile };
 
 function useRatings(userId) {
   const [ratings, setRatings] = useState([]);
