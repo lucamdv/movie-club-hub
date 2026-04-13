@@ -2961,6 +2961,7 @@ function QuickRatePage({ setPage, setSelectedMovie, auth }) {
   const startSession = (m) => {
     setMode(m);
     recPageRef.current = 0;
+    setSessionStats({ rated: [], watchlistAdded: [], skipped: 0, startTime: Date.now() });
     if (m === "random") loadRandom();
     else loadRecommended();
   };
