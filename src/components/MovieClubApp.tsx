@@ -810,6 +810,7 @@ function Navbar({ page, setPage, hasKeys, apiStatus }) {
   const items = [
     ["home", "Discover", mascotWizard],
     ["profile", "Perfil", mascotSpeak],
+    ["friends", "Amigos", null],
     ["groups", "Clubs", mascotSee],
     ["search", "Buscar", null],
   ];
