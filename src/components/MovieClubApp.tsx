@@ -39,7 +39,7 @@ input,textarea,select{font-family:inherit}
 `;
 
 // ─────────────────────────────────────────────
-//  API LAYER
+//  API LAYER (via server functions)
 // ─────────────────────────────────────────────
 const apiCache = new Map();
 async function cachedFetch(key, fetcher, ttlMs = 5 * 60 * 1000) {
@@ -50,24 +50,12 @@ async function cachedFetch(key, fetcher, ttlMs = 5 * 60 * 1000) {
   return data;
 }
 
-const TMDB_BASE = "https://api.themoviedb.org/3";
 const TMDB_IMG  = "https://image.tmdb.org/t/p";
-// Public read-only demo key — works for demo mode, user can override with own key
-const DEMO_TMDB = "2dca580c2a14b55200e784d157207b4d";
 
 const tmdb = {
-  key() { return window.__MC_KEYS__?.tmdb || DEMO_TMDB; },
   async get(path, params = {}) {
-    const url = new URL(`${TMDB_BASE}${path}`);
-    url.searchParams.set("api_key", this.key());
-    url.searchParams.set("language", "pt-BR");
-    Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
-    const cacheKey = url.toString();
-    return cachedFetch(cacheKey, async () => {
-      const r = await fetch(url.toString());
-      if (!r.ok) throw new Error(`TMDb ${r.status}: ${r.statusText}`);
-      return r.json();
-    });
+    const cacheKey = `tmdb:${path}:${JSON.stringify(params)}`;
+    return cachedFetch(cacheKey, () => tmdbProxy({ data: { path, params } }));
   },
   poster(path, size = "w300") { return path ? `${TMDB_IMG}/${size}${path}` : null; },
   backdrop(path, size = "w1280") { return path ? `${TMDB_IMG}/${size}${path}` : null; },
@@ -75,41 +63,24 @@ const tmdb = {
   async popular()           { return this.get("/movie/popular"); },
   async topRated()          { return this.get("/movie/top_rated"); },
   async details(id)         { return this.get(`/movie/${id}`, { append_to_response: "credits,videos,similar,recommendations" }); },
-  async search(q, page = 1) { return this.get("/search/movie", { query: q, page }); },
+  async search(q, page = 1) { return this.get("/search/movie", { query: q, page: String(page) }); },
   async genres()            { return this.get("/genre/movie/list"); },
-  async byGenre(gid, page = 1) { return this.get("/discover/movie", { with_genres: gid, sort_by: "popularity.desc", page }); },
+  async byGenre(gid, page = 1) { return this.get("/discover/movie", { with_genres: String(gid), sort_by: "popularity.desc", page: String(page) }); },
 };
 
 const omdb = {
-  key() { return window.__MC_KEYS__?.omdb; },
   async get(params) {
-    if (!this.key()) return null;
-    const url = new URL("https://www.omdbapi.com");
-    url.searchParams.set("apikey", this.key());
-    Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
-    return cachedFetch(url.toString(), async () => {
-      const r = await fetch(url.toString());
-      if (!r.ok) return null;
-      const d = await r.json();
-      return d.Response === "True" ? d : null;
-    });
+    const cacheKey = `omdb:${JSON.stringify(params)}`;
+    return cachedFetch(cacheKey, () => omdbProxy({ data: { params } }));
   },
   async byImdbId(id)           { return this.get({ i: id, plot: "full" }); },
-  async byTitle(title, year)   { return this.get({ t: title, plot: "short", ...(year ? { y: year } : {}) }); },
+  async byTitle(title, year)   { return this.get({ t: title, plot: "short", ...(year ? { y: String(year) } : {}) }); },
 };
 
 const streaming = {
-  key() { return window.__MC_KEYS__?.streaming; },
   async byTmdb(tmdbId, country = "br") {
-    if (!this.key()) return null;
-    const url = `https://streaming-availability.p.rapidapi.com/shows/movie/${tmdbId}?country=${country}`;
-    return cachedFetch(`stream_${tmdbId}_${country}`, async () => {
-      const r = await fetch(url, {
-        headers: { "x-rapidapi-key": this.key(), "x-rapidapi-host": "streaming-availability.p.rapidapi.com" },
-      });
-      if (!r.ok) return null;
-      return r.json();
-    });
+    const cacheKey = `stream:${tmdbId}:${country}`;
+    return cachedFetch(cacheKey, () => streamingProxy({ data: { tmdbId: Number(tmdbId), country } }));
   },
 };
 
