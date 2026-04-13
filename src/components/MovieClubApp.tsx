@@ -544,7 +544,7 @@ function Carousel({ children, movies, onMovieClick }) {
   return (
     <div className="carousel-wrapper">
       <button className="carousel-btn carousel-btn-left" onClick={() => scroll(-1)} style={{ opacity: canLeft ? undefined : 0, pointerEvents: canLeft ? "auto" : "none" }}><ChevronLeft /></button>
-      <div ref={ref} className="carousel-row" style={{ gap: 14, padding: "12px 8px 24px" }}>
+      <div ref={ref} className="carousel-row">
         {children || movies?.map(m => <MovieCard key={m.id} movie={m} onClick={() => onMovieClick?.(m)} />)}
       </div>
       <button className="carousel-btn carousel-btn-right" onClick={() => scroll(1)} style={{ opacity: canRight ? undefined : 0, pointerEvents: canRight ? "auto" : "none" }}><ChevronRight /></button>
