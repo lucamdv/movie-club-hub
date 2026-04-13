@@ -3097,7 +3097,102 @@ function QuickRatePage({ setPage, setSelectedMovie, auth }) {
     );
   }
 
-  // ── LOADING ──
+  // ── SUMMARY SCREEN ──
+  if (mode === "summary") {
+    const elapsed = sessionStats.startTime ? Math.round((Date.now() - sessionStats.startTime) / 60000) : 0;
+    const avgRating = sessionStats.rated.length > 0
+      ? (sessionStats.rated.reduce((sum, r) => sum + r.stars, 0) / sessionStats.rated.length).toFixed(1)
+      : "0";
+    const totalViewed = idx + 1;
+    const distribution = [1, 2, 3, 4, 5].map(s => sessionStats.rated.filter(r => Math.ceil(r.stars) === s).length);
+    const maxDist = Math.max(...distribution, 1);
+
+    return (
+      <div style={{ paddingTop: 80, minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ maxWidth: 500, width: "100%", padding: "0 24px" }}>
+          <div style={{ textAlign: "center", marginBottom: 32 }}>
+            <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 64, height: 64, borderRadius: 20, background: `linear-gradient(135deg, ${C.gold}22, ${C.gold}08)`, border: `1px solid ${C.gold}33`, marginBottom: 16 }}>
+              <Award size={28} style={{ color: C.gold }} />
+            </div>
+            <h1 style={{ color: C.text, fontSize: 24, fontWeight: 800, margin: "0 0 6px", fontFamily: "'Outfit', sans-serif" }}>Sessão Finalizada</h1>
+            <p style={{ color: C.textMuted, fontSize: 13 }}>{elapsed > 0 ? `${elapsed} minuto${elapsed !== 1 ? "s" : ""} de sessão` : "Menos de um minuto"}</p>
+          </div>
+
+          {/* Stats grid */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 28 }}>
+            {[
+              [sessionStats.rated.length, "Avaliados", Star, C.gold],
+              [sessionStats.watchlistAdded.length, "Na Watchlist", Bookmark, "#22C55E"],
+              [totalViewed, "Visualizados", Eye, "#818CF8"],
+            ].map(([val, label, Icon, color], i) => (
+              <div key={i} style={{ padding: 16, borderRadius: 14, background: C.bgCard, border: `1px solid ${C.border}`, textAlign: "center" }}>
+                <Icon size={18} style={{ color, marginBottom: 6 }} />
+                <div style={{ color: C.text, fontSize: 22, fontWeight: 800, fontFamily: "'Outfit', sans-serif" }}>{val}</div>
+                <div style={{ color: C.textMuted, fontSize: 11, marginTop: 2 }}>{label}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Average + Distribution */}
+          {sessionStats.rated.length > 0 && (
+            <div style={{ padding: 20, borderRadius: 16, background: C.bgCard, border: `1px solid ${C.border}`, marginBottom: 20 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+                <span style={{ color: C.textMuted, fontSize: 13, fontWeight: 600 }}>Nota Média</span>
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <Star size={16} fill={C.gold} stroke={C.gold} />
+                  <span style={{ color: C.gold, fontSize: 20, fontWeight: 800, fontFamily: "'Outfit', sans-serif" }}>{avgRating}</span>
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: 8, alignItems: "flex-end", height: 60 }}>
+                {distribution.map((count, i) => (
+                  <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                    <div style={{
+                      width: "100%", borderRadius: 4,
+                      height: Math.max(count / maxDist * 48, 4),
+                      background: count > 0 ? `linear-gradient(to top, ${C.gold}, ${C.goldLight})` : C.border,
+                      transition: "height 0.3s",
+                    }} />
+                    <span style={{ fontSize: 10, color: C.textMuted }}>{i + 1}<Star size={8} style={{ marginLeft: 1 }} /></span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Rated movies list */}
+          {sessionStats.rated.length > 0 && (
+            <div style={{ marginBottom: 24 }}>
+              <h3 style={{ color: C.text, fontSize: 14, fontWeight: 700, marginBottom: 12, fontFamily: "'DM Sans', sans-serif" }}>Filmes Avaliados</h3>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8, maxHeight: 240, overflowY: "auto" }}>
+                {sessionStats.rated.map(r => (
+                  <div key={r.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "8px 12px", borderRadius: 10, background: "rgba(255,255,255,0.03)", border: `1px solid ${C.border}` }}
+                    onClick={() => { setSelectedMovie({ tmdbId: r.id, title: r.title, poster: r.poster }); setPage("movie"); }}
+                    onMouseEnter={e => e.currentTarget.style.borderColor = C.borderHover}
+                    onMouseLeave={e => e.currentTarget.style.borderColor = C.border}
+                    style_={{ cursor: "pointer" }}>
+                    {r.poster && <img src={r.poster} alt="" style={{ width: 32, height: 48, borderRadius: 6, objectFit: "cover" }} />}
+                    <span style={{ flex: 1, color: C.text, fontSize: 13, fontWeight: 500, cursor: "pointer" }}
+                      onClick={() => { setSelectedMovie({ tmdbId: r.id, title: r.title, poster: r.poster }); setPage("movie"); }}>{r.title}</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
+                      <Star size={12} fill={C.gold} stroke={C.gold} />
+                      <span style={{ color: C.gold, fontSize: 13, fontWeight: 700 }}>{r.stars}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Actions */}
+          <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
+            <Btn variant="outline" onClick={() => setMode(null)}>Nova Sessão</Btn>
+            <Btn variant="gold" onClick={() => setPage("home")}>Voltar ao Início</Btn>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (loading && movies.length === 0) return (
     <div style={{ paddingTop: 100, minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 16 }}>
       <Spinner size={36} />
