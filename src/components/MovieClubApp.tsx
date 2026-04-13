@@ -1546,6 +1546,144 @@ function SearchPage({ setPage, setSelectedMovie }) {
 }
 
 // ─────────────────────────────────────────────
+//  PROFILE EDIT MODAL
+// ─────────────────────────────────────────────
+function ProfileEditModal({ profile, user, onClose, onSave }) {
+  const [displayName, setDisplayName] = useState(profile?.display_name || "");
+  const [username, setUsername] = useState(profile?.username || "");
+  const [bio, setBio] = useState(profile?.bio || "");
+  const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url || "");
+  const [avatarTab, setAvatarTab] = useState("monkeys"); // "monkeys" | "upload"
+  const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const fileRef = useRef(null);
+
+  const handleUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop();
+      const path = `${user.id}/avatar.${ext}`;
+      const { error: uploadErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
+      if (uploadErr) throw uploadErr;
+      const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(path);
+      setAvatarUrl(publicUrl + "?t=" + Date.now());
+      toast.success("Foto enviada!");
+    } catch (err) {
+      toast.error("Erro ao enviar foto: " + (err.message || err));
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await onSave({ display_name: displayName.trim(), username: username.trim(), bio: bio.trim(), avatar_url: avatarUrl });
+      toast.success("Perfil atualizado!");
+      onClose();
+    } catch (err) {
+      toast.error("Erro ao salvar: " + (err.message || err));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}
+      onClick={onClose}>
+      <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)" }} />
+      <div style={{ position: "relative", background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 20, padding: 28, maxWidth: 520, width: "100%", maxHeight: "90vh", overflowY: "auto" }}
+        onClick={e => e.stopPropagation()}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
+          <h2 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 20, fontWeight: 700, color: C.text }}>Editar Perfil</h2>
+          <button onClick={onClose} style={{ width: 32, height: 32, borderRadius: "50%", background: C.bgDeep, border: `1px solid ${C.border}`, color: C.textMuted, fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>✕</button>
+        </div>
+
+        {/* Avatar Section */}
+        <div style={{ textAlign: "center", marginBottom: 24 }}>
+          <div style={{
+            width: 100, height: 100, borderRadius: "50%", margin: "0 auto 16px",
+            background: avatarUrl ? "transparent" : `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`,
+            border: `3px solid ${C.gold}`, boxShadow: `0 4px 20px rgba(201,168,76,0.3)`,
+            display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden",
+            fontSize: 28, fontWeight: 800, color: C.bgDeep, fontFamily: "'Outfit', sans-serif",
+          }}>
+            {avatarUrl ? <img src={avatarUrl} alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : (displayName || "?").slice(0, 2).toUpperCase()}
+          </div>
+
+          {/* Avatar Tab Switcher */}
+          <div style={{ display: "inline-flex", gap: 4, background: C.bgDeep, borderRadius: 10, padding: 3, marginBottom: 16 }}>
+            {[["monkeys", "🐒 Macacos"], ["upload", "📷 Upload"]].map(([id, label]) => (
+              <button key={id} onClick={() => setAvatarTab(id)} style={{
+                padding: "7px 16px", fontSize: 12, fontWeight: 600,
+                color: avatarTab === id ? C.bgDeep : C.textMuted,
+                background: avatarTab === id ? C.gold : "transparent",
+                borderRadius: 8, transition: "all 0.2s"
+              }}>{label}</button>
+            ))}
+          </div>
+
+          {avatarTab === "monkeys" && (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10, maxWidth: 320, margin: "0 auto" }}>
+              {MONKEY_AVATARS.map(m => (
+                <button key={m.id} onClick={() => setAvatarUrl(m.src)} style={{
+                  padding: 8, borderRadius: 14, border: avatarUrl === m.src ? `2px solid ${C.gold}` : `1px solid ${C.border}`,
+                  background: avatarUrl === m.src ? `${C.gold}15` : C.bgDeep,
+                  cursor: "pointer", transition: "all 0.2s", display: "flex", flexDirection: "column", alignItems: "center", gap: 4
+                }}>
+                  <img src={m.src} alt={m.label} loading="lazy" width={64} height={64} style={{ borderRadius: 10 }} />
+                  <span style={{ fontSize: 10, color: avatarUrl === m.src ? C.gold : C.textDim, fontWeight: 500 }}>{m.label}</span>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {avatarTab === "upload" && (
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+              <input ref={fileRef} type="file" accept="image/*" onChange={handleUpload} style={{ display: "none" }} />
+              <Btn variant="outline" size="sm" onClick={() => fileRef.current?.click()} disabled={uploading}>
+                {uploading ? <><Spinner size={14} /> Enviando...</> : "Escolher foto"}
+              </Btn>
+              <p style={{ fontSize: 11, color: C.textDim }}>JPG, PNG ou WebP · máx. 2MB</p>
+            </div>
+          )}
+
+          {avatarUrl && (
+            <button onClick={() => setAvatarUrl("")} style={{ marginTop: 8, fontSize: 11, color: C.red, cursor: "pointer", background: "none", border: "none" }}>
+              Remover avatar
+            </button>
+          )}
+        </div>
+
+        {/* Fields */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 24 }}>
+          <TextInput label="Nome de exibição" value={displayName} onChange={setDisplayName} placeholder="Seu nome" />
+          <TextInput label="Username" value={username} onChange={setUsername} placeholder="@username" note="Sem espaços, letras e números" />
+          <div>
+            <label style={{ display: "block", fontSize: 12, color: C.textMuted, marginBottom: 6, fontWeight: 500 }}>Bio</label>
+            <textarea value={bio} onChange={e => setBio(e.target.value)} placeholder="Conte sobre você..." rows={3}
+              style={{ width: "100%", padding: "12px 16px", borderRadius: 10, background: "rgba(9,21,35,0.6)", border: `1px solid ${C.border}`, color: C.text, fontSize: 14, outline: "none", resize: "vertical", fontFamily: "inherit", transition: "border-color 0.2s" }}
+              onFocus={e => e.target.style.borderColor = C.gold}
+              onBlur={e => e.target.style.borderColor = C.border} />
+            <p style={{ fontSize: 11, color: C.textDim, marginTop: 4 }}>{bio.length}/200</p>
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+          <Btn variant="ghost" size="sm" onClick={onClose}>Cancelar</Btn>
+          <Btn variant="gold" size="sm" onClick={handleSave} disabled={saving}>
+            {saving ? <><Spinner size={14} /> Salvando...</> : "Salvar"}
+          </Btn>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
 //  PROFILE PAGE
 // ─────────────────────────────────────────────
 function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSelectedMovie }) {
