@@ -1799,18 +1799,33 @@ function ProfileEditModal({ profile, user, onClose, onSave }) {
 // ─────────────────────────────────────────────
 //  PROFILE PAGE
 // ─────────────────────────────────────────────
-function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSelectedMovie }) {
-  const userId = authCtx?.user?.id;
-  const profile = authCtx?.profile;
-  const { ratings, loading: ratingsLoading } = useRatings(userId);
-  const { items: watchlistItems, loading: wlLoading, remove: removeFromWl } = useWatchlist(userId);
+function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSelectedMovie, viewUserId }) {
+  const currentUserId = authCtx?.user?.id;
+  const isViewingOther = viewUserId && viewUserId !== currentUserId;
+  const targetUserId = isViewingOther ? viewUserId : currentUserId;
+
+  // For viewing other profiles, load their profile data
+  const [otherProfile, setOtherProfile] = useState(null);
+  useEffect(() => {
+    if (!isViewingOther) { setOtherProfile(null); return; }
+    supabase.from("profiles").select("*").eq("user_id", viewUserId).single().then(({ data }) => setOtherProfile(data));
+  }, [viewUserId, isViewingOther]);
+
+  const profile = isViewingOther ? otherProfile : authCtx?.profile;
+  const { ratings, loading: ratingsLoading } = useRatings(targetUserId);
+  const { items: watchlistItems, loading: wlLoading, remove: removeFromWl } = useWatchlist(targetUserId);
   const [tab, setTab] = useState("ratings");
   const [viewMode, setViewMode] = useState("list");
   const [perPage, setPerPage] = useState(20);
   const [showEditModal, setShowEditModal] = useState(false);
-  const displayName = profile?.display_name || authCtx?.user?.email || "Usuário";
+
+  // Follow hooks for viewing other profiles
+  const { isFollowing, follow, unfollow } = useFollows(currentUserId);
+  const { isFriend } = useFriendships(currentUserId);
+
+  const displayName = profile?.display_name || (isViewingOther ? "Usuário" : authCtx?.user?.email || "Usuário");
   const initials = displayName.slice(0, 2).toUpperCase();
-  const uname = profile?.username || authCtx?.user?.email?.split("@")[0] || "user";
+  const uname = profile?.username || (!isViewingOther ? authCtx?.user?.email?.split("@")[0] : null) || "user";
   const bio = profile?.bio || "";
   const avgRating = ratings.length > 0 ? (ratings.reduce((s, r) => s + Number(r.rating), 0) / ratings.length).toFixed(1) : "—";
 
@@ -1921,14 +1936,33 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
             )}
 
             {/* Actions */}
-            <div style={{ display: "flex", gap: 10 }}>
-              <Btn variant="gold" size="sm" onClick={() => setShowEditModal(true)}>✏️ Editar Perfil</Btn>
-              <Btn variant="ghost" size="sm" onClick={() => authCtx?.signOut?.()}>Sair da conta</Btn>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center" }}>
+              {isViewingOther ? (
+                <>
+                  <Btn variant="ghost" size="sm" onClick={() => { setPage("profile"); }}>← Voltar</Btn>
+                  {isFriend(viewUserId) && <Badge color="rgba(34,197,94,0.15)" textColor={C.success}>Amigo</Badge>}
+                  <Btn variant={isFollowing(viewUserId) ? "ghost" : "gold"} size="sm" onClick={() => {
+                    if (isFollowing(viewUserId)) unfollow(viewUserId);
+                    else follow(viewUserId);
+                  }}>
+                    {isFollowing(viewUserId) ? <><UserCheckIcon /> Seguindo</> : <><UserPlusIcon /> Seguir</>}
+                  </Btn>
+                </>
+              ) : (
+                <>
+                  <Btn variant="gold" size="sm" onClick={() => setShowEditModal(true)}>✏️ Editar Perfil</Btn>
+                  <Btn variant="ghost" size="sm" onClick={() => {
+                    const url = `${window.location.origin}?profile=${currentUserId}`;
+                    navigator.clipboard.writeText(url).then(() => toast.success("Link do perfil copiado!")).catch(() => toast.error("Erro ao copiar"));
+                  }}>🔗 Compartilhar Perfil</Btn>
+                  <Btn variant="ghost" size="sm" onClick={() => authCtx?.signOut?.()}>Sair da conta</Btn>
+                </>
+              )}
             </div>
           </div>
         </div>
 
-        {showEditModal && (
+        {showEditModal && !isViewingOther && (
           <ProfileEditModal
             profile={profile}
             user={authCtx?.user}
@@ -2166,22 +2200,19 @@ function useFriendships(userId) {
 // ─────────────────────────────────────────────
 //  FRIENDS PAGE
 // ─────────────────────────────────────────────
-function FriendsPage({ setPage, setSelectedMovie, auth: authCtx }) {
+function FriendsPage({ setPage, setSelectedMovie, auth: authCtx, onViewProfile }) {
   const userId = authCtx?.user?.id;
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [tab, setTab] = useState("search"); // search | following | followers | friends
-  const [friendCode, setFriendCode] = useState("");
-  const [generatedLink, setGeneratedLink] = useState(null);
   const [followingProfiles, setFollowingProfiles] = useState([]);
   const [followerProfiles, setFollowerProfiles] = useState([]);
   const [friendProfiles, setFriendProfiles] = useState([]);
   const debRef = useRef(null);
 
   const { following, followers, follow, unfollow, isFollowing, loading: followsLoading } = useFollows(userId);
-  const { links, createLink, deleteLink } = useFriendLinks(userId);
-  const { friends, isFriend, acceptLink } = useFriendships(userId);
+  const { friends, isFriend } = useFriendships(userId);
 
   // Search users
   useEffect(() => {
@@ -2221,29 +2252,9 @@ function FriendsPage({ setPage, setSelectedMovie, auth: authCtx }) {
     supabase.from("profiles").select("*").in("user_id", ids).then(({ data }) => setFriendProfiles(data || []));
   }, [friends, userId]);
 
-  const handleGenerateLink = async () => {
-    try {
-      const link = await createLink();
-      const url = `${window.location.origin}?friend=${link.code}`;
-      setGeneratedLink(url);
-      toast.success("Link de amizade gerado!");
-    } catch (e) { toast.error("Erro ao gerar link"); }
-  };
-
-  const handleAcceptCode = async () => {
-    if (!friendCode.trim()) return;
-    try {
-      // Extract code from URL or raw code
-      let code = friendCode.trim();
-      if (code.includes("friend=")) code = new URL(code).searchParams.get("friend") || code;
-      await acceptLink(code);
-      toast.success("Amizade aceita! 🎉");
-      setFriendCode("");
-    } catch (e) { toast.error(e.message || "Erro ao aceitar link"); }
-  };
-
-  const copyToClipboard = (text) => {
-    navigator.clipboard.writeText(text).then(() => toast.success("Link copiado!")).catch(() => toast.error("Erro ao copiar"));
+  const handleShareProfile = () => {
+    const url = `${window.location.origin}?profile=${userId}`;
+    navigator.clipboard.writeText(url).then(() => toast.success("Link do perfil copiado!")).catch(() => toast.error("Erro ao copiar"));
   };
 
   const getAvatarForProfile = (profile) => {
@@ -2260,8 +2271,9 @@ function FriendsPage({ setPage, setSelectedMovie, auth: authCtx }) {
     return (
       <div style={{
         background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 16,
-        padding: 20, display: "flex", alignItems: "center", gap: 16, transition: "all 0.2s"
-      }} className="card-hover">
+        padding: 20, display: "flex", alignItems: "center", gap: 16, transition: "all 0.2s",
+        cursor: "pointer"
+      }} className="card-hover" onClick={() => onViewProfile?.(profile.user_id)}>
         {/* Avatar */}
         <div style={{
           width: 52, height: 52, borderRadius: "50%", flexShrink: 0, overflow: "hidden",
@@ -2309,59 +2321,14 @@ function FriendsPage({ setPage, setSelectedMovie, auth: authCtx }) {
           <p style={{ color: C.textMuted, fontSize: 13 }}>Encontre pessoas, siga e adicione amigos</p>
         </div>
 
-        {/* Friendship Link Section */}
+        {/* Share Profile Section */}
         <div style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 16, padding: 22, marginBottom: 24 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
             <LinkIcon />
-            <h3 style={{ fontSize: 14, fontWeight: 600, color: C.text }}>Link de Amizade</h3>
+            <h3 style={{ fontSize: 14, fontWeight: 600, color: C.text }}>Compartilhar Perfil</h3>
           </div>
-
-          <div style={{ display: "flex", gap: 12, marginBottom: 14, flexWrap: "wrap" }}>
-            <Btn variant="gold" size="sm" onClick={handleGenerateLink}><PlusIcon /> Gerar Link</Btn>
-            {generatedLink && (
-              <div style={{ flex: 1, display: "flex", gap: 8, alignItems: "center", minWidth: 200 }}>
-                <div style={{
-                  flex: 1, padding: "8px 12px", borderRadius: 8, background: C.bgDeep,
-                  border: `1px solid ${C.gold}30`, fontSize: 12, color: C.goldLight,
-                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap"
-                }}>{generatedLink}</div>
-                <button onClick={() => copyToClipboard(generatedLink)} style={{
-                  padding: "8px 12px", borderRadius: 8, background: C.bgDeep,
-                  border: `1px solid ${C.border}`, color: C.textMuted, cursor: "pointer", display: "flex", alignItems: "center", gap: 4, fontSize: 11
-                }}><CopyIcon /> Copiar</button>
-              </div>
-            )}
-          </div>
-
-          {/* Accept a friend link */}
-          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <input value={friendCode} onChange={e => setFriendCode(e.target.value)}
-              placeholder="Cole o link ou código de amizade aqui..."
-              style={{
-                flex: 1, padding: "10px 14px", borderRadius: 8, background: C.bgDeep,
-                border: `1px solid ${C.border}`, color: C.text, fontSize: 13, outline: "none"
-              }}
-              onFocus={e => e.target.style.borderColor = C.gold}
-              onBlur={e => e.target.style.borderColor = C.border}
-              onKeyDown={e => { if (e.key === "Enter") handleAcceptCode(); }} />
-            <Btn variant="gold" size="sm" onClick={handleAcceptCode} disabled={!friendCode.trim()}>Aceitar</Btn>
-          </div>
-
-          {/* Active links */}
-          {links.length > 0 && (
-            <div style={{ marginTop: 14, borderTop: `1px solid ${C.border}`, paddingTop: 12 }}>
-              <p style={{ fontSize: 11, color: C.textDim, marginBottom: 8 }}>Seus links ativos ({links.length})</p>
-              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                {links.slice(0, 3).map(l => (
-                  <div key={l.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 10px", borderRadius: 8, background: C.bgDeep }}>
-                    <span style={{ flex: 1, fontSize: 11, color: C.textMuted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{l.code}</span>
-                    <button onClick={() => copyToClipboard(`${window.location.origin}?friend=${l.code}`)} style={{ fontSize: 10, color: C.gold, cursor: "pointer" }}>copiar</button>
-                    <button onClick={() => deleteLink(l.id)} style={{ fontSize: 10, color: C.red, cursor: "pointer" }}>×</button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          <p style={{ fontSize: 12, color: C.textMuted, marginBottom: 14 }}>Envie o link do seu perfil para que amigos possam te encontrar e seguir.</p>
+          <Btn variant="gold" size="sm" onClick={handleShareProfile}>🔗 Copiar Link do Perfil</Btn>
         </div>
 
         {/* Tabs */}
@@ -2831,6 +2798,7 @@ export default function MovieClubApp() {
   const [page, setPage] = useState("home");
   const [selectedMovie, setSM] = useState(null);
   const [selectedGroup, setSG] = useState(null);
+  const [viewProfileUserId, setViewProfileUserId] = useState(null);
   const [apiStatus, setApiStatus] = useState({ tmdb: false, omdb: false, streaming: false });
   const authCtx = useAuth();
   const [authError, setAuthError] = useState("");
@@ -2839,32 +2807,30 @@ export default function MovieClubApp() {
     tmdb.popular().then(d => { if (d?.results) setApiStatus(s => ({ ...s, tmdb: true })); }).catch(() => { });
   }, []);
 
-  // Auto-detect friend link in URL
+  // Auto-detect profile link in URL
   useEffect(() => {
     if (!authCtx.user) return;
     const params = new URLSearchParams(window.location.search);
-    const friendCode = params.get("friend");
-    if (friendCode) {
-      setPage("friends");
-      // Clean URL
+    const profileId = params.get("profile");
+    if (profileId) {
       window.history.replaceState({}, "", window.location.pathname);
-      // Auto-accept after short delay
-      setTimeout(async () => {
-        try {
-          const [a, b] = [authCtx.user.id, ""].sort();
-          // Find the link first
-          const { data: linkData } = await supabase.from("friend_links").select("*").eq("code", friendCode).single();
-          if (!linkData) { toast.error("Link de amizade inválido"); return; }
-          if (linkData.user_id === authCtx.user.id) { toast.error("Você não pode adicionar a si mesmo"); return; }
-          const [ua, ub] = [authCtx.user.id, linkData.user_id].sort();
-          const { data: existing } = await supabase.from("friendships").select("id").eq("user_a_id", ua).eq("user_b_id", ub).maybeSingle();
-          if (existing) { toast.info("Vocês já são amigos!"); return; }
-          await supabase.from("friendships").insert({ user_a_id: ua, user_b_id: ub });
-          toast.success("Amizade aceita! 🎉");
-        } catch (e) { toast.error("Erro ao aceitar amizade"); }
-      }, 500);
+      if (profileId === authCtx.user.id) {
+        setPage("profile");
+      } else {
+        setViewProfileUserId(profileId);
+        setPage("view-profile");
+      }
     }
   }, [authCtx.user]);
+
+  const handleViewProfile = (userId) => {
+    if (userId === authCtx?.user?.id) {
+      setPage("profile");
+    } else {
+      setViewProfileUserId(userId);
+      setPage("view-profile");
+    }
+  };
 
   const handleSplashDone = useCallback(() => setShowSplash(false), []);
 
@@ -2885,8 +2851,9 @@ export default function MovieClubApp() {
       <div className="page-enter" key={page}>
         {page === "home" && <HomePage setPage={setPage} setSelectedMovie={setSM} auth={authCtx} />}
         {page === "profile" && <ProfilePage setPage={setPage} isOwnProfile auth={authCtx} setSelectedMovie={setSM} />}
+        {page === "view-profile" && <ProfilePage setPage={setPage} auth={authCtx} setSelectedMovie={setSM} viewUserId={viewProfileUserId} />}
         {page === "movie" && <MoviePage movieInit={selectedMovie} setPage={setPage} setSelectedMovie={setSM} auth={authCtx} />}
-        {page === "friends" && <FriendsPage setPage={setPage} setSelectedMovie={setSM} auth={authCtx} />}
+        {page === "friends" && <FriendsPage setPage={setPage} setSelectedMovie={setSM} auth={authCtx} onViewProfile={handleViewProfile} />}
         {page === "groups" && <GroupsPage setPage={setPage} setSelectedGroup={setSG} />}
         {page === "group" && <GroupPage group={selectedGroup} setPage={setPage} setSelectedMovie={setSM} />}
         {page === "search" && <SearchPage setPage={setPage} setSelectedMovie={setSM} />}
