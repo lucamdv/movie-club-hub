@@ -343,26 +343,41 @@ function useAuth() {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState(null);
 
+  const fetchProfile = useCallback((userId) => {
+    supabase.from("profiles").select("*").eq("user_id", userId).single().then(({ data }) => {
+      setProfile(data);
+    });
+  }, []);
+
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setUser(session?.user || null);
-      if (session?.user) {
-        const { data } = await supabase.from("profiles").select("*").eq("user_id", session.user.id).single();
-        setProfile(data);
+    let ready = false;
+
+    // 1. Restore session from storage first
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      const u = session?.user || null;
+      setUser(u);
+      if (u) fetchProfile(u.id);
+      setLoading(false);
+      ready = true;
+    });
+
+    // 2. Listen for subsequent auth changes (sign in/out/token refresh)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      const u = session?.user || null;
+      setUser(u);
+      if (u) {
+        fetchProfile(u.id);
       } else {
         setProfile(null);
       }
-      setLoading(false);
-    });
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user || null);
-      if (session?.user) {
-        supabase.from("profiles").select("*").eq("user_id", session.user.id).single().then(({ data }) => setProfile(data));
+      if (!ready) {
+        setLoading(false);
+        ready = true;
       }
-      setLoading(false);
     });
+
     return () => subscription.unsubscribe();
-  }, []);
+  }, [fetchProfile]);
 
   const signUp = async (email, password, name, username) => {
     const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { full_name: name } } });
