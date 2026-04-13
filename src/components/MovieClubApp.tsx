@@ -1072,13 +1072,23 @@ function HomePage({ setPage, setSelectedMovie }) {
 // ─────────────────────────────────────────────
 //  MOVIE PAGE
 // ─────────────────────────────────────────────
-function MoviePage({ movieInit, setPage, setSelectedMovie }) {
+function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx }) {
   const { movie, loading, streamServices } = useMovieDetails(movieInit?.tmdbId || movieInit?.id);
   const m = movie || movieInit;
-  const [watched, setWatched] = useState(false);
   const [liked, setLiked] = useState(false);
-  const [rating, setRating] = useState(0);
   const [review, setReview] = useState("");
+  const { ratings: userRatings, upsertRating, getRating } = useRatings(authCtx?.user?.id);
+  const { isInList, add: addToWatchlist, remove: removeFromWatchlist } = useWatchlist(authCtx?.user?.id);
+  const existingRating = m ? getRating(m.tmdbId || m.id) : null;
+  const [localRating, setLocalRating] = useState(0);
+  const inWatchlist = m ? isInList(m.tmdbId || m.id) : false;
+
+  useEffect(() => {
+    if (existingRating) {
+      setLocalRating(Number(existingRating.rating));
+      setReview(existingRating.review || "");
+    }
+  }, [existingRating]);
 
   if (loading && !m) return (
     <div style={{ paddingTop: 80, minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
