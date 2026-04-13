@@ -564,21 +564,37 @@ function Navbar({ page, setPage, hasKeys, apiStatus }) {
         <img src={logoText} alt="MovieClub" style={{ height: 32, filter: "drop-shadow(0 0 8px rgba(201,168,76,0.2))" }} />
       </button>
 
-      <div style={{ display: "flex", gap: 4 }}>
-        {items.map(([id, label, icon]) => (
-          <button key={id} onClick={() => setPage(id)} style={{
-            padding: "8px 18px", fontSize: 13, fontWeight: 600,
-            color: page === id ? C.gold : C.textMuted,
-            borderBottom: page === id ? `2px solid ${C.gold}` : "2px solid transparent",
-            transition: "all 0.2s", background: "transparent",
-            display: "flex", alignItems: "center", gap: 6,
-          }}
-            onMouseEnter={e => { if (page !== id) e.currentTarget.style.color = C.text; }}
-            onMouseLeave={e => { if (page !== id) e.currentTarget.style.color = C.textMuted; }}>
-            {icon ? <img src={icon} alt="" style={{ width: 22, height: 22, objectFit: "contain" }} /> : <span style={{ fontSize: 15 }}>🔍</span>}
-            {label}
-          </button>
-        ))}
+      <div style={{ display: "flex", gap: 2 }}>
+        {items.map(([id, label, icon]) => {
+          const active = page === id;
+          return (
+            <button key={id} onClick={() => setPage(id)} style={{
+              padding: "6px 16px", fontSize: 13, fontWeight: 600,
+              color: active ? C.gold : C.textMuted,
+              background: active ? "rgba(201,168,76,0.08)" : "transparent",
+              borderRadius: 10,
+              borderBottom: "none",
+              transition: "all 0.25s", display: "flex", alignItems: "center", gap: 7,
+            }}
+              onMouseEnter={e => { if (!active) { e.currentTarget.style.color = C.text; e.currentTarget.style.background = "rgba(255,255,255,0.04)"; } }}
+              onMouseLeave={e => { if (!active) { e.currentTarget.style.color = C.textMuted; e.currentTarget.style.background = "transparent"; } }}>
+              {icon ? (
+                <div style={{
+                  width: 28, height: 28, borderRadius: "50%", overflow: "hidden",
+                  border: active ? `1.5px solid ${C.gold}` : "1.5px solid transparent",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  background: active ? "rgba(201,168,76,0.12)" : "rgba(255,255,255,0.05)",
+                  transition: "all 0.25s", flexShrink: 0,
+                }}>
+                  <img src={icon} alt="" style={{ width: 22, height: 22, objectFit: "cover", borderRadius: "50%" }} />
+                </div>
+              ) : (
+                <span style={{ fontSize: 14 }}>🔍</span>
+              )}
+              {label}
+            </button>
+          );
+        })}
       </div>
 
       <button onClick={() => setPage("settings")} style={{
