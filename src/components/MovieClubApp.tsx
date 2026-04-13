@@ -1694,6 +1694,7 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
   const [tab, setTab] = useState("ratings");
   const [viewMode, setViewMode] = useState("list");
   const [perPage, setPerPage] = useState(20);
+  const [showEditModal, setShowEditModal] = useState(false);
   const displayName = profile?.display_name || authCtx?.user?.email || "Usuário";
   const initials = displayName.slice(0, 2).toUpperCase();
   const uname = profile?.username || authCtx?.user?.email?.split("@")[0] || "user";
