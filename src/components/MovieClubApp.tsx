@@ -1819,8 +1819,8 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
   const [perPage, setPerPage] = useState(20);
   const [showEditModal, setShowEditModal] = useState(false);
 
-  // Follow hooks for viewing other profiles
-  const { isFollowing, follow, unfollow } = useFollows(currentUserId);
+  // Follow hooks - use targetUserId for counts, currentUserId for actions
+  const { following: targetFollowing, followers: targetFollowers, isFollowing, follow, unfollow } = useFollows(targetUserId);
   const { isFriend } = useFriendships(currentUserId);
 
   const displayName = profile?.display_name || (isViewingOther ? "Usuário" : authCtx?.user?.email || "Usuário");
@@ -1904,10 +1904,12 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
                 ["Avaliações", ratings.length, "🎬"],
                 ["Watchlist", watchlistItems.length, "📋"],
                 ["Nota Média", avgRating, "⭐"],
-              ].map(([label, val, icon], i) => (
+                ["Seguindo", targetFollowing.length, "👤"],
+                ["Seguidores", targetFollowers.length, "👥"],
+              ].map(([label, val, icon], i, arr) => (
                 <div key={label} style={{
-                  padding: "16px 32px", textAlign: "center",
-                  borderRight: i < 2 ? `1px solid ${C.border}` : "none",
+                  padding: "14px 20px", textAlign: "center",
+                  borderRight: i < arr.length - 1 ? `1px solid ${C.border}` : "none",
                   minWidth: 120
                 }}>
                   <p style={{ fontSize: 11, marginBottom: 4 }}>{icon}</p>
