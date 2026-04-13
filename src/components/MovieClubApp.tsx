@@ -57,42 +57,33 @@ const tmdb = {
     const cacheKey = `tmdb:${path}:${JSON.stringify(params)}`;
     return cachedFetch(cacheKey, () => tmdbProxy({ data: { path, params } }));
   },
-  /**
-   * Progressive loader: returns first page immediately via onFirstPage callback,
-   * then fetches all remaining pages in background and calls onComplete with full results.
-   * Also returns a promise that resolves with all results.
-   */
-  async getAllPages(path, params = {}, { onFirstPage, onProgress } = {}) {
-    const first = await this.get(path, { ...params, page: "1" });
-    const firstResults = first?.results || [];
-    const totalPages = Math.min(first?.total_pages || 1, 500);
-    
-    if (onFirstPage) onFirstPage(firstResults);
-    if (totalPages <= 1) return { results: firstResults, total_pages: 1, total_results: first?.total_results || firstResults.length };
-
-    let allResults = [...firstResults];
-    const batchSize = 20;
-    for (let start = 2; start <= totalPages; start += batchSize) {
-      const end = Math.min(start + batchSize - 1, totalPages);
-      const batch = Array.from({ length: end - start + 1 }, (_, i) =>
-        this.get(path, { ...params, page: String(start + i) })
-      );
-      const responses = await Promise.all(batch);
-      allResults = allResults.concat(responses.flatMap(r => r?.results || []));
-      if (onProgress) onProgress(allResults, totalPages);
-    }
-
-    return { results: allResults, total_pages: totalPages, total_results: first?.total_results || allResults.length };
+  /** Fetch exactly 2 TMDb pages (40 movies) for a given app-page number */
+  async getPage(path, appPage = 1, extraParams = {}) {
+    const apiPage1 = (appPage - 1) * 2 + 1;
+    const apiPage2 = apiPage1 + 1;
+    const [r1, r2] = await Promise.all([
+      this.get(path, { ...extraParams, page: String(apiPage1) }),
+      this.get(path, { ...extraParams, page: String(apiPage2) }).catch(() => null),
+    ]);
+    const totalApiPages = Math.min(r1?.total_pages || 1, 500);
+    const totalAppPages = Math.ceil(totalApiPages / 2);
+    const results = [...(r1?.results || []), ...(r2?.results || [])];
+    return {
+      results,
+      appPage,
+      totalAppPages,
+      totalResults: r1?.total_results || 0,
+    };
   },
   poster(path, size = "w300") { return path ? `${TMDB_IMG}/${size}${path}` : null; },
   backdrop(path, size = "w1280") { return path ? `${TMDB_IMG}/${size}${path}` : null; },
-  async trending(opts)      { return this.getAllPages("/trending/movie/week", {}, opts); },
-  async popular(opts)       { return this.getAllPages("/movie/popular", {}, opts); },
-  async topRated(opts)      { return this.getAllPages("/movie/top_rated", {}, opts); },
-  async details(id)         { return this.get(`/movie/${id}`, { append_to_response: "credits,videos,similar,recommendations" }); },
-  async search(q, page = 1) { return this.get("/search/movie", { query: q, page: String(page) }); },
-  async genres()            { return this.get("/genre/movie/list"); },
-  async byGenre(gid, opts)  { return this.getAllPages("/discover/movie", { with_genres: String(gid), sort_by: "popularity.desc" }, opts); },
+  async trending(page = 1)          { return this.getPage("/trending/movie/week", page); },
+  async popular(page = 1)           { return this.getPage("/movie/popular", page); },
+  async topRated(page = 1)          { return this.getPage("/movie/top_rated", page); },
+  async details(id)                 { return this.get(`/movie/${id}`, { append_to_response: "credits,videos,similar,recommendations" }); },
+  async search(q, page = 1)         { return this.get("/search/movie", { query: q, page: String(page) }); },
+  async genres()                    { return this.get("/genre/movie/list"); },
+  async byGenre(gid, page = 1)      { return this.getPage("/discover/movie", page, { with_genres: String(gid), sort_by: "popularity.desc" }); },
 };
 
 const omdb = {
