@@ -2298,7 +2298,7 @@ export default function MovieClubApp() {
     <div style={{ minHeight: "100vh", background: C.bg }}>
       <Navbar page={page} setPage={setPage} hasKeys={true} apiStatus={apiStatus} />
       <div className="page-enter" key={page}>
-        {page === "home" && <HomePage setPage={setPage} setSelectedMovie={setSM} />}
+        {page === "home" && <HomePage setPage={setPage} setSelectedMovie={setSM} auth={authCtx} />}
         {page === "profile" && <ProfilePage setPage={setPage} isOwnProfile auth={authCtx} setSelectedMovie={setSM} />}
         {page === "movie" && <MoviePage movieInit={selectedMovie} setPage={setPage} setSelectedMovie={setSM} auth={authCtx} />}
         {page === "groups" && <GroupsPage setPage={setPage} setSelectedGroup={setSG} />}
