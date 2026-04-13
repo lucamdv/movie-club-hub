@@ -1465,36 +1465,74 @@ function LoginPage({ onLogin }) {
   const [email, setEmail] = useState(""), [pass, setPass] = useState(""), [name, setName] = useState(""), [username, setUsername] = useState("");
 
   return (
-    <div style={{ minHeight: "100vh", background: C.bg, display: "flex", alignItems: "center", justifyContent: "center", position: "relative", overflow: "hidden" }}>
-      {/* Background effects */}
-      <div style={{ position: "absolute", inset: 0, background: `radial-gradient(ellipse 80% 60% at 30% 20%, rgba(201,168,76,0.06) 0%, transparent 60%), radial-gradient(ellipse 50% 50% at 70% 80%, rgba(37,99,235,0.04) 0%, transparent 60%)`, pointerEvents: "none" }} />
+    <div style={{ minHeight: "100vh", background: C.bg, display: "flex", position: "relative", overflow: "hidden" }}>
+      {/* ── Left Side: Branding ── */}
+      <div style={{
+        flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+        position: "relative", overflow: "hidden",
+        background: `linear-gradient(135deg, ${C.bgDeep} 0%, ${C.bg} 40%, rgba(201,168,76,0.08) 100%)`,
+      }}>
+        {/* Decorative circles */}
+        <div style={{ position: "absolute", width: 500, height: 500, borderRadius: "50%", border: `1px solid rgba(201,168,76,0.08)`, top: "-15%", left: "-10%", pointerEvents: "none" }} />
+        <div style={{ position: "absolute", width: 350, height: 350, borderRadius: "50%", border: `1px solid rgba(201,168,76,0.05)`, bottom: "-10%", right: "-5%", pointerEvents: "none" }} />
 
-      <div style={{ width: 440, position: "relative", zIndex: 1 }}>
-        {/* Logo area */}
-        <div style={{ textAlign: "center", marginBottom: 36, animation: "staggerUp 0.6s ease 0.1s both" }}>
-          <img src={logoMain} alt="MovieClub" style={{ width: 220, marginBottom: 8, filter: "drop-shadow(0 0 20px rgba(201,168,76,0.2))" }} />
+        {/* Logo */}
+        <div style={{ animation: "staggerUp 0.8s ease 0.1s both", textAlign: "center", position: "relative", zIndex: 1 }}>
+          <img src={logoMain} alt="MovieClub Logo" style={{ width: 280, marginBottom: 24, filter: "drop-shadow(0 8px 32px rgba(201,168,76,0.25))" }} />
         </div>
 
-        {/* Card */}
-        <div style={{
-          background: `linear-gradient(180deg, ${C.bgCard}, ${C.bgDeep})`,
-          border: `1px solid ${C.border}`, borderRadius: 20,
-          padding: "36px 32px", boxShadow: "0 32px 64px rgba(0,0,0,0.5)",
-          animation: "staggerUp 0.6s ease 0.2s both",
-        }}>
-          <p style={{ color: C.textMuted, fontSize: 14, marginBottom: 22, textAlign: "center" }}>
-            {mode === "login" ? "Bem-vindo de volta" : "Crie sua conta"}
+        {/* Text logo */}
+        <div style={{ animation: "staggerUp 0.8s ease 0.3s both", textAlign: "center", position: "relative", zIndex: 1 }}>
+          <img src={logoText} alt="MOVIECLUB" style={{ width: 320, marginBottom: 16, filter: "drop-shadow(0 4px 16px rgba(201,168,76,0.2))" }} />
+          <p style={{ color: C.goldLight, fontSize: 13, letterSpacing: "0.35em", fontWeight: 300, opacity: 0.7, fontFamily: "'Inter', sans-serif" }}>
+            SHARED FILM PLATFORM
           </p>
+        </div>
+
+        {/* Mascots */}
+        <div style={{ animation: "staggerUp 0.8s ease 0.5s both", marginTop: 40, position: "relative", zIndex: 1 }}>
+          <img src={mascotsNav} alt="MovieClub Mascots" loading="lazy" style={{ width: 320, opacity: 0.85, filter: "drop-shadow(0 8px 24px rgba(0,0,0,0.4))" }} />
+        </div>
+
+        {/* Tagline */}
+        <p style={{
+          animation: "staggerUp 0.8s ease 0.7s both",
+          color: C.textMuted, fontSize: 14, marginTop: 32, maxWidth: 300, textAlign: "center", lineHeight: 1.6,
+          fontFamily: "'Inter', sans-serif", position: "relative", zIndex: 1,
+        }}>
+          Descubra, avalie e compartilhe filmes com seus amigos em um só lugar.
+        </p>
+      </div>
+
+      {/* ── Right Side: Form ── */}
+      <div style={{
+        flex: 1, display: "flex", alignItems: "center", justifyContent: "center",
+        background: `linear-gradient(180deg, ${C.bgCard} 0%, ${C.bgDeep} 100%)`,
+        borderLeft: `1px solid ${C.border}`,
+        position: "relative",
+      }}>
+        {/* Subtle glow */}
+        <div style={{ position: "absolute", inset: 0, background: `radial-gradient(ellipse 70% 50% at 50% 30%, rgba(201,168,76,0.04) 0%, transparent 70%)`, pointerEvents: "none" }} />
+
+        <div style={{ width: 400, position: "relative", zIndex: 1, padding: "0 24px" }}>
+          {/* Welcome heading */}
+          <div style={{ marginBottom: 32, animation: "staggerUp 0.6s ease 0.2s both" }}>
+            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, color: C.text, fontWeight: 700, marginBottom: 6 }}>
+              {mode === "login" ? "Bem-vindo de volta" : "Crie sua conta"}
+            </h2>
+            <p style={{ color: C.textMuted, fontSize: 14 }}>
+              {mode === "login" ? "Entre para continuar sua jornada cinematográfica" : "Junte-se ao clube e descubra novos filmes"}
+            </p>
+          </div>
 
           {/* Toggle */}
-          <div style={{ display: "flex", marginBottom: 24, background: "rgba(9,21,35,0.5)", borderRadius: 12, padding: 3 }}>
+          <div style={{ display: "flex", marginBottom: 28, background: "rgba(9,21,35,0.6)", borderRadius: 12, padding: 3, animation: "staggerUp 0.6s ease 0.3s both" }}>
             {["login", "signup"].map(m => (
               <button key={m} onClick={() => setMode(m)} style={{
-                flex: 1, padding: "9px", borderRadius: 10, fontSize: 13, fontWeight: 500,
-                background: mode === m ? C.bgCard : "transparent",
-                color: mode === m ? C.text : C.textMuted,
-                border: mode === m ? `1px solid ${C.border}` : "1px solid transparent",
-                transition: "all 0.2s",
+                flex: 1, padding: "10px", borderRadius: 10, fontSize: 13, fontWeight: 600,
+                background: mode === m ? `linear-gradient(135deg, ${C.gold}, ${C.goldLight})` : "transparent",
+                color: mode === m ? C.bgDeep : C.textMuted,
+                border: "none", transition: "all 0.25s",
               }}>
                 {m === "login" ? "Entrar" : "Cadastrar"}
               </button>
@@ -1502,7 +1540,7 @@ function LoginPage({ onLogin }) {
           </div>
 
           {/* Fields */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 14, animation: "staggerUp 0.5s ease 0.3s both" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 16, animation: "staggerUp 0.5s ease 0.4s both" }}>
             {mode === "signup" && (
               <>
                 <TextInput label="Nome" value={name} onChange={setName} placeholder="Seu nome" />
@@ -1513,11 +1551,21 @@ function LoginPage({ onLogin }) {
             <TextInput label="Senha" value={pass} onChange={setPass} placeholder="••••••••" type="password" />
           </div>
 
+          {mode === "login" && (
+            <div style={{ textAlign: "right", marginTop: 8 }}>
+              <button style={{ color: C.gold, fontSize: 12, fontWeight: 500, opacity: 0.8, transition: "opacity 0.2s" }}
+                onMouseEnter={e => e.currentTarget.style.opacity = "1"}
+                onMouseLeave={e => e.currentTarget.style.opacity = "0.8"}>
+                Esqueceu a senha?
+              </button>
+            </div>
+          )}
+
           {/* Submit */}
           <button onClick={onLogin} className="btn-gold-shimmer"
             style={{
-              width: "100%", marginTop: 24, padding: "13px", color: C.bgDeep,
-              borderRadius: 12, fontSize: 14, fontWeight: 700,
+              width: "100%", marginTop: 24, padding: "14px", color: C.bgDeep,
+              borderRadius: 12, fontSize: 15, fontWeight: 700,
               fontFamily: "'Playfair Display',serif", letterSpacing: "0.06em",
               transition: "transform 0.15s, box-shadow 0.2s",
               boxShadow: "0 4px 20px rgba(201,168,76,0.25)",
@@ -1527,25 +1575,30 @@ function LoginPage({ onLogin }) {
             {mode === "login" ? "Entrar" : "Criar Conta"}
           </button>
 
-          {/* Social login */}
-          <div style={{ marginTop: 24, textAlign: "center" }}>
-            <p style={{ color: C.textDim, fontSize: 11, marginBottom: 12 }}>ou continue com</p>
-            <div style={{ display: "flex", gap: 10 }}>
-              {["Google", "Apple"].map(p => (
-                <button key={p} onClick={onLogin} style={{
-                  flex: 1, padding: "10px", borderRadius: 10, fontSize: 12, fontWeight: 500,
-                  background: "rgba(9,21,35,0.5)", color: C.textMuted,
-                  border: `1px solid ${C.border}`, transition: "all 0.2s",
-                }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = C.goldDim; e.currentTarget.style.color = C.text; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.color = C.textMuted; }}>
-                  {p}
-                </button>
-              ))}
-            </div>
+          {/* Divider */}
+          <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "24px 0" }}>
+            <div style={{ flex: 1, height: 1, background: C.border }} />
+            <span style={{ color: C.textDim, fontSize: 11, whiteSpace: "nowrap" }}>ou continue com</span>
+            <div style={{ flex: 1, height: 1, background: C.border }} />
+          </div>
+
+          {/* Social */}
+          <div style={{ display: "flex", gap: 10, animation: "staggerUp 0.5s ease 0.5s both" }}>
+            {["Google", "Apple"].map(p => (
+              <button key={p} onClick={onLogin} style={{
+                flex: 1, padding: "11px", borderRadius: 10, fontSize: 13, fontWeight: 500,
+                background: "rgba(9,21,35,0.5)", color: C.textMuted,
+                border: `1px solid ${C.border}`, transition: "all 0.2s",
+              }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = C.goldDim; e.currentTarget.style.color = C.text; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.color = C.textMuted; }}>
+                {p}
+              </button>
+            ))}
           </div>
         </div>
       </div>
+
       <FilmStripBg />
     </div>
   );
