@@ -1908,8 +1908,8 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
                 ["Seguidores", targetFollowers.length, "👥"],
               ].map(([label, val, icon], i, arr) => (
                 <div key={label} style={{
-                  padding: "16px 32px", textAlign: "center",
-                  borderRight: i < 2 ? `1px solid ${C.border}` : "none",
+                  padding: "14px 20px", textAlign: "center",
+                  borderRight: i < arr.length - 1 ? `1px solid ${C.border}` : "none",
                   minWidth: 120
                 }}>
                   <p style={{ fontSize: 11, marginBottom: 4 }}>{icon}</p>
