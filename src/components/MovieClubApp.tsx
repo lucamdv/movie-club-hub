@@ -1319,7 +1319,7 @@ function GroupPage({ group, setPage, setSelectedMovie }) {
     const allIds = [...new Set(Object.values(recIds).flat())];
     Promise.all(allIds.map(id=>
       cachedFetch(`detail_${id}`,()=>
-        fetch(`${TMDB_BASE}/movie/${id}?api_key=${tmdb.key()}&language=pt-BR`).then(r=>r.json())
+        tmdbProxy({ data: { path: `/movie/${id}`, params: {} } })
       ).then(normalizeTmdb).catch(()=>null)
     )).then(movies=>{
       const map={};
