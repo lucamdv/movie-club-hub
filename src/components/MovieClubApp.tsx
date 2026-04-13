@@ -2960,8 +2960,8 @@ export default function MovieClubApp() {
         {page === "view-profile" && <ProfilePage setPage={setPage} auth={authCtx} setSelectedMovie={setSM} viewUserId={viewProfileUserId} />}
         {page === "movie" && <MoviePage movieInit={selectedMovie} setPage={setPage} setSelectedMovie={setSM} auth={authCtx} />}
         {page === "friends" && <FriendsPage setPage={setPage} setSelectedMovie={setSM} auth={authCtx} onViewProfile={handleViewProfile} />}
-        {page === "groups" && <GroupsPage setPage={setPage} setSelectedGroup={setSG} />}
-        {page === "group" && <GroupPage group={selectedGroup} setPage={setPage} setSelectedMovie={setSM} />}
+        {page === "groups" && <GroupsPage setPage={setPage} setSelectedGroup={setSG} auth={authCtx} />}
+        {page === "group" && <GroupPage group={selectedGroup} setPage={setPage} setSelectedMovie={setSM} auth={authCtx} />}
         {page === "search" && <SearchPage setPage={setPage} setSelectedMovie={setSM} />}
         {page === "settings" && <SettingsPage apiStatus={apiStatus} />}
       </div>
