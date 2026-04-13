@@ -1471,9 +1471,36 @@ function SearchPage({ setPage, setSelectedMovie }) {
 
         {results.length > 0 ? (
           <>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 16 }}>
-              {results.map(m => <MovieCard key={m.id} movie={m} onClick={() => { setSelectedMovie(m); setPage("movie"); }} />)}
-            </div>
+            {viewMode === "grid" ? (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 16 }}>
+                {results.slice(0, perPage).map(m => <MovieCard key={m.id} movie={m} onClick={() => { setSelectedMovie(m); setPage("movie"); }} />)}
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {results.slice(0, perPage).map(m => (
+                  <div key={m.id} style={{
+                    background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 14,
+                    padding: 16, display: "flex", gap: 16, alignItems: "center",
+                    cursor: "pointer", transition: "all 0.2s"
+                  }}
+                    className="card-hover"
+                    onClick={() => { setSelectedMovie(m); setPage("movie"); }}>
+                    <div style={{ width: 50, height: 75, borderRadius: 8, overflow: "hidden", flexShrink: 0, background: C.bgDeep }}>
+                      {m.poster && <img src={m.poster} alt={m.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontSize: 15, fontWeight: 600, color: C.text, marginBottom: 2 }}>{m.title}</p>
+                      <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                        {m.year && <span style={{ fontSize: 12, color: C.textDim }}>{m.year}</span>}
+                        {m.genre && <Badge color="rgba(201,168,76,0.1)" textColor={C.goldDim} small>{m.genre}</Badge>}
+                        {m.rating && <span style={{ fontSize: 12, color: C.gold, fontWeight: 600 }}>★ {m.rating}</span>}
+                      </div>
+                      {m.overview && <p style={{ fontSize: 12, color: C.textMuted, marginTop: 4, lineHeight: 1.5, overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>{m.overview}</p>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
             <PaginationBar page={currentPage} totalPages={totalPages} totalResults={totalResults} onPageChange={handlePageChange} />
           </>
         ) : (
