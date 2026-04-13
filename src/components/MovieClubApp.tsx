@@ -1577,80 +1577,129 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
           </div>
         </div>
 
-        {/* Tabs */}
-        <div style={{
-          display: "flex", justifyContent: "center", gap: 4,
-          marginTop: 32, marginBottom: 24,
-          background: C.bgCard, borderRadius: 12, padding: 4,
-          border: `1px solid ${C.border}`, maxWidth: 400, margin: "32px auto 24px"
-        }}>
-          {[["ratings", "⭐ Avaliações"], ["watchlist", "📋 Watchlist"]].map(([id, label]) => (
-            <button key={id} onClick={() => setTab(id)} style={{
-              flex: 1, padding: "10px 16px", fontSize: 13, fontWeight: 600,
-              color: tab === id ? C.bgDeep : C.textMuted,
-              background: tab === id ? C.gold : "transparent",
-              borderRadius: 9, transition: "all 0.25s ease",
-              fontFamily: "'DM Sans', sans-serif"
-            }}>{label}</button>
-          ))}
+        {/* Tabs + View Controls */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 32, marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
+          <div style={{
+            display: "flex", gap: 4,
+            background: C.bgCard, borderRadius: 12, padding: 4,
+            border: `1px solid ${C.border}`,
+          }}>
+            {[["ratings", "⭐ Avaliações"], ["watchlist", "📋 Watchlist"]].map(([id, label]) => (
+              <button key={id} onClick={() => setTab(id)} style={{
+                padding: "10px 20px", fontSize: 13, fontWeight: 600,
+                color: tab === id ? C.bgDeep : C.textMuted,
+                background: tab === id ? C.gold : "transparent",
+                borderRadius: 9, transition: "all 0.25s ease",
+                fontFamily: "'DM Sans', sans-serif"
+              }}>{label}</button>
+            ))}
+          </div>
+          <ViewToolbar viewMode={viewMode} setViewMode={setViewMode} perPage={perPage} setPerPage={setPerPage} />
         </div>
 
         {/* Ratings Tab */}
         {tab === "ratings" && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            {ratingsLoading ? <Spinner /> : ratings.length > 0 ? ratings.map((r) => (
-              <div key={r.id} style={{
-                background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 16,
-                padding: 18, display: "flex", gap: 16, alignItems: "center",
-                cursor: "pointer", transition: "all 0.2s ease"
-              }}
-                className="card-hover"
-                onClick={() => { setSelectedMovie?.({ tmdbId: r.tmdb_id, title: r.title, poster: r.poster_url }); setPage("movie"); }}>
-                <div style={{
-                  width: 56, height: 84, borderRadius: 10, overflow: "hidden",
-                  flexShrink: 0, background: C.bgDeep, border: `1px solid ${C.border}`
-                }}>
-                  {r.poster_url && <img src={r.poster_url} alt={r.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
+          viewMode === "list" ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              {ratingsLoading ? <Spinner /> : ratings.length > 0 ? ratings.slice(0, perPage).map((r) => (
+                <div key={r.id} style={{
+                  background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 16,
+                  padding: 18, display: "flex", gap: 16, alignItems: "center",
+                  cursor: "pointer", transition: "all 0.2s ease"
+                }}
+                  className="card-hover"
+                  onClick={() => { setSelectedMovie?.({ tmdbId: r.tmdb_id, title: r.title, poster: r.poster_url }); setPage("movie"); }}>
+                  <div style={{ width: 56, height: 84, borderRadius: 10, overflow: "hidden", flexShrink: 0, background: C.bgDeep, border: `1px solid ${C.border}` }}>
+                    {r.poster_url && <img src={r.poster_url} alt={r.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontSize: 15, fontWeight: 600, color: C.text, marginBottom: 4 }}>{r.title || `TMDb #${r.tmdb_id}`}</p>
+                    <StarRating value={Number(r.rating)} size={14} />
+                    {r.review && <p style={{ fontSize: 12, color: C.textMuted, lineHeight: 1.5, fontStyle: "italic", marginTop: 6, overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>"{r.review}"</p>}
+                  </div>
+                  <p style={{ fontSize: 11, color: C.textDim, whiteSpace: "nowrap", flexShrink: 0 }}>{new Date(r.updated_at).toLocaleDateString("pt-BR")}</p>
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ fontSize: 15, fontWeight: 600, color: C.text, marginBottom: 4 }}>{r.title || `TMDb #${r.tmdb_id}`}</p>
-                  <StarRating value={Number(r.rating)} size={14} />
-                  {r.review && <p style={{ fontSize: 12, color: C.textMuted, lineHeight: 1.5, fontStyle: "italic", marginTop: 6, overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>"{r.review}"</p>}
+              )) : (
+                <div style={{ textAlign: "center", padding: "60px 20px" }}>
+                  <p style={{ fontSize: 40, marginBottom: 12 }}>🎬</p>
+                  <p style={{ color: C.textMuted, fontSize: 15, fontWeight: 500 }}>Nenhuma avaliação ainda</p>
+                  <p style={{ color: C.textDim, fontSize: 13, marginTop: 4 }}>Avalie filmes para construir seu histórico!</p>
                 </div>
-                <p style={{ fontSize: 11, color: C.textDim, whiteSpace: "nowrap", flexShrink: 0 }}>{new Date(r.updated_at).toLocaleDateString("pt-BR")}</p>
-              </div>
-            )) : (
-              <div style={{ textAlign: "center", padding: "60px 20px" }}>
-                <p style={{ fontSize: 40, marginBottom: 12 }}>🎬</p>
-                <p style={{ color: C.textMuted, fontSize: 15, fontWeight: 500 }}>Nenhuma avaliação ainda</p>
-                <p style={{ color: C.textDim, fontSize: 13, marginTop: 4 }}>Avalie filmes para construir seu histórico!</p>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          ) : (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: 18 }}>
+              {ratingsLoading ? <Spinner /> : ratings.length > 0 ? ratings.slice(0, perPage).map((r) => (
+                <div key={r.id} className="movie-card-netflix" style={{ position: "relative" }}>
+                  <div style={{ cursor: "pointer" }} onClick={() => { setSelectedMovie?.({ tmdbId: r.tmdb_id, title: r.title, poster: r.poster_url }); setPage("movie"); }}>
+                    <div style={{ width: "100%", aspectRatio: "2/3", borderRadius: 12, overflow: "hidden", background: C.bgCard, border: `1px solid ${C.border}` }}>
+                      {r.poster_url ? <img src={r.poster_url} alt={r.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 32, opacity: 0.3 }}>🎬</div>}
+                    </div>
+                    <p style={{ fontSize: 12, fontWeight: 500, color: C.text, marginTop: 8, lineHeight: 1.3 }}>{r.title}</p>
+                    <div style={{ marginTop: 4 }}><StarRating value={Number(r.rating)} size={12} /></div>
+                  </div>
+                </div>
+              )) : (
+                <div style={{ textAlign: "center", padding: "60px 20px", gridColumn: "1/-1" }}>
+                  <p style={{ fontSize: 40, marginBottom: 12 }}>🎬</p>
+                  <p style={{ color: C.textMuted, fontSize: 15, fontWeight: 500 }}>Nenhuma avaliação ainda</p>
+                </div>
+              )}
+            </div>
+          )
         )}
 
         {/* Watchlist Tab */}
         {tab === "watchlist" && (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: 18 }}>
-            {wlLoading ? <Spinner /> : watchlistItems.length > 0 ? watchlistItems.map((item) => (
-              <div key={item.id} style={{ position: "relative" }} className="movie-card-netflix">
-                <div style={{ cursor: "pointer" }} onClick={() => { setSelectedMovie?.({ tmdbId: item.tmdb_id, title: item.title, poster: item.poster_url }); setPage("movie"); }}>
-                  <div style={{ width: "100%", aspectRatio: "2/3", borderRadius: 12, overflow: "hidden", background: C.bgCard, border: `1px solid ${C.border}` }}>
-                    {item.poster_url ? <img src={item.poster_url} alt={item.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 32, opacity: 0.3 }}>🎬</div>}
+          viewMode === "grid" ? (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: 18 }}>
+              {wlLoading ? <Spinner /> : watchlistItems.length > 0 ? watchlistItems.slice(0, perPage).map((item) => (
+                <div key={item.id} style={{ position: "relative" }} className="movie-card-netflix">
+                  <div style={{ cursor: "pointer" }} onClick={() => { setSelectedMovie?.({ tmdbId: item.tmdb_id, title: item.title, poster: item.poster_url }); setPage("movie"); }}>
+                    <div style={{ width: "100%", aspectRatio: "2/3", borderRadius: 12, overflow: "hidden", background: C.bgCard, border: `1px solid ${C.border}` }}>
+                      {item.poster_url ? <img src={item.poster_url} alt={item.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 32, opacity: 0.3 }}>🎬</div>}
+                    </div>
+                    <p style={{ fontSize: 12, fontWeight: 500, color: C.text, marginTop: 8, lineHeight: 1.3 }}>{item.title}</p>
                   </div>
-                  <p style={{ fontSize: 12, fontWeight: 500, color: C.text, marginTop: 8, lineHeight: 1.3 }}>{item.title}</p>
+                  <button onClick={(e) => { e.stopPropagation(); removeFromWl(item.tmdb_id); }}
+                    style={{ position: "absolute", top: 8, right: 8, width: 26, height: 26, borderRadius: "50%", background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)", color: "#ef4444", fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid rgba(239,68,68,0.3)", cursor: "pointer", transition: "all 0.2s" }}>✕</button>
                 </div>
-                <button onClick={(e) => { e.stopPropagation(); removeFromWl(item.tmdb_id); }}
-                  style={{ position: "absolute", top: 8, right: 8, width: 26, height: 26, borderRadius: "50%", background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)", color: "#ef4444", fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid rgba(239,68,68,0.3)", cursor: "pointer", transition: "all 0.2s" }}>✕</button>
-              </div>
-            )) : (
-              <div style={{ textAlign: "center", padding: "60px 20px", gridColumn: "1/-1" }}>
-                <p style={{ fontSize: 40, marginBottom: 12 }}>📋</p>
-                <p style={{ color: C.textMuted, fontSize: 15, fontWeight: 500 }}>Sua lista está vazia</p>
-                <p style={{ color: C.textDim, fontSize: 13, marginTop: 4 }}>Adicione filmes para assistir depois!</p>
-              </div>
-            )}
-          </div>
+              )) : (
+                <div style={{ textAlign: "center", padding: "60px 20px", gridColumn: "1/-1" }}>
+                  <p style={{ fontSize: 40, marginBottom: 12 }}>📋</p>
+                  <p style={{ color: C.textMuted, fontSize: 15, fontWeight: 500 }}>Sua lista está vazia</p>
+                  <p style={{ color: C.textDim, fontSize: 13, marginTop: 4 }}>Adicione filmes para assistir depois!</p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              {wlLoading ? <Spinner /> : watchlistItems.length > 0 ? watchlistItems.slice(0, perPage).map((item) => (
+                <div key={item.id} style={{
+                  background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 16,
+                  padding: 18, display: "flex", gap: 16, alignItems: "center",
+                  cursor: "pointer", transition: "all 0.2s ease"
+                }}
+                  className="card-hover"
+                  onClick={() => { setSelectedMovie?.({ tmdbId: item.tmdb_id, title: item.title, poster: item.poster_url }); setPage("movie"); }}>
+                  <div style={{ width: 56, height: 84, borderRadius: 10, overflow: "hidden", flexShrink: 0, background: C.bgDeep, border: `1px solid ${C.border}` }}>
+                    {item.poster_url ? <img src={item.poster_url} alt={item.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 24, opacity: 0.3 }}>🎬</div>}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontSize: 15, fontWeight: 600, color: C.text }}>{item.title}</p>
+                    <p style={{ fontSize: 11, color: C.textDim, marginTop: 4 }}>Adicionado em {new Date(item.created_at).toLocaleDateString("pt-BR")}</p>
+                  </div>
+                  <button onClick={(e) => { e.stopPropagation(); removeFromWl(item.tmdb_id); }}
+                    style={{ padding: "6px 12px", borderRadius: 8, background: "transparent", border: `1px solid ${C.border}`, color: C.red, fontSize: 11, cursor: "pointer" }}>Remover</button>
+                </div>
+              )) : (
+                <div style={{ textAlign: "center", padding: "60px 20px" }}>
+                  <p style={{ fontSize: 40, marginBottom: 12 }}>📋</p>
+                  <p style={{ color: C.textMuted, fontSize: 15, fontWeight: 500 }}>Sua lista está vazia</p>
+                </div>
+              )}
+            </div>
+          )
         )}
       </div>
     </div>
