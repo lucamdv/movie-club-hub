@@ -1826,18 +1826,21 @@ function LoginPage({ onLogin, onSignup, error }) {
             </div>
           )}
 
+          {error && <p style={{ color: C.red, fontSize: 13, textAlign: "center", marginTop: 12, marginBottom: -8 }}>{error}</p>}
+
           {/* Submit */}
-          <button onClick={onLogin} className="btn-gold-shimmer"
+          <button onClick={handleSubmit} disabled={loading} className="btn-gold-shimmer"
             style={{
               width: "100%", marginTop: 24, padding: "14px", color: C.bgDeep,
               borderRadius: 12, fontSize: 15, fontWeight: 700,
               fontFamily: "'Outfit', sans-serif", letterSpacing: "0.06em",
               transition: "transform 0.15s, box-shadow 0.2s",
               boxShadow: "0 4px 20px rgba(201,168,76,0.25)",
+              opacity: loading ? 0.6 : 1,
             }}
-            onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 30px rgba(201,168,76,0.35)"; }}
+            onMouseEnter={e => { if (!loading) { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 30px rgba(201,168,76,0.35)"; } }}
             onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = "0 4px 20px rgba(201,168,76,0.25)"; }}>
-            {mode === "login" ? "Entrar" : "Criar Conta"}
+            {loading ? "Carregando..." : mode === "login" ? "Entrar" : "Criar Conta"}
           </button>
 
           {/* Divider */}
