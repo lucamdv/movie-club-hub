@@ -815,6 +815,7 @@ function Navbar({ page, setPage, hasKeys, apiStatus }) {
   // Monkey mascots: wizard=discover, speak-no-evil=profile, see-no-evil=clubs
   const items = [
     ["home", "Discover", mascotWizard],
+    ["quickrate", "Avaliar", null],
     ["groups", "Clubs", mascotSee],
     ["profile", "Perfil", mascotSpeak],
     ["friends", "Amigos", null],
