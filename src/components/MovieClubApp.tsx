@@ -1730,12 +1730,14 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
             {/* Avatar */}
             <div style={{
               width: 110, height: 110, borderRadius: "50%",
-              background: `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`,
+              background: profile?.avatar_url ? "transparent" : `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`,
               border: `4px solid ${C.bgDeep}`, boxShadow: `0 4px 24px rgba(201,168,76,0.3)`,
-              display: "flex", alignItems: "center", justifyContent: "center",
+              display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden",
               fontSize: 32, fontWeight: 800, color: C.bgDeep, fontFamily: "'Outfit', sans-serif",
               marginBottom: 14
-            }}>{initials}</div>
+            }}>
+              {profile?.avatar_url ? <img src={profile.avatar_url} alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : initials}
+            </div>
 
             <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 26, fontWeight: 700, color: C.text, marginBottom: 2 }}>{displayName}</h1>
             <p style={{ color: C.gold, fontSize: 14, fontWeight: 500, marginBottom: 8 }}>@{uname}</p>
