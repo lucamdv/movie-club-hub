@@ -437,18 +437,18 @@ function formatReleaseDateBR(dateStr) {
 }
 
 function MovieCard({ movie, size = "md", onClick }) {
-  const w = size === "sm" ? 110 : size === "lg" ? 200 : 160;
+  const w = size === "sm" ? 130 : size === "lg" ? 220 : 180;
   const h = Math.round(w * 1.5);
   const upcoming = isUpcoming(movie);
   const [imgLoaded, setImgLoaded] = useState(false);
 
   return (
     <div className="movie-card-netflix" onClick={onClick} style={{ width: w }}>
-      <div style={{ width: w, height: h, borderRadius: 8, background: C.bgCard, border: `1px solid ${upcoming ? C.accent : "transparent"}`, overflow: "hidden", position: "relative" }}>
+      <div style={{ width: w, height: h, borderRadius: 10, background: C.bgCard, border: `1px solid ${upcoming ? C.accent : C.border}`, overflow: "hidden", position: "relative" }}>
         {movie.poster ? (
-          <img src={movie.poster} alt={movie.title} loading="lazy"
+          <img src={movie.posterHD || movie.poster} alt={movie.title} loading="lazy"
             onLoad={() => setImgLoaded(true)}
-            style={{ width: "100%", height: "100%", objectFit: "cover", filter: upcoming ? "brightness(0.7)" : "none", opacity: imgLoaded ? 1 : 0, transition: "opacity 0.4s ease" }}
+            style={{ width: "100%", height: "100%", objectFit: "cover", filter: upcoming ? "brightness(0.7)" : "brightness(1.05) contrast(1.02)", opacity: imgLoaded ? 1 : 0, transition: "opacity 0.5s ease" }}
             onError={e => e.target.style.display = "none"} />
         ) : (
           <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 6, padding: 8 }}>
@@ -457,7 +457,7 @@ function MovieCard({ movie, size = "md", onClick }) {
           </div>
         )}
         {!imgLoaded && movie.poster && (
-          <div className="skeleton" style={{ position: "absolute", inset: 0, borderRadius: 8 }} />
+          <div className="skeleton" style={{ position: "absolute", inset: 0, borderRadius: 10 }} />
         )}
         {upcoming && (
           <div style={{ position: "absolute", top: 0, left: 0, right: 0, background: "rgba(37,99,235,0.88)", color: "#fff", fontSize: 9, fontWeight: 700, padding: "4px 0", textAlign: "center", textTransform: "uppercase", letterSpacing: "0.08em" }}>
@@ -465,20 +465,20 @@ function MovieCard({ movie, size = "md", onClick }) {
           </div>
         )}
         {upcoming && movie.releaseDate && (
-          <div style={{ position: "absolute", bottom: 6, left: 6, right: 6, background: "rgba(9,21,35,0.92)", color: C.accent, fontSize: 10, fontWeight: 600, padding: "3px 6px", borderRadius: 4, textAlign: "center" }}>
+          <div style={{ position: "absolute", bottom: 6, left: 6, right: 6, background: "rgba(9,21,35,0.92)", color: C.accent, fontSize: 10, fontWeight: 600, padding: "3px 6px", borderRadius: 6, textAlign: "center" }}>
             📅 {formatReleaseDateBR(movie.releaseDate)}
           </div>
         )}
         {/* Hover overlay */}
         <div className="movie-card-overlay">
-          <p style={{ fontSize: 12, fontWeight: 600, color: C.text, lineHeight: 1.2, marginBottom: 4 }}>{movie.title}</p>
+          <p style={{ fontSize: 13, fontWeight: 600, color: C.text, lineHeight: 1.2, marginBottom: 4 }}>{movie.title}</p>
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            {!upcoming && movie.rating && <span style={{ fontSize: 11, fontWeight: 700, color: C.gold }}>★ {movie.rating}</span>}
-            {movie.year && <span style={{ fontSize: 10, color: C.textMuted }}>{upcoming ? formatReleaseDateBR(movie.releaseDate) : movie.year}</span>}
+            {!upcoming && movie.rating && <span style={{ fontSize: 12, fontWeight: 700, color: C.gold }}>★ {movie.rating}</span>}
+            {movie.year && <span style={{ fontSize: 11, color: C.textMuted }}>{upcoming ? formatReleaseDateBR(movie.releaseDate) : movie.year}</span>}
           </div>
         </div>
         {!upcoming && movie.rating && (
-          <div style={{ position: "absolute", top: 6, right: 6, background: "rgba(9,21,35,0.85)", color: C.gold, fontSize: 10, fontWeight: 700, padding: "2px 6px", borderRadius: 4 }}>
+          <div style={{ position: "absolute", top: 6, right: 6, background: "rgba(9,21,35,0.85)", color: C.gold, fontSize: 11, fontWeight: 700, padding: "3px 7px", borderRadius: 6 }}>
             ★ {movie.rating}
           </div>
         )}
@@ -517,18 +517,40 @@ const ChevronRight = () => <svg width={22} height={22} viewBox="0 0 24 24" fill=
 // ─────────────────────────────────────────────
 function Carousel({ children, movies, onMovieClick }) {
   const ref = useRef(null);
+  const [canLeft, setCanLeft] = useState(false);
+  const [canRight, setCanRight] = useState(true);
+
+  const checkScroll = useCallback(() => {
+    if (!ref.current) return;
+    const { scrollLeft, scrollWidth, clientWidth } = ref.current;
+    setCanLeft(scrollLeft > 10);
+    setCanRight(scrollLeft < scrollWidth - clientWidth - 10);
+  }, []);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.addEventListener("scroll", checkScroll, { passive: true });
+    checkScroll();
+    return () => el.removeEventListener("scroll", checkScroll);
+  }, [checkScroll]);
+
   const scroll = (dir) => {
     if (!ref.current) return;
-    const amount = ref.current.clientWidth * 0.8;
+    const amount = ref.current.clientWidth * 0.75;
     ref.current.scrollBy({ left: dir * amount, behavior: "smooth" });
   };
+
   return (
     <div className="carousel-wrapper">
-      <button className="carousel-btn carousel-btn-left" onClick={() => scroll(-1)}><ChevronLeft /></button>
-      <div ref={ref} className="carousel-row">
+      <button className="carousel-btn carousel-btn-left" onClick={() => scroll(-1)} style={{ opacity: canLeft ? undefined : 0, pointerEvents: canLeft ? "auto" : "none" }}><ChevronLeft /></button>
+      <div ref={ref} className="carousel-row" style={{ gap: 14, padding: "12px 8px 24px" }}>
         {children || movies?.map(m => <MovieCard key={m.id} movie={m} onClick={() => onMovieClick?.(m)} />)}
       </div>
-      <button className="carousel-btn carousel-btn-right" onClick={() => scroll(1)}><ChevronRight /></button>
+      <button className="carousel-btn carousel-btn-right" onClick={() => scroll(1)} style={{ opacity: canRight ? undefined : 0, pointerEvents: canRight ? "auto" : "none" }}><ChevronRight /></button>
+      {/* Fade edges */}
+      {canLeft && <div style={{ position: "absolute", top: 0, bottom: 0, left: 0, width: 60, background: `linear-gradient(to right, ${C.bg}, transparent)`, pointerEvents: "none", zIndex: 5 }} />}
+      {canRight && <div style={{ position: "absolute", top: 0, bottom: 0, right: 0, width: 60, background: `linear-gradient(to left, ${C.bg}, transparent)`, pointerEvents: "none", zIndex: 5 }} />}
     </div>
   );
 }
