@@ -2883,7 +2883,7 @@ function LoginPage({ onLogin, onSignup, error }) {
 //  QUICK RATE PAGE (Tinder-style)
 // ─────────────────────────────────────────────
 function QuickRatePage({ setPage, setSelectedMovie, auth }) {
-  const [mode, setMode] = useState(null); // null = setup, "random" | "recommended"
+  const [mode, setMode] = useState(null); // null = setup, "random" | "recommended" | "summary"
   const [movies, setMovies] = useState([]);
   const [idx, setIdx] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -2897,6 +2897,8 @@ function QuickRatePage({ setPage, setSelectedMovie, auth }) {
   const containerRef = useRef(null);
   const loadingMoreRef = useRef(false);
   const recPageRef = useRef(0);
+  // Session stats
+  const [sessionStats, setSessionStats] = useState({ rated: [], watchlistAdded: [], skipped: 0, startTime: null });
 
   // Load random movies
   const loadRandom = useCallback(async (append = false) => {
