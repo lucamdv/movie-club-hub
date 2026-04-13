@@ -2321,59 +2321,14 @@ function FriendsPage({ setPage, setSelectedMovie, auth: authCtx, onViewProfile }
           <p style={{ color: C.textMuted, fontSize: 13 }}>Encontre pessoas, siga e adicione amigos</p>
         </div>
 
-        {/* Friendship Link Section */}
+        {/* Share Profile Section */}
         <div style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 16, padding: 22, marginBottom: 24 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
             <LinkIcon />
-            <h3 style={{ fontSize: 14, fontWeight: 600, color: C.text }}>Link de Amizade</h3>
+            <h3 style={{ fontSize: 14, fontWeight: 600, color: C.text }}>Compartilhar Perfil</h3>
           </div>
-
-          <div style={{ display: "flex", gap: 12, marginBottom: 14, flexWrap: "wrap" }}>
-            <Btn variant="gold" size="sm" onClick={handleGenerateLink}><PlusIcon /> Gerar Link</Btn>
-            {generatedLink && (
-              <div style={{ flex: 1, display: "flex", gap: 8, alignItems: "center", minWidth: 200 }}>
-                <div style={{
-                  flex: 1, padding: "8px 12px", borderRadius: 8, background: C.bgDeep,
-                  border: `1px solid ${C.gold}30`, fontSize: 12, color: C.goldLight,
-                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap"
-                }}>{generatedLink}</div>
-                <button onClick={() => copyToClipboard(generatedLink)} style={{
-                  padding: "8px 12px", borderRadius: 8, background: C.bgDeep,
-                  border: `1px solid ${C.border}`, color: C.textMuted, cursor: "pointer", display: "flex", alignItems: "center", gap: 4, fontSize: 11
-                }}><CopyIcon /> Copiar</button>
-              </div>
-            )}
-          </div>
-
-          {/* Accept a friend link */}
-          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <input value={friendCode} onChange={e => setFriendCode(e.target.value)}
-              placeholder="Cole o link ou código de amizade aqui..."
-              style={{
-                flex: 1, padding: "10px 14px", borderRadius: 8, background: C.bgDeep,
-                border: `1px solid ${C.border}`, color: C.text, fontSize: 13, outline: "none"
-              }}
-              onFocus={e => e.target.style.borderColor = C.gold}
-              onBlur={e => e.target.style.borderColor = C.border}
-              onKeyDown={e => { if (e.key === "Enter") handleAcceptCode(); }} />
-            <Btn variant="gold" size="sm" onClick={handleAcceptCode} disabled={!friendCode.trim()}>Aceitar</Btn>
-          </div>
-
-          {/* Active links */}
-          {links.length > 0 && (
-            <div style={{ marginTop: 14, borderTop: `1px solid ${C.border}`, paddingTop: 12 }}>
-              <p style={{ fontSize: 11, color: C.textDim, marginBottom: 8 }}>Seus links ativos ({links.length})</p>
-              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                {links.slice(0, 3).map(l => (
-                  <div key={l.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 10px", borderRadius: 8, background: C.bgDeep }}>
-                    <span style={{ flex: 1, fontSize: 11, color: C.textMuted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{l.code}</span>
-                    <button onClick={() => copyToClipboard(`${window.location.origin}?friend=${l.code}`)} style={{ fontSize: 10, color: C.gold, cursor: "pointer" }}>copiar</button>
-                    <button onClick={() => deleteLink(l.id)} style={{ fontSize: 10, color: C.red, cursor: "pointer" }}>×</button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          <p style={{ fontSize: 12, color: C.textMuted, marginBottom: 14 }}>Envie o link do seu perfil para que amigos possam te encontrar e seguir.</p>
+          <Btn variant="gold" size="sm" onClick={handleShareProfile}>🔗 Copiar Link do Perfil</Btn>
         </div>
 
         {/* Tabs */}
