@@ -539,10 +539,10 @@ function Carousel({ children, movies, onMovieClick }) {
 function Navbar({ page, setPage, hasKeys, apiStatus }) {
   // Monkey mascots: wizard=discover, speak-no-evil=profile, see-no-evil=clubs
   const items = [
-    ["home", "Discover", "🙈"],
-    ["profile", "Perfil", "🙊"],
-    ["groups", "Clubs", "🙉"],
-    ["search", "Buscar", "🔍"],
+    ["home", "Discover", mascotWizard],
+    ["profile", "Perfil", mascotSpeak],
+    ["groups", "Clubs", mascotSee],
+    ["search", "Buscar", null],
   ];
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
