@@ -330,7 +330,7 @@ function Section({ title, children, action }) {
   return (
     <div style={{ marginBottom: 40 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, padding: "0 4px" }}>
-        <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 18, fontWeight: 700, color: C.text, display: "flex", alignItems: "center", gap: 10 }}>
+        <h2 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 18, fontWeight: 700, color: C.text, display: "flex", alignItems: "center", gap: 10 }}>
           {title}
         </h2>
         {action && <button onClick={action.onClick} style={{ fontSize: 12, color: C.gold, fontWeight: 500, transition: "opacity 0.2s" }}
@@ -413,7 +413,7 @@ function RatingsRow({ movie }) {
         <div key={i} style={{ background: C.bgDeep, border: `1px solid ${C.border}`, borderRadius: 12, padding: "10px 16px", minWidth: 78, position: "relative", overflow: "hidden" }}>
           <div style={{ position: "absolute", bottom: 0, left: 0, height: 3, width: `${Math.min(b.pct, 100)}%`, background: b.color, borderRadius: "0 2px 2px 0", opacity: 0.5 }} />
           <p style={{ fontSize: 10, color: C.textDim, marginBottom: 4, fontWeight: 500 }}>{b.src}</p>
-          <p style={{ fontSize: 20, fontWeight: 700, color: b.color, fontFamily: "'Playfair Display',serif", lineHeight: 1 }}>
+          <p style={{ fontSize: 20, fontWeight: 700, color: b.color, fontFamily: "'Outfit', sans-serif", lineHeight: 1 }}>
             {b.val}<span style={{ fontSize: 11, fontWeight: 400, opacity: 0.7 }}>{b.suffix}</span>
           </p>
           {b.sub && <p style={{ fontSize: 9, color: C.textDim, marginTop: 3 }}>{b.sub}</p>}
@@ -637,7 +637,7 @@ function SettingsPage({ apiStatus }) {
   return (
     <div style={{ paddingTop: 80, paddingBottom: 80 }}>
       <div style={{ maxWidth: 720, margin: "0 auto", padding: "0 28px" }}>
-        <h1 style={{ fontFamily: "'Playfair Display',serif", fontSize: 26, fontWeight: 700, color: C.text, marginBottom: 8 }}>Status das <span style={{ color: C.gold }}>APIs</span></h1>
+        <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 26, fontWeight: 700, color: C.text, marginBottom: 8 }}>Status das <span style={{ color: C.gold }}>APIs</span></h1>
         <p style={{ color: C.textMuted, fontSize: 14, lineHeight: 1.7, marginBottom: 28 }}>As chaves de API estão configuradas no <strong style={{ color: C.text }}>servidor</strong>.</p>
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           {APIS.map(api => {
@@ -734,7 +734,7 @@ function HeroBanner({ movies, onSelect }) {
           <Badge color="rgba(201,168,76,0.15)" textColor={C.gold}>✦ Em Alta Esta Semana</Badge>
           {hero.rating && <Badge color="rgba(201,168,76,0.1)" textColor={C.goldLight}>★ {hero.rating}/10</Badge>}
         </div>
-        <h1 style={{ fontFamily: "'Playfair Display',serif", fontSize: 42, fontWeight: 900, color: C.text, marginBottom: 8, lineHeight: 1.1, textShadow: "0 2px 20px rgba(0,0,0,0.5)" }}>{hero.title}</h1>
+        <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 42, fontWeight: 900, color: C.text, marginBottom: 8, lineHeight: 1.1, textShadow: "0 2px 20px rgba(0,0,0,0.5)" }}>{hero.title}</h1>
         {hero.overview && (
           <p style={{ color: C.textMuted, fontSize: 14, lineHeight: 1.7, marginBottom: 24, display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{hero.overview}</p>
         )}
@@ -827,7 +827,7 @@ function HomePage({ setPage, setSelectedMovie }) {
         {/* Genre explorer */}
         {genres.length > 0 && (
           <div style={{ marginBottom: 40 }}>
-            <h3 style={{ fontFamily: "'Playfair Display',serif", fontSize: 18, fontWeight: 700, color: C.text, marginBottom: 16 }}>Explorar por Gênero</h3>
+            <h3 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 18, fontWeight: 700, color: C.text, marginBottom: 16 }}>Explorar por Gênero</h3>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 20 }}>
               {genres.map(g => (
                 <button key={g.id} onClick={() => setActiveG(activeG?.id === g.id ? null : g)}
@@ -919,7 +919,7 @@ function MoviePage({ movieInit, setPage, setSelectedMovie }) {
               {m.year && <Badge color={C.bgCard} textColor={C.textDim}>{m.year}</Badge>}
               {m.runtime && <Badge color={C.bgCard} textColor={C.textDim}>{m.runtime} min</Badge>}
             </div>
-            <h1 style={{ fontFamily: "'Playfair Display',serif", fontSize: 36, fontWeight: 900, color: C.text, marginBottom: 4, lineHeight: 1.15 }}>{m.title}</h1>
+            <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 36, fontWeight: 900, color: C.text, marginBottom: 4, lineHeight: 1.15 }}>{m.title}</h1>
             {m.tagline && <p style={{ color: C.gold, fontSize: 13, fontStyle: "italic", marginBottom: 14 }}>"{m.tagline}"</p>}
             <div style={{ display: "flex", gap: 20, marginBottom: 14, flexWrap: "wrap" }}>
               {m.director && <div><span style={{ fontSize: 10, color: C.textDim, display: "block" }}>Direção</span><span style={{ fontSize: 13, color: C.textMuted }}>{m.director}</span></div>}
@@ -1127,7 +1127,7 @@ function SearchPage({ setPage, setSelectedMovie }) {
     <div style={{ paddingTop: 80, paddingBottom: 60 }}>
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 32px" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
-          <h1 style={{ fontFamily: "'Playfair Display',serif", fontSize: 26, fontWeight: 700, color: C.text }}>Buscar <span style={{ color: C.gold }}>Filmes</span></h1>
+          <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 26, fontWeight: 700, color: C.text }}>Buscar <span style={{ color: C.gold }}>Filmes</span></h1>
           <button onClick={() => setShowFilters(!showFilters)}
             style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 8, background: showFilters ? C.gold : C.bgCard, color: showFilters ? C.bgDeep : C.textMuted, border: `1px solid ${showFilters ? C.gold : C.border}`, fontSize: 13, fontWeight: 500, cursor: "pointer", transition: "all 0.2s" }}>
             Filtros {hasFilters && <span style={{ background: showFilters ? C.bgDeep : C.gold, color: showFilters ? C.gold : C.bgDeep, borderRadius: 10, padding: "1px 6px", fontSize: 10, fontWeight: 700 }}>●</span>}
@@ -1240,9 +1240,9 @@ function ProfilePage({ user, setPage, isOwnProfile = true }) {
         <div style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderTop: "none", borderRadius: "0 0 16px 16px", padding: "0 28px 24px", marginBottom: 28 }}>
           <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 14 }}>
             <div style={{ display: "flex", alignItems: "flex-end", gap: 14, marginTop: -36 }}>
-              <div style={{ width: 86, height: 86, borderRadius: "50%", background: u.color, border: `3px solid ${C.bgCard}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 700, color: "#fff", fontFamily: "'Playfair Display',serif" }}>{u.initials}</div>
+              <div style={{ width: 86, height: 86, borderRadius: "50%", background: u.color, border: `3px solid ${C.bgCard}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 700, color: "#fff", fontFamily: "'Outfit', sans-serif" }}>{u.initials}</div>
               <div style={{ paddingBottom: 4 }}>
-                <h1 style={{ fontFamily: "'Playfair Display',serif", fontSize: 21, fontWeight: 700, color: C.text }}>{u.name}</h1>
+                <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 21, fontWeight: 700, color: C.text }}>{u.name}</h1>
                 <p style={{ color: C.textMuted, fontSize: 13 }}>@{u.username}</p>
               </div>
             </div>
@@ -1250,7 +1250,7 @@ function ProfilePage({ user, setPage, isOwnProfile = true }) {
           </div>
           <div style={{ display: "flex", gap: 28 }}>
             {[["Reviews", u.reviews], ["Amigos", u.friends], ["Clubs", MOCK_GROUPS.filter(g => g.members.includes(u.id)).length]].map(([l, v]) => (
-              <div key={l}><p style={{ fontSize: 21, fontWeight: 700, color: C.gold, fontFamily: "'Playfair Display',serif" }}>{v}</p><p style={{ fontSize: 12, color: C.textMuted }}>{l}</p></div>
+              <div key={l}><p style={{ fontSize: 21, fontWeight: 700, color: C.gold, fontFamily: "'Outfit', sans-serif" }}>{v}</p><p style={{ fontSize: 12, color: C.textMuted }}>{l}</p></div>
             ))}
           </div>
         </div>
@@ -1304,14 +1304,14 @@ function GroupsPage({ setPage, setSelectedGroup }) {
       <div style={{ maxWidth: 960, margin: "0 auto", padding: "0 32px" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 30 }}>
           <div>
-            <h1 style={{ fontFamily: "'Playfair Display',serif", fontSize: 26, fontWeight: 700, color: C.text, marginBottom: 6 }}>Meus <span style={{ color: C.gold }}>Clubs</span></h1>
+            <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 26, fontWeight: 700, color: C.text, marginBottom: 6 }}>Meus <span style={{ color: C.gold }}>Clubs</span></h1>
             <p style={{ color: C.textMuted, fontSize: 13 }}>Listas colaborativas com seus amigos</p>
           </div>
           <Btn variant="gold" onClick={() => setShowCreate(true)}><PlusIcon /> Criar Club</Btn>
         </div>
         {showCreate && (
           <div style={{ background: C.bgCard, border: `1px solid ${C.gold}`, borderRadius: 16, padding: 24, marginBottom: 22, animation: "fadeIn 0.2s ease" }}>
-            <h3 style={{ fontFamily: "'Playfair Display',serif", fontSize: 15, color: C.text, marginBottom: 16 }}>Novo Club</h3>
+            <h3 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 15, color: C.text, marginBottom: 16 }}>Novo Club</h3>
             <div style={{ display: "flex", gap: 12 }}>
               <TextInput label="Nome do Club" value={name} onChange={setName} placeholder="Ex: Cinéphiles de Sexta" style={{ flex: 1 }} />
               <TextInput label="Convidar (username)" value="" onChange={() => { }} placeholder="@username" style={{ flex: 1 }} />
@@ -1331,7 +1331,7 @@ function GroupsPage({ setPage, setSelectedGroup }) {
                 style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 16, padding: 22, cursor: "pointer" }}>
                 <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 14 }}>
                   <div>
-                    <h3 style={{ fontFamily: "'Playfair Display',serif", fontSize: 15, fontWeight: 600, color: C.text, marginBottom: 4 }}>{group.name}</h3>
+                    <h3 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 15, fontWeight: 600, color: C.text, marginBottom: 4 }}>{group.name}</h3>
                     <p style={{ fontSize: 12, color: C.textDim }}>{members.length} membros · {allIds.length} filmes</p>
                   </div>
                   <div style={{ display: "flex" }}>{members.slice(0, 3).map((m, i) => <div key={m.id} style={{ marginLeft: i > 0 ? -8 : 0, zIndex: 3 - i }}><Avatar user={m} size={28} /></div>)}</div>
@@ -1389,7 +1389,7 @@ function GroupPage({ group, setPage, setSelectedMovie }) {
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 32px" }}>
         <div style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 20, padding: "26px 28px", marginBottom: 26 }}>
           <button onClick={() => setPage("groups")} style={{ display: "flex", alignItems: "center", gap: 6, color: C.textMuted, fontSize: 13, marginBottom: 14 }}><BackIcon /> Meus Clubs</button>
-          <h1 style={{ fontFamily: "'Playfair Display',serif", fontSize: 24, fontWeight: 700, color: C.text, marginBottom: 8 }}>{g.name}</h1>
+          <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 24, fontWeight: 700, color: C.text, marginBottom: 8 }}>{g.name}</h1>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
             {members.map(m => <div key={m.id} style={{ display: "flex", alignItems: "center", gap: 6 }}><Avatar user={m} size={22} /><span style={{ fontSize: 12, color: C.textMuted }}>{m.name}</span></div>)}
           </div>
@@ -1434,7 +1434,7 @@ function GroupPage({ group, setPage, setSelectedMovie }) {
                   <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16, paddingBottom: 14, borderBottom: `1px solid ${C.border}` }}>
                     <Avatar user={member} size={46} />
                     <div>
-                      <h3 style={{ fontFamily: "'Playfair Display',serif", fontSize: 15, fontWeight: 600, color: C.text, marginBottom: 2 }}>{member.name}</h3>
+                      <h3 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 15, fontWeight: 600, color: C.text, marginBottom: 2 }}>{member.name}</h3>
                       <p style={{ fontSize: 12, color: C.textMuted }}>@{member.username} · {movies.length} recomendaç{movies.length === 1 ? "ão" : "ões"}</p>
                     </div>
                   </div>
@@ -1503,7 +1503,7 @@ function LoginPage({ onLogin }) {
         {/* Text logo */}
         <div style={{ animation: "staggerUp 0.8s ease 0.3s both", textAlign: "center", position: "relative", zIndex: 1 }}>
           <img src={logoText} alt="MOVIECLUB" style={{ width: 320, marginBottom: 16, filter: "drop-shadow(0 4px 16px rgba(201,168,76,0.2))" }} />
-          <p style={{ color: C.goldLight, fontSize: 13, letterSpacing: "0.35em", fontWeight: 300, opacity: 0.7, fontFamily: "'Inter', sans-serif" }}>
+          <p style={{ color: C.goldLight, fontSize: 13, letterSpacing: "0.35em", fontWeight: 300, opacity: 0.7, fontFamily: "'DM Sans', sans-serif" }}>
             SHARED FILM PLATFORM
           </p>
         </div>
@@ -1517,7 +1517,7 @@ function LoginPage({ onLogin }) {
         <p style={{
           animation: "staggerUp 0.8s ease 0.7s both",
           color: C.textMuted, fontSize: 14, marginTop: 32, maxWidth: 300, textAlign: "center", lineHeight: 1.6,
-          fontFamily: "'Inter', sans-serif", position: "relative", zIndex: 1,
+          fontFamily: "'DM Sans', sans-serif", position: "relative", zIndex: 1,
         }}>
           Descubra, avalie e compartilhe filmes com seus amigos em um só lugar.
         </p>
@@ -1536,7 +1536,7 @@ function LoginPage({ onLogin }) {
         <div style={{ width: 400, position: "relative", zIndex: 1, padding: "0 24px" }}>
           {/* Welcome heading */}
           <div style={{ marginBottom: 32, animation: "staggerUp 0.6s ease 0.2s both" }}>
-            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, color: C.text, fontWeight: 700, marginBottom: 6 }}>
+            <h2 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 28, color: C.text, fontWeight: 700, marginBottom: 6 }}>
               {mode === "login" ? "Bem-vindo de volta" : "Crie sua conta"}
             </h2>
             <p style={{ color: C.textMuted, fontSize: 14 }}>
@@ -1585,7 +1585,7 @@ function LoginPage({ onLogin }) {
             style={{
               width: "100%", marginTop: 24, padding: "14px", color: C.bgDeep,
               borderRadius: 12, fontSize: 15, fontWeight: 700,
-              fontFamily: "'Playfair Display',serif", letterSpacing: "0.06em",
+              fontFamily: "'Outfit', sans-serif", letterSpacing: "0.06em",
               transition: "transform 0.15s, box-shadow 0.2s",
               boxShadow: "0 4px 20px rgba(201,168,76,0.25)",
             }}
