@@ -4,7 +4,10 @@ const STREAMING_BASE = "https://streaming-availability.p.rapidapi.com";
 
 function getTmdbKey() {
   const key = process.env.TMDB_API_KEY;
-  if (!key) throw new Error("TMDB_API_KEY is not configured");
+  if (!key) {
+    console.error("TMDB_API_KEY is not configured in process.env. Available env keys:", Object.keys(process.env).filter(k => k.includes("TMDB") || k.includes("OMDB") || k.includes("STREAMING")));
+    throw new Error("TMDB_API_KEY is not configured. Please ensure the secret is saved in Lovable Cloud.");
+  }
   return key;
 }
 
