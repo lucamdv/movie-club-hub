@@ -1500,7 +1500,8 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
   const { ratings, loading: ratingsLoading } = useRatings(userId);
   const { items: watchlistItems, loading: wlLoading, remove: removeFromWl } = useWatchlist(userId);
   const [tab, setTab] = useState("ratings");
-
+  const [viewMode, setViewMode] = useState("list");
+  const [perPage, setPerPage] = useState(20);
   const displayName = profile?.display_name || authCtx?.user?.email || "Usuário";
   const initials = displayName.slice(0, 2).toUpperCase();
   const uname = profile?.username || authCtx?.user?.email?.split("@")[0] || "user";
