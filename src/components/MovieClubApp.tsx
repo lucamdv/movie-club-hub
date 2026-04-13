@@ -1799,18 +1799,33 @@ function ProfileEditModal({ profile, user, onClose, onSave }) {
 // ─────────────────────────────────────────────
 //  PROFILE PAGE
 // ─────────────────────────────────────────────
-function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSelectedMovie }) {
-  const userId = authCtx?.user?.id;
-  const profile = authCtx?.profile;
-  const { ratings, loading: ratingsLoading } = useRatings(userId);
-  const { items: watchlistItems, loading: wlLoading, remove: removeFromWl } = useWatchlist(userId);
+function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSelectedMovie, viewUserId }) {
+  const currentUserId = authCtx?.user?.id;
+  const isViewingOther = viewUserId && viewUserId !== currentUserId;
+  const targetUserId = isViewingOther ? viewUserId : currentUserId;
+
+  // For viewing other profiles, load their profile data
+  const [otherProfile, setOtherProfile] = useState(null);
+  useEffect(() => {
+    if (!isViewingOther) { setOtherProfile(null); return; }
+    supabase.from("profiles").select("*").eq("user_id", viewUserId).single().then(({ data }) => setOtherProfile(data));
+  }, [viewUserId, isViewingOther]);
+
+  const profile = isViewingOther ? otherProfile : authCtx?.profile;
+  const { ratings, loading: ratingsLoading } = useRatings(targetUserId);
+  const { items: watchlistItems, loading: wlLoading, remove: removeFromWl } = useWatchlist(targetUserId);
   const [tab, setTab] = useState("ratings");
   const [viewMode, setViewMode] = useState("list");
   const [perPage, setPerPage] = useState(20);
   const [showEditModal, setShowEditModal] = useState(false);
-  const displayName = profile?.display_name || authCtx?.user?.email || "Usuário";
+
+  // Follow hooks for viewing other profiles
+  const { isFollowing, follow, unfollow } = useFollows(currentUserId);
+  const { isFriend } = useFriendships(currentUserId);
+
+  const displayName = profile?.display_name || (isViewingOther ? "Usuário" : authCtx?.user?.email || "Usuário");
   const initials = displayName.slice(0, 2).toUpperCase();
-  const uname = profile?.username || authCtx?.user?.email?.split("@")[0] || "user";
+  const uname = profile?.username || (!isViewingOther ? authCtx?.user?.email?.split("@")[0] : null) || "user";
   const bio = profile?.bio || "";
   const avgRating = ratings.length > 0 ? (ratings.reduce((s, r) => s + Number(r.rating), 0) / ratings.length).toFixed(1) : "—";
 
