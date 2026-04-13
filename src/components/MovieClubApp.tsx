@@ -6,7 +6,8 @@ import { tmdbProxy, omdbProxy, streamingProxy } from "@/lib/movie-api.functions"
 import {
   Film, ClipboardList, Star, User, Users, Search, Handshake, Pencil, Link2,
   TrendingUp, Target, Radio, Calendar, X, Flame, UserRound, Bookmark,
-  Clapperboard, Eye, EyeOff, Share2, ListVideo, Award
+  Clapperboard, Eye, EyeOff, Share2, ListVideo, Award, Zap, ChevronLeft,
+  ChevronRight, Plus, SkipForward
 } from "lucide-react";
 import logoMain from "@/assets/logo-main.png";
 import mascotsNav from "@/assets/mascots-nav.png";
