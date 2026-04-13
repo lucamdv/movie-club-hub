@@ -859,6 +859,8 @@ function Navbar({ page, setPage, hasKeys, apiStatus }) {
                 }}>
                   <img src={icon} alt="" style={{ width: 30, height: 30, objectFit: "cover", borderRadius: "50%" }} />
                 </div>
+              ) : id === "friends" ? (
+                <span style={{ fontSize: 16 }}>👥</span>
               ) : (
                 <span style={{ fontSize: 16 }}>🔍</span>
               )}
