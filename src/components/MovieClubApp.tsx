@@ -57,13 +57,20 @@ const tmdb = {
     const cacheKey = `tmdb:${path}:${JSON.stringify(params)}`;
     return cachedFetch(cacheKey, () => tmdbProxy({ data: { path, params } }));
   },
-  async getAllPages(path, params = {}) {
-    // Fetch page 1 to discover total_pages
+  /**
+   * Progressive loader: returns first page immediately via onFirstPage callback,
+   * then fetches all remaining pages in background and calls onComplete with full results.
+   * Also returns a promise that resolves with all results.
+   */
+  async getAllPages(path, params = {}, { onFirstPage, onProgress } = {}) {
     const first = await this.get(path, { ...params, page: "1" });
-    const totalPages = Math.min(first?.total_pages || 1, 500); // TMDb caps at 500
-    let allResults = [...(first?.results || [])];
+    const firstResults = first?.results || [];
+    const totalPages = Math.min(first?.total_pages || 1, 500);
+    
+    if (onFirstPage) onFirstPage(firstResults);
+    if (totalPages <= 1) return { results: firstResults, total_pages: 1, total_results: first?.total_results || firstResults.length };
 
-    // Fetch remaining pages in batches of 20 to avoid overwhelming the API
+    let allResults = [...firstResults];
     const batchSize = 20;
     for (let start = 2; start <= totalPages; start += batchSize) {
       const end = Math.min(start + batchSize - 1, totalPages);
@@ -72,23 +79,20 @@ const tmdb = {
       );
       const responses = await Promise.all(batch);
       allResults = allResults.concat(responses.flatMap(r => r?.results || []));
+      if (onProgress) onProgress(allResults, totalPages);
     }
 
-    return {
-      results: allResults,
-      total_pages: totalPages,
-      total_results: first?.total_results || allResults.length,
-    };
+    return { results: allResults, total_pages: totalPages, total_results: first?.total_results || allResults.length };
   },
   poster(path, size = "w300") { return path ? `${TMDB_IMG}/${size}${path}` : null; },
   backdrop(path, size = "w1280") { return path ? `${TMDB_IMG}/${size}${path}` : null; },
-  async trending()          { return this.getAllPages("/trending/movie/week"); },
-  async popular()           { return this.getAllPages("/movie/popular"); },
-  async topRated()          { return this.getAllPages("/movie/top_rated"); },
+  async trending(opts)      { return this.getAllPages("/trending/movie/week", {}, opts); },
+  async popular(opts)       { return this.getAllPages("/movie/popular", {}, opts); },
+  async topRated(opts)      { return this.getAllPages("/movie/top_rated", {}, opts); },
   async details(id)         { return this.get(`/movie/${id}`, { append_to_response: "credits,videos,similar,recommendations" }); },
   async search(q, page = 1) { return this.get("/search/movie", { query: q, page: String(page) }); },
   async genres()            { return this.get("/genre/movie/list"); },
-  async byGenre(gid)        { return this.getAllPages("/discover/movie", { with_genres: String(gid), sort_by: "popularity.desc" }); },
+  async byGenre(gid, opts)  { return this.getAllPages("/discover/movie", { with_genres: String(gid), sort_by: "popularity.desc" }, opts); },
 };
 
 const omdb = {
