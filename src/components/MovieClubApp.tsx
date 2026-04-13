@@ -3,6 +3,11 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { tmdbProxy, omdbProxy, streamingProxy } from "@/lib/movie-api.functions";
+import {
+  Film, ClipboardList, Star, User, Users, Search, Handshake, Pencil, Link2,
+  TrendingUp, Target, Radio, Calendar, X, Flame, UserRound, Bookmark,
+  Clapperboard, Eye, EyeOff, Share2, ListVideo, Award
+} from "lucide-react";
 import logoMain from "@/assets/logo-main.png";
 import mascotsNav from "@/assets/mascots-nav.png";
 import logoText from "@/assets/logo-text.png";
