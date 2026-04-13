@@ -57,13 +57,20 @@ const tmdb = {
     const cacheKey = `tmdb:${path}:${JSON.stringify(params)}`;
     return cachedFetch(cacheKey, () => tmdbProxy({ data: { path, params } }));
   },
-  async getAllPages(path, params = {}) {
-    // Fetch page 1 to discover total_pages
+  /**
+   * Progressive loader: returns first page immediately via onFirstPage callback,
+   * then fetches all remaining pages in background and calls onComplete with full results.
+   * Also returns a promise that resolves with all results.
+   */
+  async getAllPages(path, params = {}, { onFirstPage, onProgress } = {}) {
     const first = await this.get(path, { ...params, page: "1" });
-    const totalPages = Math.min(first?.total_pages || 1, 500); // TMDb caps at 500
-    let allResults = [...(first?.results || [])];
+    const firstResults = first?.results || [];
+    const totalPages = Math.min(first?.total_pages || 1, 500);
+    
+    if (onFirstPage) onFirstPage(firstResults);
+    if (totalPages <= 1) return { results: firstResults, total_pages: 1, total_results: first?.total_results || firstResults.length };
 
-    // Fetch remaining pages in batches of 20 to avoid overwhelming the API
+    let allResults = [...firstResults];
     const batchSize = 20;
     for (let start = 2; start <= totalPages; start += batchSize) {
       const end = Math.min(start + batchSize - 1, totalPages);
@@ -72,23 +79,20 @@ const tmdb = {
       );
       const responses = await Promise.all(batch);
       allResults = allResults.concat(responses.flatMap(r => r?.results || []));
+      if (onProgress) onProgress(allResults, totalPages);
     }
 
-    return {
-      results: allResults,
-      total_pages: totalPages,
-      total_results: first?.total_results || allResults.length,
-    };
+    return { results: allResults, total_pages: totalPages, total_results: first?.total_results || allResults.length };
   },
   poster(path, size = "w300") { return path ? `${TMDB_IMG}/${size}${path}` : null; },
   backdrop(path, size = "w1280") { return path ? `${TMDB_IMG}/${size}${path}` : null; },
-  async trending()          { return this.getAllPages("/trending/movie/week"); },
-  async popular()           { return this.getAllPages("/movie/popular"); },
-  async topRated()          { return this.getAllPages("/movie/top_rated"); },
+  async trending(opts)      { return this.getAllPages("/trending/movie/week", {}, opts); },
+  async popular(opts)       { return this.getAllPages("/movie/popular", {}, opts); },
+  async topRated(opts)      { return this.getAllPages("/movie/top_rated", {}, opts); },
   async details(id)         { return this.get(`/movie/${id}`, { append_to_response: "credits,videos,similar,recommendations" }); },
   async search(q, page = 1) { return this.get("/search/movie", { query: q, page: String(page) }); },
   async genres()            { return this.get("/genre/movie/list"); },
-  async byGenre(gid)        { return this.getAllPages("/discover/movie", { with_genres: String(gid), sort_by: "popularity.desc" }); },
+  async byGenre(gid, opts)  { return this.getAllPages("/discover/movie", { with_genres: String(gid), sort_by: "popularity.desc" }, opts); },
 };
 
 const omdb = {
@@ -455,7 +459,7 @@ function MovieCard({ movie, size="md", onClick }) {
     <div className="card-hover" onClick={onClick} style={{ width:w, flexShrink:0, cursor:"pointer", display:"flex", flexDirection:"column", gap:6 }}>
       <div style={{ width:w, height:h, borderRadius:8, background:C.bgCard, border:`1px solid ${C.border}`, overflow:"hidden", position:"relative" }}>
         {movie.poster
-          ? <img src={movie.poster} alt={movie.title} style={{ width:"100%", height:"100%", objectFit:"cover" }} onError={e=>e.target.style.display="none"}/>
+          ? <img src={movie.poster} alt={movie.title} loading="lazy" style={{ width:"100%", height:"100%", objectFit:"cover" }} onError={e=>e.target.style.display="none"}/>
           : <div style={{ width:"100%", height:"100%", display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:6, padding:8 }}>
               <span style={{ fontSize:24, opacity:0.4 }}>🎬</span>
               <p style={{ fontSize:10, color:C.textDim, textAlign:"center", lineHeight:1.3 }}>{movie.title}</p>
@@ -633,30 +637,79 @@ function HomePage({ setPage, setSelectedMovie }) {
   const [genreMovs, setGenreMovs] = useState([]);
   const [loading,   setLoading]   = useState(true);
   const [loadingG,  setLoadingG]  = useState(false);
+  const [loadingMore, setLoadingMore] = useState({ trending:false, popular:false, topRated:false, genre:false });
+  
+  // Visible count per section — starts with initial batch, expands with "show more"
+  const PAGE_SIZE = 40;
+  const [visible, setVisible] = useState({ trending: PAGE_SIZE, popular: PAGE_SIZE, topRated: PAGE_SIZE, genre: PAGE_SIZE });
+
+  const showMore = (section) => setVisible(v => ({ ...v, [section]: v[section] + PAGE_SIZE }));
 
   useEffect(()=>{
     setLoading(true);
-    Promise.all([tmdb.trending(),tmdb.popular(),tmdb.topRated(),tmdb.genres()])
-      .then(([t,p,tr,g])=>{
-        setTrending((t.results||[]).map(normalizeTmdb).filter(Boolean));
-        setPopular((p.results||[]).map(normalizeTmdb).filter(Boolean));
-        setTopRated((tr.results||[]).map(normalizeTmdb).filter(Boolean));
-        setGenres(g.genres||[]);
-        setLoading(false);
-      }).catch(()=>setLoading(false));
+    const norm = r => (r||[]).map(normalizeTmdb).filter(Boolean);
+
+    // Load genres immediately
+    tmdb.genres().then(g => setGenres(g.genres || [])).catch(()=>{});
+
+    // Progressive: show first page fast, then fill in background
+    const loadSection = (fetcher, setter, key) => {
+      return fetcher({
+        onFirstPage: results => {
+          setter(norm(results));
+          setLoading(false); // Remove spinner as soon as first data arrives
+        },
+        onProgress: results => setter(norm(results)),
+      }).then(d => {
+        setter(norm(d.results));
+        setLoadingMore(s => ({ ...s, [key]: false }));
+      }).catch(()=>{});
+    };
+
+    setLoadingMore({ trending:true, popular:true, topRated:true, genre:false });
+    loadSection(opts => tmdb.trending(opts), setTrending, "trending");
+    loadSection(opts => tmdb.popular(opts), setPopular, "popular");
+    loadSection(opts => tmdb.topRated(opts), setTopRated, "topRated");
   },[]);
 
   useEffect(()=>{
     if(!activeG) return;
     setLoadingG(true);
-    tmdb.byGenre(activeG.id).then(d=>{
-      setGenreMovs((d.results||[]).map(normalizeTmdb).filter(Boolean));
-      setLoadingG(false);
+    setVisible(v => ({ ...v, genre: PAGE_SIZE }));
+    const norm = r => (r||[]).map(normalizeTmdb).filter(Boolean);
+    tmdb.byGenre(activeG.id, {
+      onFirstPage: results => {
+        setGenreMovs(norm(results));
+        setLoadingG(false);
+      },
+      onProgress: results => setGenreMovs(norm(results)),
+    }).then(d => {
+      setGenreMovs(norm(d.results));
+      setLoadingMore(s => ({ ...s, genre: false }));
     }).catch(()=>setLoadingG(false));
   },[activeG]);
 
   const go = m=>{ setSelectedMovie(m); setPage("movie"); };
   const hero = trending[0];
+
+  const LoadMoreBtn = ({ section, total }) => {
+    const shown = visible[section];
+    if (shown >= total) return null;
+    return (
+      <div style={{ display:"flex", justifyContent:"center", marginTop:16 }}>
+        <Btn variant="outline" onClick={() => showMore(section)}>
+          Mostrar mais ({total - shown} restantes)
+          {loadingMore[section] && " — carregando…"}
+        </Btn>
+      </div>
+    );
+  };
+
+  const CountBadge = ({ count, isLoading }) => (
+    <span style={{ fontSize:11, color:C.textDim, fontWeight:400, marginLeft:8 }}>
+      {count} filmes{isLoading ? " (carregando mais…)" : ""}
+    </span>
+  );
 
   return (
     <div style={{ paddingTop:60, paddingBottom:60 }}>
@@ -683,7 +736,7 @@ function HomePage({ setPage, setSelectedMovie }) {
             {trending.slice(1,5).map((m,i)=>(
               <div key={m.id} onClick={()=>go(m)} style={{ width:68, cursor:"pointer", transform:`translateY(${i*10}px)`, opacity:0.7+i*0.07 }}>
                 <div style={{ height:102, borderRadius:6, overflow:"hidden", border:`1px solid ${C.border}` }}>
-                  {m.poster&&<img src={m.poster} alt={m.title} style={{ width:"100%", height:"100%", objectFit:"cover" }}/>}
+                  {m.poster&&<img src={m.poster} alt={m.title} loading="lazy" style={{ width:"100%", height:"100%", objectFit:"cover" }}/>}
                 </div>
               </div>
             ))}
@@ -694,12 +747,15 @@ function HomePage({ setPage, setSelectedMovie }) {
       )}
 
       <div style={{ maxWidth:1200, margin:"0 auto", padding:"0 32px" }}>
-        <Section title="Em Alta Agora" action={{label:"Ver mais",onClick:()=>setPage("search")}}>
-          {loading
+        <Section title={<>Em Alta Agora<CountBadge count={trending.length} isLoading={loadingMore.trending}/></>} action={{label:"Ver mais",onClick:()=>setPage("search")}}>
+          {loading && trending.length === 0
             ?<div style={{ display:"flex", gap:14 }}>{Array(6).fill(0).map((_,i)=><SkeletonCard key={i}/>)}</div>
-            :<div style={{ display:"flex", gap:14, overflowX:"auto", paddingBottom:8 }}>
-               {trending.map(m=><MovieCard key={m.id} movie={m} onClick={()=>go(m)}/>)}
-             </div>
+            :<>
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(130px, 1fr))", gap:14 }}>
+                {trending.slice(0, visible.trending).map(m=><MovieCard key={m.id} movie={m} onClick={()=>go(m)}/>)}
+              </div>
+              <LoadMoreBtn section="trending" total={trending.length}/>
+            </>
           }
         </Section>
 
@@ -717,28 +773,40 @@ function HomePage({ setPage, setSelectedMovie }) {
             {activeG&&(
               loadingG
                 ?<div style={{ display:"flex", gap:14 }}>{Array(6).fill(0).map((_,i)=><SkeletonCard key={i}/>)}</div>
-                :<div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(130px, 1fr))", gap:14 }}>
-                   {genreMovs.map(m=><MovieCard key={m.id} movie={m} onClick={()=>go(m)}/>)}
-                 </div>
+                :<>
+                  <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(130px, 1fr))", gap:14 }}>
+                    {genreMovs.slice(0, visible.genre).map(m=><MovieCard key={m.id} movie={m} onClick={()=>go(m)}/>)}
+                  </div>
+                  <div style={{ textAlign:"center", marginTop:8 }}>
+                    <span style={{ fontSize:11, color:C.textDim }}>{genreMovs.length} filmes{loadingMore.genre ? " (carregando mais…)" : ""}</span>
+                  </div>
+                  <LoadMoreBtn section="genre" total={genreMovs.length}/>
+                </>
             )}
           </div>
         )}
 
-        <Section title="Mais Populares">
-          {loading
+        <Section title={<>Mais Populares<CountBadge count={popular.length} isLoading={loadingMore.popular}/></>}>
+          {loading && popular.length === 0
             ?<div style={{ display:"flex", gap:14 }}>{Array(6).fill(0).map((_,i)=><SkeletonCard key={i}/>)}</div>
-            :<div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(130px, 1fr))", gap:14 }}>
-               {popular.map(m=><MovieCard key={m.id} movie={m} onClick={()=>go(m)}/>)}
-             </div>
+            :<>
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(130px, 1fr))", gap:14 }}>
+                {popular.slice(0, visible.popular).map(m=><MovieCard key={m.id} movie={m} onClick={()=>go(m)}/>)}
+              </div>
+              <LoadMoreBtn section="popular" total={popular.length}/>
+            </>
           }
         </Section>
 
-        <Section title="Melhor Avaliados pelo TMDb">
-          {loading
+        <Section title={<>Melhor Avaliados pelo TMDb<CountBadge count={topRated.length} isLoading={loadingMore.topRated}/></>}>
+          {loading && topRated.length === 0
             ?<div style={{ display:"flex", gap:14 }}>{Array(6).fill(0).map((_,i)=><SkeletonCard key={i}/>)}</div>
-            :<div style={{ display:"flex", gap:14, overflowX:"auto", paddingBottom:8 }}>
-               {topRated.map(m=><MovieCard key={m.id} movie={m} onClick={()=>go(m)}/>)}
-             </div>
+            :<>
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(130px, 1fr))", gap:14 }}>
+                {topRated.slice(0, visible.topRated).map(m=><MovieCard key={m.id} movie={m} onClick={()=>go(m)}/>)}
+              </div>
+              <LoadMoreBtn section="topRated" total={topRated.length}/>
+            </>
           }
         </Section>
       </div>
