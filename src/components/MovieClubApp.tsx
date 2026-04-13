@@ -1647,7 +1647,7 @@ function SearchPage({ setPage, setSelectedMovie }) {
         ) : (
           !loading && (query || hasFilters) ? (
             <div style={{ textAlign: "center", padding: "60px 0", color: C.textDim }}>
-              <p style={{ fontSize: 32, marginBottom: 12 }}>🔍</p>
+              <div style={{ marginBottom: 12 }}><Search size={32} style={{ color: "#4A5E72" }} /></div>
               <p style={{ fontSize: 15 }}>Nenhum resultado encontrado</p>
             </div>
           ) : null
@@ -1655,7 +1655,7 @@ function SearchPage({ setPage, setSelectedMovie }) {
 
         {!query && !hasFilters && !loading && (
           <div style={{ textAlign: "center", padding: "60px 0", color: C.textDim }}>
-            <p style={{ fontSize: 40, marginBottom: 12 }}>🎬</p>
+            <div style={{ marginBottom: 12 }}><Film size={40} style={{ color: "#4A5E72" }} /></div>
             <p style={{ fontSize: 15 }}>Digite um título ou use os filtros para explorar</p>
           </div>
         )}
@@ -2022,7 +2022,7 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
                 </div>
               )) : (
                 <div style={{ textAlign: "center", padding: "60px 20px" }}>
-                  <p style={{ fontSize: 40, marginBottom: 12 }}>🎬</p>
+                  <div style={{ marginBottom: 12 }}><Film size={40} style={{ color: "#4A5E72" }} /></div>
                   <p style={{ color: C.textMuted, fontSize: 15, fontWeight: 500 }}>Nenhuma avaliação ainda</p>
                   <p style={{ color: C.textDim, fontSize: 13, marginTop: 4 }}>Avalie filmes para construir seu histórico!</p>
                 </div>
@@ -2034,7 +2034,7 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
                 <div key={r.id} className="movie-card-netflix" style={{ position: "relative" }}>
                   <div style={{ cursor: "pointer" }} onClick={() => { setSelectedMovie?.({ tmdbId: r.tmdb_id, title: r.title, poster: r.poster_url }); setPage("movie"); }}>
                     <div style={{ width: "100%", aspectRatio: "2/3", borderRadius: 12, overflow: "hidden", background: C.bgCard, border: `1px solid ${C.border}` }}>
-                      {r.poster_url ? <img src={r.poster_url} alt={r.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 32, opacity: 0.3 }}>🎬</div>}
+                      {r.poster_url ? <img src={r.poster_url} alt={r.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", opacity: 0.3 }}><Film size={32} /></div>}
                     </div>
                     <p style={{ fontSize: 12, fontWeight: 500, color: C.text, marginTop: 8, lineHeight: 1.3 }}>{r.title}</p>
                     <div style={{ marginTop: 4 }}><StarRating value={Number(r.rating)} size={12} /></div>
@@ -2042,7 +2042,7 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
                 </div>
               )) : (
                 <div style={{ textAlign: "center", padding: "60px 20px", gridColumn: "1/-1" }}>
-                  <p style={{ fontSize: 40, marginBottom: 12 }}>🎬</p>
+                  <div style={{ marginBottom: 12 }}><Film size={40} style={{ color: "#4A5E72" }} /></div>
                   <p style={{ color: C.textMuted, fontSize: 15, fontWeight: 500 }}>Nenhuma avaliação ainda</p>
                 </div>
               )}
@@ -2058,7 +2058,7 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
                 <div key={item.id} style={{ position: "relative" }} className="movie-card-netflix">
                   <div style={{ cursor: "pointer" }} onClick={() => { setSelectedMovie?.({ tmdbId: item.tmdb_id, title: item.title, poster: item.poster_url }); setPage("movie"); }}>
                     <div style={{ width: "100%", aspectRatio: "2/3", borderRadius: 12, overflow: "hidden", background: C.bgCard, border: `1px solid ${C.border}` }}>
-                      {item.poster_url ? <img src={item.poster_url} alt={item.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 32, opacity: 0.3 }}>🎬</div>}
+                      {item.poster_url ? <img src={item.poster_url} alt={item.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", opacity: 0.3 }}><Film size={32} /></div>}
                     </div>
                     <p style={{ fontSize: 12, fontWeight: 500, color: C.text, marginTop: 8, lineHeight: 1.3 }}>{item.title}</p>
                   </div>
@@ -2067,7 +2067,7 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
                 </div>
               )) : (
                 <div style={{ textAlign: "center", padding: "60px 20px", gridColumn: "1/-1" }}>
-                  <p style={{ fontSize: 40, marginBottom: 12 }}>📋</p>
+                  <div style={{ marginBottom: 12 }}><ClipboardList size={40} style={{ color: "#4A5E72" }} /></div>
                   <p style={{ color: C.textMuted, fontSize: 15, fontWeight: 500 }}>Sua lista está vazia</p>
                   <p style={{ color: C.textDim, fontSize: 13, marginTop: 4 }}>Adicione filmes para assistir depois!</p>
                 </div>
@@ -2084,7 +2084,7 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
                   className="card-hover"
                   onClick={() => { setSelectedMovie?.({ tmdbId: item.tmdb_id, title: item.title, poster: item.poster_url }); setPage("movie"); }}>
                   <div style={{ width: 56, height: 84, borderRadius: 10, overflow: "hidden", flexShrink: 0, background: C.bgDeep, border: `1px solid ${C.border}` }}>
-                    {item.poster_url ? <img src={item.poster_url} alt={item.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 24, opacity: 0.3 }}>🎬</div>}
+                    {item.poster_url ? <img src={item.poster_url} alt={item.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", opacity: 0.3 }}><Film size={24} /></div>}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ fontSize: 15, fontWeight: 600, color: C.text }}>{item.title}</p>
@@ -2095,7 +2095,7 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
                 </div>
               )) : (
                 <div style={{ textAlign: "center", padding: "60px 20px" }}>
-                  <p style={{ fontSize: 40, marginBottom: 12 }}>📋</p>
+                  <div style={{ marginBottom: 12 }}><ClipboardList size={40} style={{ color: "#4A5E72" }} /></div>
                   <p style={{ color: C.textMuted, fontSize: 15, fontWeight: 500 }}>Sua lista está vazia</p>
                 </div>
               )}
@@ -2379,12 +2379,12 @@ function FriendsPage({ setPage, setSelectedMovie, auth: authCtx, onViewProfile }
               </div>
             ) : searchQuery ? (
               <div style={{ textAlign: "center", padding: "60px 0", color: C.textDim }}>
-                <p style={{ fontSize: 32, marginBottom: 12 }}>🔍</p>
+                <div style={{ marginBottom: 12 }}><Search size={32} style={{ color: "#4A5E72" }} /></div>
                 <p style={{ fontSize: 14 }}>Nenhum usuário encontrado</p>
               </div>
             ) : (
               <div style={{ textAlign: "center", padding: "60px 0", color: C.textDim }}>
-                <p style={{ fontSize: 40, marginBottom: 12 }}>👥</p>
+                <div style={{ marginBottom: 12 }}><Users size={40} style={{ color: "#4A5E72" }} /></div>
                 <p style={{ fontSize: 14, marginBottom: 4 }}>Busque por nome ou username</p>
                 <p style={{ fontSize: 12 }}>para encontrar e seguir outros cinéfilos</p>
               </div>
@@ -2403,7 +2403,7 @@ function FriendsPage({ setPage, setSelectedMovie, auth: authCtx, onViewProfile }
               </div>
             ) : (
               <div style={{ textAlign: "center", padding: "60px 0", color: C.textDim }}>
-                <p style={{ fontSize: 40, marginBottom: 12 }}>🫥</p>
+                <div style={{ marginBottom: 12 }}><UserRound size={40} style={{ color: "#4A5E72" }} /></div>
                 <p style={{ fontSize: 14 }}>Você ainda não segue ninguém</p>
                 <p style={{ fontSize: 12, marginTop: 4 }}>Busque usuários e comece a seguir!</p>
               </div>
@@ -2422,7 +2422,7 @@ function FriendsPage({ setPage, setSelectedMovie, auth: authCtx, onViewProfile }
               </div>
             ) : (
               <div style={{ textAlign: "center", padding: "60px 0", color: C.textDim }}>
-                <p style={{ fontSize: 40, marginBottom: 12 }}>🫥</p>
+                <div style={{ marginBottom: 12 }}><UserRound size={40} style={{ color: "#4A5E72" }} /></div>
                 <p style={{ fontSize: 14 }}>Nenhum seguidor ainda</p>
                 <p style={{ fontSize: 12, marginTop: 4 }}>Compartilhe seu perfil para ganhar seguidores!</p>
               </div>
@@ -2439,7 +2439,7 @@ function FriendsPage({ setPage, setSelectedMovie, auth: authCtx, onViewProfile }
               </div>
             ) : (
               <div style={{ textAlign: "center", padding: "60px 0", color: C.textDim }}>
-                <p style={{ fontSize: 40, marginBottom: 12 }}>🤝</p>
+                <div style={{ marginBottom: 12 }}><Handshake size={40} style={{ color: "#4A5E72" }} /></div>
                 <p style={{ fontSize: 14 }}>Nenhum amigo ainda</p>
                 <p style={{ fontSize: 12, marginTop: 4 }}>Gere um link de amizade e envie para seus amigos!</p>
               </div>
