@@ -30,6 +30,8 @@ const MONKEY_AVATARS = [
   { id: "astronaut", src: monkeyAstronaut, label: "Astronauta" },
   { id: "strong", src: monkeyStrong, label: "Fortão" },
   { id: "shy", src: monkeyShy, label: "Tímido" },
+  { id: "gym", src: monkeyGym, label: "Academia" },
+  { id: "ears", src: monkeyEars, label: "Surdo" },
 ];
 
 // ─────────────────────────────────────────────
