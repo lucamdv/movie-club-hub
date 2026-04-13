@@ -3209,19 +3209,48 @@ function QuickRatePage({ setPage, setSelectedMovie, auth }) {
           </button>
         </div>
 
-        {/* Watchlist + Skip */}
+        {/* Watchlist + Skip + Finish */}
         <div style={{ display: "flex", justifyContent: "center", gap: 12, marginTop: 16 }}>
           <Btn variant={inWl(current.id) ? "gold" : "outline"} size="sm" onClick={async () => {
-            if (inWl(current.id)) { await removeWl(current.id); toast.success("Removido da watchlist"); }
-            else { await addWl(current.id, current.title, tmdb.poster(current.poster_path)); toast.success("Adicionado à watchlist"); }
+            if (inWl(current.id)) {
+              await removeWl(current.id);
+              setSessionStats(prev => ({ ...prev, watchlistAdded: prev.watchlistAdded.filter(id => id !== current.id) }));
+              toast.success("Removido da watchlist");
+            } else {
+              await addWl(current.id, current.title, tmdb.poster(current.poster_path));
+              setSessionStats(prev => ({ ...prev, watchlistAdded: [...prev.watchlistAdded, current.id] }));
+              toast.success("Adicionado à watchlist");
+            }
           }}>
             <Bookmark size={14} fill={inWl(current.id) ? C.gold : "none"} />
             {inWl(current.id) ? "Na Watchlist" : "Watchlist"}
           </Btn>
-          <Btn variant="ghost" size="sm" onClick={goNext}>Pular <ChevronRight size={14} /></Btn>
+          <Btn variant="ghost" size="sm" onClick={() => {
+            setSessionStats(prev => ({ ...prev, skipped: prev.skipped + 1 }));
+            goNext();
+          }}>Pular <ChevronRight size={14} /></Btn>
         </div>
 
-        <p style={{ textAlign: "center", color: C.textDim, fontSize: 11, marginTop: 20 }}>
+        {/* Session counter bar */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 20, marginTop: 20, padding: "12px 20px", borderRadius: 12, background: "rgba(255,255,255,0.03)", border: `1px solid ${C.border}` }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <Star size={13} style={{ color: C.gold }} />
+            <span style={{ color: C.text, fontSize: 13, fontWeight: 600 }}>{sessionStats.rated.length}</span>
+            <span style={{ color: C.textDim, fontSize: 11 }}>avaliados</span>
+          </div>
+          <div style={{ width: 1, height: 16, background: C.border }} />
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <Bookmark size={13} style={{ color: C.gold }} />
+            <span style={{ color: C.text, fontSize: 13, fontWeight: 600 }}>{sessionStats.watchlistAdded.length}</span>
+            <span style={{ color: C.textDim, fontSize: 11 }}>na lista</span>
+          </div>
+          <div style={{ width: 1, height: 16, background: C.border }} />
+          <Btn variant="outline" size="sm" onClick={() => setMode("summary")} style={{ fontSize: 11, padding: "4px 12px" }}>
+            <Award size={13} /> Finalizar
+          </Btn>
+        </div>
+
+        <p style={{ textAlign: "center", color: C.textDim, fontSize: 11, marginTop: 12 }}>
           Arraste para os lados ou use as setas ← → para navegar
         </p>
       </div>
