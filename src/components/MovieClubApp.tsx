@@ -424,6 +424,7 @@ function useAuth() {
   };
 
   return { user, profile, loading, signUp, signIn, signOut, updateProfile, fetchProfile };
+}
 
 function useRatings(userId) {
   const [ratings, setRatings] = useState([]);
