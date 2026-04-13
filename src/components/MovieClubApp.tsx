@@ -3,6 +3,11 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { tmdbProxy, omdbProxy, streamingProxy } from "@/lib/movie-api.functions";
+import {
+  Film, ClipboardList, Star, User, Users, Search, Handshake, Pencil, Link2,
+  TrendingUp, Target, Radio, Calendar, X, Flame, UserRound, Bookmark,
+  Clapperboard, Eye, EyeOff, Share2, ListVideo, Award
+} from "lucide-react";
 import logoMain from "@/assets/logo-main.png";
 import mascotsNav from "@/assets/mascots-nav.png";
 import logoText from "@/assets/logo-text.png";
@@ -590,7 +595,7 @@ function StreamingBadges({ services, loading }) {
   );
   if (!services?.length) return (
     <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", borderRadius: 9, background: "rgba(74,94,114,0.12)", border: `1px dashed ${C.border}` }}>
-      <span style={{ fontSize: 14 }}>📡</span>
+      <Radio size={14} />
       <p style={{ fontSize: 12, color: C.textDim, fontStyle: "italic" }}>Não encontrado em streaming no Brasil</p>
     </div>
   );
@@ -673,7 +678,7 @@ function MovieCard({ movie, size = "md", onClick }) {
             onError={e => e.target.style.display = "none"} />
         ) : (
           <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 6, padding: 8 }}>
-            <span style={{ fontSize: 28, opacity: 0.3 }}>🎬</span>
+            <Film size={28} style={{ opacity: 0.3 }} />
             <p style={{ fontSize: 10, color: C.textDim, textAlign: "center", lineHeight: 1.3 }}>{movie.title}</p>
           </div>
         )}
@@ -687,7 +692,7 @@ function MovieCard({ movie, size = "md", onClick }) {
         )}
         {upcoming && movie.releaseDate && (
           <div style={{ position: "absolute", bottom: 6, left: 6, right: 6, background: "rgba(9,21,35,0.92)", color: C.accent, fontSize: 10, fontWeight: 600, padding: "3px 6px", borderRadius: 6, textAlign: "center" }}>
-            📅 {formatReleaseDateBR(movie.releaseDate)}
+            <Calendar size={12} style={{ display: "inline", verticalAlign: "middle" }} /> {formatReleaseDateBR(movie.releaseDate)}
           </div>
         )}
         {/* Hover overlay */}
@@ -860,9 +865,9 @@ function Navbar({ page, setPage, hasKeys, apiStatus }) {
                   <img src={icon} alt="" style={{ width: 30, height: 30, objectFit: "cover", borderRadius: "50%" }} />
                 </div>
               ) : id === "friends" ? (
-                <span style={{ fontSize: 16 }}>👥</span>
+                <Users size={16} />
               ) : (
-                <span style={{ fontSize: 16 }}>🔍</span>
+                <Search size={16} />
               )}
               {label}
             </button>
@@ -1054,7 +1059,7 @@ function Top10Card({ movie, rank, onClick }) {
       }}>{rank}</span>
       <div style={{ width: 130, height: 195, borderRadius: 10, overflow: "hidden", marginLeft: 40, border: `1px solid ${C.border}`, background: C.bgCard, position: "relative", zIndex: 1 }}>
         {movie.poster ? <img src={movie.posterHD || movie.poster} alt={movie.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> :
-          <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: 28, opacity: 0.3 }}>🎬</span></div>}
+          <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}><Film size={28} style={{ opacity: 0.3 }} /></div>}
         {movie.rating && (
           <div style={{ position: "absolute", top: 6, right: 6, background: "rgba(9,21,35,0.85)", color: C.gold, fontSize: 11, fontWeight: 700, padding: "3px 7px", borderRadius: 6 }}>★ {movie.rating}</div>
         )}
@@ -1162,7 +1167,7 @@ function HomePage({ setPage, setSelectedMovie, auth: authCtx }) {
 
       <div style={{ maxWidth: 1400, margin: "0 auto", padding: "0 40px" }}>
         {/* Top 10 Weekly */}
-        <Section title="🔥 Top 10 da Semana">
+        <Section title={<><Flame size={18} style={{ display: 'inline', color: '#EF4444' }} /> Top 10 da Semana</>}>
           {top10Loading ? (
             <div style={{ display: "flex", gap: 12 }}>{Array(5).fill(0).map((_, i) => <SkeletonCard key={i} w={130} />)}</div>
           ) : (
@@ -1176,7 +1181,7 @@ function HomePage({ setPage, setSelectedMovie, auth: authCtx }) {
 
         {/* Personalized Recommendations */}
         {recs.length > 0 && (
-          <Section title="🎯 Recomendados para Você">
+          <Section title={<><Target size={18} style={{ display: 'inline', color: '#C9A84C' }} /> Recomendados para Você</>}>
             {recsLoading ? (
               <div style={{ display: "flex", gap: 12 }}>{Array(8).fill(0).map((_, i) => <SkeletonCard key={i} />)}</div>
             ) : (
@@ -1372,7 +1377,7 @@ function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx }) {
                   {m.cast.map(actor => (
                     <div key={actor.id} style={{ textAlign: "center", flexShrink: 0, width: 78 }}>
                       <div style={{ width: 66, height: 66, borderRadius: "50%", overflow: "hidden", margin: "0 auto 6px", background: C.bgCard, border: `2px solid ${C.border}` }}>
-                        {actor.photo ? <img src={actor.photo} alt={actor.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={e => e.target.style.display = "none"} /> : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, opacity: 0.4 }}>👤</div>}
+                        {actor.photo ? <img src={actor.photo} alt={actor.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={e => e.target.style.display = "none"} /> : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, opacity: 0.4 }}><UserRound size={20} /></div>}
                       </div>
                       <p style={{ fontSize: 11, fontWeight: 500, color: C.text, lineHeight: 1.2 }}>{actor.name}</p>
                       <p style={{ fontSize: 10, color: C.textDim, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 78 }}>{actor.character}</p>
@@ -1642,7 +1647,7 @@ function SearchPage({ setPage, setSelectedMovie }) {
         ) : (
           !loading && (query || hasFilters) ? (
             <div style={{ textAlign: "center", padding: "60px 0", color: C.textDim }}>
-              <p style={{ fontSize: 32, marginBottom: 12 }}>🔍</p>
+              <div style={{ marginBottom: 12 }}><Search size={32} style={{ color: "#4A5E72" }} /></div>
               <p style={{ fontSize: 15 }}>Nenhum resultado encontrado</p>
             </div>
           ) : null
@@ -1650,7 +1655,7 @@ function SearchPage({ setPage, setSelectedMovie }) {
 
         {!query && !hasFilters && !loading && (
           <div style={{ textAlign: "center", padding: "60px 0", color: C.textDim }}>
-            <p style={{ fontSize: 40, marginBottom: 12 }}>🎬</p>
+            <div style={{ marginBottom: 12 }}><Film size={40} style={{ color: "#4A5E72" }} /></div>
             <p style={{ fontSize: 15 }}>Digite um título ou use os filtros para explorar</p>
           </div>
         )}
@@ -1901,18 +1906,18 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
               borderRadius: 16, overflow: "hidden", marginBottom: 20
             }}>
               {[
-                ["Avaliações", ratings.length, "🎬"],
-                ["Watchlist", watchlistItems.length, "📋"],
-                ["Nota Média", avgRating, "⭐"],
-                ["Seguindo", targetFollowing.length, "👤"],
-                ["Seguidores", targetFollowers.length, "👥"],
+                ["Avaliações", ratings.length, <Film size={16} />],
+                ["Watchlist", watchlistItems.length, <ClipboardList size={16} />],
+                ["Nota Média", avgRating, <Star size={16} />],
+                ["Seguindo", targetFollowing.length, <UserRound size={16} />],
+                ["Seguidores", targetFollowers.length, <Users size={16} />],
               ].map(([label, val, icon], i, arr) => (
                 <div key={label} style={{
                   padding: "14px 20px", textAlign: "center",
                   borderRight: i < arr.length - 1 ? `1px solid ${C.border}` : "none",
                   minWidth: 120
                 }}>
-                  <p style={{ fontSize: 11, marginBottom: 4 }}>{icon}</p>
+                  <div style={{ marginBottom: 4, display: "flex", justifyContent: "center", color: C.gold }}>{icon}</div>
                   <p style={{ fontSize: 22, fontWeight: 700, color: C.gold, fontFamily: "'Outfit', sans-serif" }}>{val}</p>
                   <p style={{ fontSize: 11, color: C.textMuted, marginTop: 2 }}>{label}</p>
                 </div>
@@ -1952,11 +1957,11 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
                 </>
               ) : (
                 <>
-                  <Btn variant="gold" size="sm" onClick={() => setShowEditModal(true)}>✏️ Editar Perfil</Btn>
+                  <Btn variant="gold" size="sm" onClick={() => setShowEditModal(true)}><Pencil size={13} /> Editar Perfil</Btn>
                   <Btn variant="ghost" size="sm" onClick={() => {
                     const url = `${window.location.origin}?profile=${currentUserId}`;
                     navigator.clipboard.writeText(url).then(() => toast.success("Link do perfil copiado!")).catch(() => toast.error("Erro ao copiar"));
-                  }}>🔗 Compartilhar Perfil</Btn>
+                  }}><Link2 size={13} /> Compartilhar Perfil</Btn>
                   <Btn variant="ghost" size="sm" onClick={() => authCtx?.signOut?.()}>Sair da conta</Btn>
                 </>
               )}
@@ -1980,7 +1985,7 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
             background: C.bgCard, borderRadius: 12, padding: 4,
             border: `1px solid ${C.border}`,
           }}>
-            {[["ratings", "⭐ Avaliações"], ["watchlist", "📋 Watchlist"]].map(([id, label]) => (
+            {[["ratings", "Avaliações"], ["watchlist", "Watchlist"]].map(([id, label]) => (
               <button key={id} onClick={() => setTab(id)} style={{
                 padding: "10px 20px", fontSize: 13, fontWeight: 600,
                 color: tab === id ? C.bgDeep : C.textMuted,
@@ -2017,7 +2022,7 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
                 </div>
               )) : (
                 <div style={{ textAlign: "center", padding: "60px 20px" }}>
-                  <p style={{ fontSize: 40, marginBottom: 12 }}>🎬</p>
+                  <div style={{ marginBottom: 12 }}><Film size={40} style={{ color: "#4A5E72" }} /></div>
                   <p style={{ color: C.textMuted, fontSize: 15, fontWeight: 500 }}>Nenhuma avaliação ainda</p>
                   <p style={{ color: C.textDim, fontSize: 13, marginTop: 4 }}>Avalie filmes para construir seu histórico!</p>
                 </div>
@@ -2029,7 +2034,7 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
                 <div key={r.id} className="movie-card-netflix" style={{ position: "relative" }}>
                   <div style={{ cursor: "pointer" }} onClick={() => { setSelectedMovie?.({ tmdbId: r.tmdb_id, title: r.title, poster: r.poster_url }); setPage("movie"); }}>
                     <div style={{ width: "100%", aspectRatio: "2/3", borderRadius: 12, overflow: "hidden", background: C.bgCard, border: `1px solid ${C.border}` }}>
-                      {r.poster_url ? <img src={r.poster_url} alt={r.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 32, opacity: 0.3 }}>🎬</div>}
+                      {r.poster_url ? <img src={r.poster_url} alt={r.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", opacity: 0.3 }}><Film size={32} /></div>}
                     </div>
                     <p style={{ fontSize: 12, fontWeight: 500, color: C.text, marginTop: 8, lineHeight: 1.3 }}>{r.title}</p>
                     <div style={{ marginTop: 4 }}><StarRating value={Number(r.rating)} size={12} /></div>
@@ -2037,7 +2042,7 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
                 </div>
               )) : (
                 <div style={{ textAlign: "center", padding: "60px 20px", gridColumn: "1/-1" }}>
-                  <p style={{ fontSize: 40, marginBottom: 12 }}>🎬</p>
+                  <div style={{ marginBottom: 12 }}><Film size={40} style={{ color: "#4A5E72" }} /></div>
                   <p style={{ color: C.textMuted, fontSize: 15, fontWeight: 500 }}>Nenhuma avaliação ainda</p>
                 </div>
               )}
@@ -2053,7 +2058,7 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
                 <div key={item.id} style={{ position: "relative" }} className="movie-card-netflix">
                   <div style={{ cursor: "pointer" }} onClick={() => { setSelectedMovie?.({ tmdbId: item.tmdb_id, title: item.title, poster: item.poster_url }); setPage("movie"); }}>
                     <div style={{ width: "100%", aspectRatio: "2/3", borderRadius: 12, overflow: "hidden", background: C.bgCard, border: `1px solid ${C.border}` }}>
-                      {item.poster_url ? <img src={item.poster_url} alt={item.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 32, opacity: 0.3 }}>🎬</div>}
+                      {item.poster_url ? <img src={item.poster_url} alt={item.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", opacity: 0.3 }}><Film size={32} /></div>}
                     </div>
                     <p style={{ fontSize: 12, fontWeight: 500, color: C.text, marginTop: 8, lineHeight: 1.3 }}>{item.title}</p>
                   </div>
@@ -2062,7 +2067,7 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
                 </div>
               )) : (
                 <div style={{ textAlign: "center", padding: "60px 20px", gridColumn: "1/-1" }}>
-                  <p style={{ fontSize: 40, marginBottom: 12 }}>📋</p>
+                  <div style={{ marginBottom: 12 }}><ClipboardList size={40} style={{ color: "#4A5E72" }} /></div>
                   <p style={{ color: C.textMuted, fontSize: 15, fontWeight: 500 }}>Sua lista está vazia</p>
                   <p style={{ color: C.textDim, fontSize: 13, marginTop: 4 }}>Adicione filmes para assistir depois!</p>
                 </div>
@@ -2079,7 +2084,7 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
                   className="card-hover"
                   onClick={() => { setSelectedMovie?.({ tmdbId: item.tmdb_id, title: item.title, poster: item.poster_url }); setPage("movie"); }}>
                   <div style={{ width: 56, height: 84, borderRadius: 10, overflow: "hidden", flexShrink: 0, background: C.bgDeep, border: `1px solid ${C.border}` }}>
-                    {item.poster_url ? <img src={item.poster_url} alt={item.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 24, opacity: 0.3 }}>🎬</div>}
+                    {item.poster_url ? <img src={item.poster_url} alt={item.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", opacity: 0.3 }}><Film size={24} /></div>}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ fontSize: 15, fontWeight: 600, color: C.text }}>{item.title}</p>
@@ -2090,7 +2095,7 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
                 </div>
               )) : (
                 <div style={{ textAlign: "center", padding: "60px 20px" }}>
-                  <p style={{ fontSize: 40, marginBottom: 12 }}>📋</p>
+                  <div style={{ marginBottom: 12 }}><ClipboardList size={40} style={{ color: "#4A5E72" }} /></div>
                   <p style={{ color: C.textMuted, fontSize: 15, fontWeight: 500 }}>Sua lista está vazia</p>
                 </div>
               )}
@@ -2330,13 +2335,13 @@ function FriendsPage({ setPage, setSelectedMovie, auth: authCtx, onViewProfile }
             <h3 style={{ fontSize: 14, fontWeight: 600, color: C.text }}>Compartilhar Perfil</h3>
           </div>
           <p style={{ fontSize: 12, color: C.textMuted, marginBottom: 14 }}>Envie o link do seu perfil para que amigos possam te encontrar e seguir.</p>
-          <Btn variant="gold" size="sm" onClick={handleShareProfile}>🔗 Copiar Link do Perfil</Btn>
+          <Btn variant="gold" size="sm" onClick={handleShareProfile}><Link2 size={13} /> Copiar Link do Perfil</Btn>
         </div>
 
         {/* Tabs */}
         <div style={{ display: "flex", gap: 4, marginBottom: 20, background: C.bgCard, borderRadius: 12, padding: 3, border: `1px solid ${C.border}` }}>
           {[
-            ["search", "🔍 Buscar"],
+            ["search", "Buscar"],
             ["following", `Seguindo (${following.length})`],
             ["followers", `Seguidores (${followers.length})`],
             ["friends", `Amigos (${friends.length})`],
@@ -2374,12 +2379,12 @@ function FriendsPage({ setPage, setSelectedMovie, auth: authCtx, onViewProfile }
               </div>
             ) : searchQuery ? (
               <div style={{ textAlign: "center", padding: "60px 0", color: C.textDim }}>
-                <p style={{ fontSize: 32, marginBottom: 12 }}>🔍</p>
+                <div style={{ marginBottom: 12 }}><Search size={32} style={{ color: "#4A5E72" }} /></div>
                 <p style={{ fontSize: 14 }}>Nenhum usuário encontrado</p>
               </div>
             ) : (
               <div style={{ textAlign: "center", padding: "60px 0", color: C.textDim }}>
-                <p style={{ fontSize: 40, marginBottom: 12 }}>👥</p>
+                <div style={{ marginBottom: 12 }}><Users size={40} style={{ color: "#4A5E72" }} /></div>
                 <p style={{ fontSize: 14, marginBottom: 4 }}>Busque por nome ou username</p>
                 <p style={{ fontSize: 12 }}>para encontrar e seguir outros cinéfilos</p>
               </div>
@@ -2398,7 +2403,7 @@ function FriendsPage({ setPage, setSelectedMovie, auth: authCtx, onViewProfile }
               </div>
             ) : (
               <div style={{ textAlign: "center", padding: "60px 0", color: C.textDim }}>
-                <p style={{ fontSize: 40, marginBottom: 12 }}>🫥</p>
+                <div style={{ marginBottom: 12 }}><UserRound size={40} style={{ color: "#4A5E72" }} /></div>
                 <p style={{ fontSize: 14 }}>Você ainda não segue ninguém</p>
                 <p style={{ fontSize: 12, marginTop: 4 }}>Busque usuários e comece a seguir!</p>
               </div>
@@ -2417,7 +2422,7 @@ function FriendsPage({ setPage, setSelectedMovie, auth: authCtx, onViewProfile }
               </div>
             ) : (
               <div style={{ textAlign: "center", padding: "60px 0", color: C.textDim }}>
-                <p style={{ fontSize: 40, marginBottom: 12 }}>🫥</p>
+                <div style={{ marginBottom: 12 }}><UserRound size={40} style={{ color: "#4A5E72" }} /></div>
                 <p style={{ fontSize: 14 }}>Nenhum seguidor ainda</p>
                 <p style={{ fontSize: 12, marginTop: 4 }}>Compartilhe seu perfil para ganhar seguidores!</p>
               </div>
@@ -2434,7 +2439,7 @@ function FriendsPage({ setPage, setSelectedMovie, auth: authCtx, onViewProfile }
               </div>
             ) : (
               <div style={{ textAlign: "center", padding: "60px 0", color: C.textDim }}>
-                <p style={{ fontSize: 40, marginBottom: 12 }}>🤝</p>
+                <div style={{ marginBottom: 12 }}><Handshake size={40} style={{ color: "#4A5E72" }} /></div>
                 <p style={{ fontSize: 14 }}>Nenhum amigo ainda</p>
                 <p style={{ fontSize: 12, marginTop: 4 }}>Gere um link de amizade e envie para seus amigos!</p>
               </div>
