@@ -84,6 +84,7 @@ const tmdb = {
   async search(q, page = 1)         { return this.get("/search/movie", { query: q, page: String(page) }); },
   async genres()                    { return this.get("/genre/movie/list"); },
   async byGenre(gid, page = 1)      { return this.getPage("/discover/movie", page, { with_genres: String(gid), sort_by: "popularity.desc" }); },
+  async upcoming(page = 1)          { return this.getPage("/movie/upcoming", page); },
 };
 
 const omdb = {
@@ -443,20 +444,42 @@ function RatingsRow({ movie }) {
 // ─────────────────────────────────────────────
 //  MOVIE CARD
 // ─────────────────────────────────────────────
+function isUpcoming(movie) {
+  if (!movie.releaseDate) return false;
+  return new Date(movie.releaseDate) > new Date();
+}
+
+function formatReleaseDateBR(dateStr) {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
+}
+
 function MovieCard({ movie, size="md", onClick }) {
   const w = size==="sm"?100:size==="lg"?170:130;
   const h = Math.round(w*1.5);
+  const upcoming = isUpcoming(movie);
   return (
     <div className="card-hover" onClick={onClick} style={{ width:w, flexShrink:0, cursor:"pointer", display:"flex", flexDirection:"column", gap:6 }}>
-      <div style={{ width:w, height:h, borderRadius:8, background:C.bgCard, border:`1px solid ${C.border}`, overflow:"hidden", position:"relative" }}>
+      <div style={{ width:w, height:h, borderRadius:8, background:C.bgCard, border:`1px solid ${upcoming ? C.accent : C.border}`, overflow:"hidden", position:"relative" }}>
         {movie.poster
-          ? <img src={movie.poster} alt={movie.title} loading="lazy" style={{ width:"100%", height:"100%", objectFit:"cover" }} onError={e=>e.target.style.display="none"}/>
+          ? <img src={movie.poster} alt={movie.title} loading="lazy" style={{ width:"100%", height:"100%", objectFit:"cover", filter: upcoming ? "brightness(0.7)" : "none" }} onError={e=>e.target.style.display="none"}/>
           : <div style={{ width:"100%", height:"100%", display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:6, padding:8 }}>
               <span style={{ fontSize:24, opacity:0.4 }}>🎬</span>
               <p style={{ fontSize:10, color:C.textDim, textAlign:"center", lineHeight:1.3 }}>{movie.title}</p>
             </div>
         }
-        {movie.rating&&(
+        {upcoming && (
+          <div style={{ position:"absolute", top:0, left:0, right:0, background:"rgba(37,99,235,0.88)", color:"#fff", fontSize:9, fontWeight:700, padding:"4px 0", textAlign:"center", textTransform:"uppercase", letterSpacing:"0.08em" }}>
+            EM BREVE
+          </div>
+        )}
+        {upcoming && movie.releaseDate && (
+          <div style={{ position:"absolute", bottom:6, left:6, right:6, background:"rgba(9,21,35,0.92)", color:C.accent, fontSize:10, fontWeight:600, padding:"3px 6px", borderRadius:4, textAlign:"center" }}>
+            📅 {formatReleaseDateBR(movie.releaseDate)}
+          </div>
+        )}
+        {!upcoming && movie.rating && (
           <div style={{ position:"absolute", bottom:6, left:6, background:"rgba(9,21,35,0.88)", color:C.gold, fontSize:10, fontWeight:700, padding:"2px 6px", borderRadius:4 }}>
             ★ {movie.rating}
           </div>
@@ -465,7 +488,7 @@ function MovieCard({ movie, size="md", onClick }) {
       {size!=="sm"&&(
         <div>
           <p style={{ fontSize:12, fontWeight:500, color:C.text, lineHeight:1.3, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", maxWidth:w }}>{movie.title}</p>
-          <p style={{ fontSize:11, color:C.textMuted }}>{movie.year}</p>
+          <p style={{ fontSize:11, color: upcoming ? C.accent : C.textMuted }}>{upcoming ? formatReleaseDateBR(movie.releaseDate) : movie.year}</p>
         </div>
       )}
     </div>
@@ -500,7 +523,7 @@ const HeartIcon  = ({f})=><svg width={14} height={14} viewBox="0 0 24 24" fill={
 //  NAVBAR
 // ─────────────────────────────────────────────
 function Navbar({ page, setPage, hasKeys, apiStatus }) {
-  const items = [["home","Discover"],["profile","Perfil"],["groups","Clubs"],["search","Buscar"]];
+  const items = [["home","Discover"],["releases","Lançamentos"],["profile","Perfil"],["groups","Clubs"],["search","Buscar"]];
   const statusDot = (ok) => (
     <span style={{ width:6, height:6, borderRadius:"50%", background: ok ? C.success : C.red, display:"inline-block", flexShrink:0 }}/>
   );
@@ -1611,6 +1634,7 @@ export default function MovieClubApp() {
       <Navbar page={page} setPage={setPage} hasKeys={true} apiStatus={apiStatus}/>
       <div className="page-enter" key={page}>
         {page==="home"     && <HomePage     setPage={setPage} setSelectedMovie={setSM}/>}
+        {page==="releases" && <ReleasesPage setPage={setPage} setSelectedMovie={setSM}/>}
         {page==="profile"  && <ProfilePage  user={MOCK_USERS[3]} setPage={setPage} isOwnProfile/>}
         {page==="friend"   && <ProfilePage  user={MOCK_USERS[1]} setPage={setPage} isOwnProfile={false}/>}
         {page==="movie"    && <MoviePage    movieInit={selectedMovie} setPage={setPage} setSelectedMovie={setSM}/>}
