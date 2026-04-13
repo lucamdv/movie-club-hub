@@ -4,6 +4,9 @@ import { tmdbProxy, omdbProxy, streamingProxy } from "@/lib/movie-api.functions"
 import logoMain from "@/assets/logo-main.png";
 import mascotsNav from "@/assets/mascots-nav.png";
 import logoText from "@/assets/logo-text.png";
+import mascotWizard from "@/assets/mascot-wizard.png";
+import mascotSpeak from "@/assets/mascot-speak.png";
+import mascotSee from "@/assets/mascot-see.png";
 
 // ─────────────────────────────────────────────
 //  DESIGN TOKENS
