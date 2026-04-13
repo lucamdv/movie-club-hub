@@ -1042,98 +1042,254 @@ function MoviePage({ movieInit, setPage, setSelectedMovie }) {
 }
 
 // ─────────────────────────────────────────────
-//  SEARCH PAGE
+//  SEARCH PAGE (with advanced filters)
 // ─────────────────────────────────────────────
+const SORT_OPTIONS = [
+  { value: "popularity.desc", label: "Mais populares" },
+  { value: "popularity.asc", label: "Menos populares" },
+  { value: "vote_average.desc", label: "Melhor avaliados" },
+  { value: "vote_average.asc", label: "Pior avaliados" },
+  { value: "release_date.desc", label: "Mais recentes" },
+  { value: "release_date.asc", label: "Mais antigos" },
+  { value: "revenue.desc", label: "Maior bilheteria" },
+  { value: "original_title.asc", label: "A–Z" },
+];
+
+const LANG_OPTIONS = [
+  { value: "", label: "Todos idiomas" },
+  { value: "pt", label: "Português" },
+  { value: "en", label: "Inglês" },
+  { value: "es", label: "Espanhol" },
+  { value: "fr", label: "Francês" },
+  { value: "de", label: "Alemão" },
+  { value: "ja", label: "Japonês" },
+  { value: "ko", label: "Coreano" },
+  { value: "it", label: "Italiano" },
+  { value: "hi", label: "Hindi" },
+  { value: "zh", label: "Chinês" },
+];
+
 function SearchPage({ setPage, setSelectedMovie }) {
-  const [query,    setQuery]    = useState("");
-  const [results,  setResults]  = useState([]);
-  const [genres,   setGenres]   = useState([]);
-  const [activeG,  setActiveG]  = useState(null);
-  const [total,    setTotal]    = useState(0);
-  const [page,     setSearchPg] = useState(1);
-  const [loading,  setLoading]  = useState(false);
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState([]);
+  const [genres, setGenres] = useState([]);
+  const [selectedGenres, setSelectedGenres] = useState([]);
+  const [sortBy, setSortBy] = useState("popularity.desc");
+  const [yearFrom, setYearFrom] = useState("");
+  const [yearTo, setYearTo] = useState("");
+  const [ratingMin, setRatingMin] = useState("");
+  const [lang, setLang] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalResults, setTotalResults] = useState(0);
+  const [loading, setLoading] = useState(false);
   const debRef = useRef(null);
 
-  useEffect(()=>{ tmdb.genres().then(d=>setGenres(d.genres||[])).catch(()=>{}); },[]);
+  useEffect(() => { tmdb.genres().then(d => setGenres(d.genres || [])).catch(() => {}); }, []);
 
-  useEffect(()=>{
-    clearTimeout(debRef.current);
-    if (!query.trim()) { setResults([]); setTotal(0); return; }
-    debRef.current = setTimeout(async ()=>{
-      setLoading(true); setSearchPg(1);
-      const d = await tmdb.search(query,1).catch(()=>({results:[],total_results:0}));
-      setResults((d.results||[]).map(normalizeTmdb).filter(Boolean));
-      setTotal(d.total_results||0);
-      setLoading(false);
-    },360);
-  },[query]);
-
-  useEffect(()=>{
-    if (!activeG) return;
+  // Text search
+  const doSearch = useCallback(async (q, pg) => {
     setLoading(true);
-    tmdb.byGenre(activeG.id,page).then(d=>{
-      setResults(prev=> page===1?(d.results||[]).map(normalizeTmdb).filter(Boolean):[...prev,...(d.results||[]).map(normalizeTmdb).filter(Boolean)]);
-      setTotal(d.total_results||0);
-      setLoading(false);
-    }).catch(()=>setLoading(false));
-  },[activeG,page]);
+    const d = await tmdb.search(q, pg).catch(() => ({ results: [], total_results: 0, total_pages: 1 }));
+    setResults((d.results || []).map(normalizeTmdb).filter(Boolean));
+    setTotalResults(d.total_results || 0);
+    setTotalPages(Math.min(d.total_pages || 1, 500));
+    setCurrentPage(pg);
+    setLoading(false);
+  }, []);
+
+  // Discover (filters)
+  const doDiscover = useCallback(async (pg) => {
+    setLoading(true);
+    const params = { sort_by: sortBy };
+    if (selectedGenres.length > 0) params.with_genres = selectedGenres.join(",");
+    if (yearFrom) params["primary_release_date.gte"] = `${yearFrom}-01-01`;
+    if (yearTo) params["primary_release_date.lte"] = `${yearTo}-12-31`;
+    if (ratingMin) params["vote_average.gte"] = ratingMin;
+    if (lang) params.with_original_language = lang;
+    // Require at least some votes for rating filter
+    if (ratingMin) params["vote_count.gte"] = "50";
+    params.page = String(pg);
+
+    const d = await tmdb.get("/discover/movie", params).catch(() => ({ results: [], total_results: 0, total_pages: 1 }));
+    setResults((d.results || []).map(normalizeTmdb).filter(Boolean));
+    setTotalResults(d.total_results || 0);
+    setTotalPages(Math.min(d.total_pages || 1, 500));
+    setCurrentPage(pg);
+    setLoading(false);
+  }, [sortBy, selectedGenres, yearFrom, yearTo, ratingMin, lang]);
+
+  // Debounced text search
+  useEffect(() => {
+    clearTimeout(debRef.current);
+    if (!query.trim()) {
+      if (selectedGenres.length > 0 || yearFrom || yearTo || ratingMin || lang) {
+        doDiscover(1);
+      } else {
+        setResults([]); setTotalResults(0); setTotalPages(1);
+      }
+      return;
+    }
+    debRef.current = setTimeout(() => doSearch(query, 1), 360);
+    return () => clearTimeout(debRef.current);
+  }, [query]);
+
+  // Re-run discover when filters change (only if no text query)
+  useEffect(() => {
+    if (query.trim()) return;
+    if (selectedGenres.length > 0 || yearFrom || yearTo || ratingMin || lang || sortBy !== "popularity.desc") {
+      doDiscover(1);
+    } else {
+      setResults([]); setTotalResults(0); setTotalPages(1);
+    }
+  }, [selectedGenres, sortBy, yearFrom, yearTo, ratingMin, lang, doDiscover]);
+
+  const toggleGenre = (gid) => {
+    setSelectedGenres(prev => prev.includes(gid) ? prev.filter(id => id !== gid) : [...prev, gid]);
+  };
+
+  const handlePageChange = (pg) => {
+    if (query.trim()) doSearch(query, pg);
+    else doDiscover(pg);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const clearFilters = () => {
+    setSelectedGenres([]); setSortBy("popularity.desc"); setYearFrom(""); setYearTo(""); setRatingMin(""); setLang("");
+  };
+
+  const hasFilters = selectedGenres.length > 0 || sortBy !== "popularity.desc" || yearFrom || yearTo || ratingMin || lang;
+  const currentYear = new Date().getFullYear();
+
+  const selectStyle = {
+    padding: "8px 12px", borderRadius: 8, background: C.bgCard, border: `1px solid ${C.border}`,
+    color: C.text, fontSize: 13, outline: "none", minWidth: 140, cursor: "pointer",
+  };
+  const inputSmStyle = {
+    padding: "8px 12px", borderRadius: 8, background: C.bgCard, border: `1px solid ${C.border}`,
+    color: C.text, fontSize: 13, outline: "none", width: 80, textAlign: "center",
+  };
 
   return (
-    <div style={{ paddingTop:80, paddingBottom:60 }}>
-      <div style={{ maxWidth:1100, margin:"0 auto", padding:"0 32px" }}>
-        <h1 style={{ fontFamily:"'Cinzel',serif", fontSize:26, fontWeight:700, color:C.text, marginBottom:24 }}>
-          Buscar <span style={{ color:C.gold }}>Filmes</span>
-        </h1>
-        <div style={{ position:"relative", marginBottom:20 }}>
-          <div style={{ position:"absolute", left:16, top:"50%", transform:"translateY(-50%)", pointerEvents:"none" }}><SearchSVG size={18}/></div>
-          <input value={query} onChange={e=>{ setQuery(e.target.value); setActiveG(null); }}
-            placeholder="Buscar por título, ator, ano…"
-            style={{ width:"100%", paddingLeft:48, paddingRight:20, paddingTop:14, paddingBottom:14, borderRadius:12, background:C.bgCard, border:`1px solid ${C.border}`, color:C.text, fontSize:15, outline:"none", transition:"border-color 0.2s" }}
-            onFocus={e=>e.target.style.borderColor=C.gold} onBlur={e=>e.target.style.borderColor=C.border}/>
-          {loading&&<div style={{ position:"absolute", right:16, top:"50%", transform:"translateY(-50%)" }}><Spinner size={18}/></div>}
+    <div style={{ paddingTop: 80, paddingBottom: 60 }}>
+      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 32px" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
+          <h1 style={{ fontFamily: "'Cinzel',serif", fontSize: 26, fontWeight: 700, color: C.text }}>
+            Buscar <span style={{ color: C.gold }}>Filmes</span>
+          </h1>
+          <button onClick={() => setShowFilters(!showFilters)}
+            style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 8, background: showFilters ? C.gold : C.bgCard, color: showFilters ? C.bgDeep : C.textMuted, border: `1px solid ${showFilters ? C.gold : C.border}`, fontSize: 13, fontWeight: 500, cursor: "pointer", transition: "all 0.2s" }}>
+            <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="8" cy="6" r="2" fill="currentColor"/><circle cx="16" cy="12" r="2" fill="currentColor"/><circle cx="10" cy="18" r="2" fill="currentColor"/></svg>
+            Filtros {hasFilters && <span style={{ background: showFilters ? C.bgDeep : C.gold, color: showFilters ? C.gold : C.bgDeep, borderRadius: 10, padding: "1px 6px", fontSize: 10, fontWeight: 700 }}>●</span>}
+          </button>
         </div>
 
-        {!query&&(
-          <div style={{ display:"flex", gap:8, flexWrap:"wrap", marginBottom:24 }}>
-            {genres.slice(0,14).map(g=>(
-              <button key={g.id} onClick={()=>{ setActiveG(activeG?.id===g.id?null:g); setSearchPg(1); }}
-                style={{ padding:"6px 16px", borderRadius:20, fontSize:12, fontWeight:500, whiteSpace:"nowrap", transition:"all 0.2s", background:activeG?.id===g.id?C.gold:C.bgCard, color:activeG?.id===g.id?C.bgDeep:C.textMuted, border:`1px solid ${activeG?.id===g.id?C.gold:C.border}` }}>
-                {g.name}
-              </button>
-            ))}
+        {/* Search bar */}
+        <div style={{ position: "relative", marginBottom: 16 }}>
+          <div style={{ position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}><SearchSVG size={18} /></div>
+          <input value={query} onChange={e => setQuery(e.target.value)}
+            placeholder="Buscar por título…"
+            style={{ width: "100%", paddingLeft: 48, paddingRight: 20, paddingTop: 14, paddingBottom: 14, borderRadius: 12, background: C.bgCard, border: `1px solid ${C.border}`, color: C.text, fontSize: 15, outline: "none", transition: "border-color 0.2s" }}
+            onFocus={e => e.target.style.borderColor = C.gold} onBlur={e => e.target.style.borderColor = C.border} />
+          {loading && <div style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)" }}><Spinner size={18} /></div>}
+        </div>
+
+        {/* Filters panel */}
+        {showFilters && (
+          <div style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 12, padding: 20, marginBottom: 20, transition: "all 0.3s" }}>
+            {/* Genres */}
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ fontSize: 12, fontWeight: 600, color: C.textMuted, marginBottom: 8, display: "block", textTransform: "uppercase", letterSpacing: 0.5 }}>Gêneros</label>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                {genres.map(g => (
+                  <button key={g.id} onClick={() => toggleGenre(g.id)}
+                    style={{ padding: "5px 14px", borderRadius: 16, fontSize: 11, fontWeight: 500, whiteSpace: "nowrap", transition: "all 0.2s", background: selectedGenres.includes(g.id) ? C.gold : "transparent", color: selectedGenres.includes(g.id) ? C.bgDeep : C.textMuted, border: `1px solid ${selectedGenres.includes(g.id) ? C.gold : C.border}`, cursor: "pointer" }}>
+                    {g.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Row of filters */}
+            <div style={{ display: "flex", gap: 16, flexWrap: "wrap", alignItems: "flex-end" }}>
+              {/* Sort */}
+              <div>
+                <label style={{ fontSize: 11, fontWeight: 600, color: C.textDim, marginBottom: 4, display: "block", textTransform: "uppercase", letterSpacing: 0.5 }}>Ordenar</label>
+                <select value={sortBy} onChange={e => setSortBy(e.target.value)} style={selectStyle}>
+                  {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
+              </div>
+
+              {/* Year range */}
+              <div>
+                <label style={{ fontSize: 11, fontWeight: 600, color: C.textDim, marginBottom: 4, display: "block", textTransform: "uppercase", letterSpacing: 0.5 }}>Ano</label>
+                <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                  <input type="number" min="1888" max={currentYear} placeholder="De" value={yearFrom} onChange={e => setYearFrom(e.target.value)} style={inputSmStyle} />
+                  <span style={{ color: C.textDim, fontSize: 12 }}>—</span>
+                  <input type="number" min="1888" max={currentYear} placeholder="Até" value={yearTo} onChange={e => setYearTo(e.target.value)} style={inputSmStyle} />
+                </div>
+              </div>
+
+              {/* Min rating */}
+              <div>
+                <label style={{ fontSize: 11, fontWeight: 600, color: C.textDim, marginBottom: 4, display: "block", textTransform: "uppercase", letterSpacing: 0.5 }}>Nota mínima</label>
+                <select value={ratingMin} onChange={e => setRatingMin(e.target.value)} style={selectStyle}>
+                  <option value="">Qualquer</option>
+                  {[9, 8, 7, 6, 5, 4, 3].map(n => <option key={n} value={String(n)}>≥ {n}/10</option>)}
+                </select>
+              </div>
+
+              {/* Language */}
+              <div>
+                <label style={{ fontSize: 11, fontWeight: 600, color: C.textDim, marginBottom: 4, display: "block", textTransform: "uppercase", letterSpacing: 0.5 }}>Idioma original</label>
+                <select value={lang} onChange={e => setLang(e.target.value)} style={selectStyle}>
+                  {LANG_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
+              </div>
+
+              {/* Clear */}
+              {hasFilters && (
+                <button onClick={clearFilters}
+                  style={{ padding: "8px 16px", borderRadius: 8, background: "transparent", color: C.gold, border: `1px solid ${C.gold}`, fontSize: 12, fontWeight: 500, cursor: "pointer", whiteSpace: "nowrap" }}>
+                  ✕ Limpar filtros
+                </button>
+              )}
+            </div>
           </div>
         )}
 
-        {total>0&&(
-          <p style={{ color:C.textDim, fontSize:13, marginBottom:20 }}>
-            {total.toLocaleString()} resultado{total!==1?"s":""}{(query||activeG)&&<span style={{ color:C.gold }}> · "{query||activeG?.name}"</span>}
+        {/* Results count */}
+        {totalResults > 0 && (
+          <p style={{ color: C.textDim, fontSize: 13, marginBottom: 16 }}>
+            {totalResults.toLocaleString("pt-BR")} resultado{totalResults !== 1 ? "s" : ""}
+            {query && <span style={{ color: C.gold }}> · "{query}"</span>}
+            {hasFilters && !query && <span style={{ color: C.gold }}> · filtros aplicados</span>}
           </p>
         )}
 
-        {results.length>0?(
+        {/* Results grid */}
+        {results.length > 0 ? (
           <>
-            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(130px, 1fr))", gap:14 }}>
-              {results.map(m=><MovieCard key={m.id} movie={m} onClick={()=>{ setSelectedMovie(m); setPage("movie"); }}/>)}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: 14 }}>
+              {results.map(m => <MovieCard key={m.id} movie={m} onClick={() => { setSelectedMovie(m); setPage("movie"); }} />)}
             </div>
-            {!query&&activeG&&results.length<total&&(
-              <div style={{ textAlign:"center", marginTop:28 }}>
-                <Btn variant="ghost" onClick={()=>setSearchPg(p=>p+1)}>{loading?<Spinner size={14}/>:"Carregar mais"}</Btn>
-              </div>
-            )}
+            <PaginationBar page={currentPage} totalPages={totalPages} totalResults={totalResults} onPageChange={handlePageChange} />
           </>
-        ):(
-          !loading&&(query||activeG)&&(
-            <div style={{ textAlign:"center", padding:"60px 0", color:C.textDim }}>
-              <p style={{ fontSize:32, marginBottom:12 }}>🔍</p>
-              <p style={{ fontSize:15 }}>Nenhum resultado para "{query||activeG?.name}"</p>
+        ) : (
+          !loading && (query || hasFilters) ? (
+            <div style={{ textAlign: "center", padding: "60px 0", color: C.textDim }}>
+              <p style={{ fontSize: 32, marginBottom: 12 }}>🔍</p>
+              <p style={{ fontSize: 15 }}>Nenhum resultado encontrado</p>
+              <p style={{ fontSize: 13, marginTop: 8, color: C.textDim }}>Tente ajustar os filtros ou buscar outro termo</p>
             </div>
-          )
+          ) : null
         )}
 
-        {!query&&!activeG&&!loading&&(
-          <div style={{ textAlign:"center", padding:"60px 0", color:C.textDim }}>
-            <p style={{ fontSize:40, marginBottom:12 }}>🎬</p>
-            <p style={{ fontSize:15 }}>Digite um título ou selecione um gênero</p>
+        {!query && !hasFilters && !loading && (
+          <div style={{ textAlign: "center", padding: "60px 0", color: C.textDim }}>
+            <p style={{ fontSize: 40, marginBottom: 12 }}>🎬</p>
+            <p style={{ fontSize: 15 }}>Digite um título ou use os filtros para explorar</p>
           </div>
         )}
       </div>
