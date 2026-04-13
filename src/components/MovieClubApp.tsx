@@ -190,16 +190,6 @@ function parseStreamingServices(raw) {
 // ─────────────────────────────────────────────
 //  HOOKS
 // ─────────────────────────────────────────────
-function useApiKeys() {
-  const [keys, setKeys] = useState(() => {
-    try { return JSON.parse(localStorage.getItem("mc_api_keys") || "{}"); }
-    catch { return {}; }
-  });
-  const saveKeys = (k) => { setKeys(k); window.__MC_KEYS__ = k; localStorage.setItem("mc_api_keys", JSON.stringify(k)); apiCache.clear(); };
-  useEffect(() => { window.__MC_KEYS__ = keys; }, [keys]);
-  const merged = { tmdb: "", omdb: "", streaming: "", ...keys };
-  return [merged, saveKeys];
-}
 
 function useMovieDetails(tmdbId) {
   const [movie, setMovie] = useState(null);
