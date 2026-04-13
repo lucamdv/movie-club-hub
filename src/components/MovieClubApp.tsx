@@ -1864,11 +1864,12 @@ function LoginPage({ onLogin }) {
 // ─────────────────────────────────────────────
 export default function MovieClubApp() {
   const [showSplash, setShowSplash] = useState(true);
-  const [loggedIn, setLoggedIn] = useState(false);
   const [page, setPage] = useState("home");
   const [selectedMovie, setSM] = useState(null);
   const [selectedGroup, setSG] = useState(null);
   const [apiStatus, setApiStatus] = useState({ tmdb: false, omdb: false, streaming: false });
+  const authCtx = useAuth();
+  const [authError, setAuthError] = useState("");
 
   useEffect(() => {
     tmdb.popular().then(d => { if (d?.results) setApiStatus(s => ({ ...s, tmdb: true })); }).catch(() => { });
@@ -1876,17 +1877,24 @@ export default function MovieClubApp() {
 
   const handleSplashDone = useCallback(() => setShowSplash(false), []);
 
+  const handleLogin = async (email, password) => {
+    try { setAuthError(""); await authCtx.signIn(email, password); } catch (e) { setAuthError(e.message || "Erro ao entrar"); throw e; }
+  };
+  const handleSignup = async (email, password, name, username) => {
+    try { setAuthError(""); await authCtx.signUp(email, password, name, username); } catch (e) { setAuthError(e.message || "Erro ao cadastrar"); throw e; }
+  };
+
   if (showSplash) return <SplashScreen onFinish={handleSplashDone} />;
-  if (!loggedIn) return <LoginPage onLogin={() => setLoggedIn(true)} />;
+  if (authCtx.loading) return <div style={{ minHeight: "100vh", background: C.bg, display: "flex", alignItems: "center", justifyContent: "center" }}><Spinner size={32} /></div>;
+  if (!authCtx.user) return <LoginPage onLogin={handleLogin} onSignup={handleSignup} error={authError} />;
 
   return (
     <div style={{ minHeight: "100vh", background: C.bg }}>
       <Navbar page={page} setPage={setPage} hasKeys={true} apiStatus={apiStatus} />
       <div className="page-enter" key={page}>
         {page === "home" && <HomePage setPage={setPage} setSelectedMovie={setSM} />}
-        {page === "profile" && <ProfilePage user={MOCK_USERS[3]} setPage={setPage} isOwnProfile />}
-        {page === "friend" && <ProfilePage user={MOCK_USERS[1]} setPage={setPage} isOwnProfile={false} />}
-        {page === "movie" && <MoviePage movieInit={selectedMovie} setPage={setPage} setSelectedMovie={setSM} />}
+        {page === "profile" && <ProfilePage setPage={setPage} isOwnProfile auth={authCtx} setSelectedMovie={setSM} />}
+        {page === "movie" && <MoviePage movieInit={selectedMovie} setPage={setPage} setSelectedMovie={setSM} auth={authCtx} />}
         {page === "groups" && <GroupsPage setPage={setPage} setSelectedGroup={setSG} />}
         {page === "group" && <GroupPage group={selectedGroup} setPage={setPage} setSelectedMovie={setSM} />}
         {page === "search" && <SearchPage setPage={setPage} setSelectedMovie={setSM} />}
