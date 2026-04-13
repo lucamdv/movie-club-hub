@@ -1640,10 +1640,9 @@ function ProfileEditModal({ profile, user, onClose, onSave }) {
                 <button key={m.id} onClick={() => setAvatarUrl(m.src)} style={{
                   padding: 8, borderRadius: 14, border: avatarUrl === m.src ? `2px solid ${C.gold}` : `1px solid ${C.border}`,
                   background: avatarUrl === m.src ? `${C.gold}15` : C.bgDeep,
-                  cursor: "pointer", transition: "all 0.2s", display: "flex", flexDirection: "column", alignItems: "center", gap: 4
+                  cursor: "pointer", transition: "all 0.2s", display: "flex", alignItems: "center", justifyContent: "center"
                 }}>
                   <img src={m.src} alt={m.label} loading="lazy" width={64} height={64} style={{ borderRadius: 10 }} />
-                  <span style={{ fontSize: 10, color: avatarUrl === m.src ? C.gold : C.textDim, fontWeight: 500 }}>{m.label}</span>
                 </button>
               ))}
             </div>
@@ -1707,7 +1706,7 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
   const displayName = profile?.display_name || authCtx?.user?.email || "Usuário";
   const initials = displayName.slice(0, 2).toUpperCase();
   const uname = profile?.username || authCtx?.user?.email?.split("@")[0] || "user";
-  const bio = profile?.bio || "Cinéfilo apaixonado por boas histórias 🎬";
+  const bio = profile?.bio || "";
   const avgRating = ratings.length > 0 ? (ratings.reduce((s, r) => s + Number(r.rating), 0) / ratings.length).toFixed(1) : "—";
 
   // Top 3 recent posters for banner collage
@@ -1750,7 +1749,7 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
 
             <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 26, fontWeight: 700, color: C.text, marginBottom: 2 }}>{displayName}</h1>
             <p style={{ color: C.gold, fontSize: 14, fontWeight: 500, marginBottom: 8 }}>@{uname}</p>
-            <p style={{ color: C.textMuted, fontSize: 13, maxWidth: 380, lineHeight: 1.5, marginBottom: 20 }}>{bio}</p>
+            {bio && <p style={{ color: C.textMuted, fontSize: 13, maxWidth: 380, lineHeight: 1.5, marginBottom: 20 }}>{bio}</p>}
 
             {/* Stats Row */}
             <div style={{
