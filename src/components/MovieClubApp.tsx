@@ -57,15 +57,26 @@ const tmdb = {
     const cacheKey = `tmdb:${path}:${JSON.stringify(params)}`;
     return cachedFetch(cacheKey, () => tmdbProxy({ data: { path, params } }));
   },
+  async getPages(path, params = {}, pages = 5) {
+    const fetches = Array.from({ length: pages }, (_, i) =>
+      this.get(path, { ...params, page: String(i + 1) })
+    );
+    const responses = await Promise.all(fetches);
+    return {
+      results: responses.flatMap(r => r?.results || []),
+      total_pages: responses[0]?.total_pages || 1,
+      total_results: responses[0]?.total_results || 0,
+    };
+  },
   poster(path, size = "w300") { return path ? `${TMDB_IMG}/${size}${path}` : null; },
   backdrop(path, size = "w1280") { return path ? `${TMDB_IMG}/${size}${path}` : null; },
-  async trending()          { return this.get("/trending/movie/week"); },
-  async popular()           { return this.get("/movie/popular"); },
-  async topRated()          { return this.get("/movie/top_rated"); },
+  async trending()          { return this.getPages("/trending/movie/week", {}, 5); },
+  async popular()           { return this.getPages("/movie/popular", {}, 5); },
+  async topRated()          { return this.getPages("/movie/top_rated", {}, 5); },
   async details(id)         { return this.get(`/movie/${id}`, { append_to_response: "credits,videos,similar,recommendations" }); },
   async search(q, page = 1) { return this.get("/search/movie", { query: q, page: String(page) }); },
   async genres()            { return this.get("/genre/movie/list"); },
-  async byGenre(gid, page = 1) { return this.get("/discover/movie", { with_genres: String(gid), sort_by: "popularity.desc", page: String(page) }); },
+  async byGenre(gid, pages = 3) { return this.getPages("/discover/movie", { with_genres: String(gid), sort_by: "popularity.desc" }, pages); },
 };
 
 const omdb = {
