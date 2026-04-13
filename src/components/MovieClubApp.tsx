@@ -2452,11 +2452,116 @@ function FriendsPage({ setPage, setSelectedMovie, auth: authCtx, onViewProfile }
 }
 
 // ─────────────────────────────────────────────
-//  GROUPS PAGE
+//  CLUBS HOOKS
 // ─────────────────────────────────────────────
-function GroupsPage({ setPage, setSelectedGroup }) {
+function useClubs(userId) {
+  const [clubs, setClubs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [invites, setInvites] = useState([]);
+  const load = useCallback(async () => {
+    if (!userId) return;
+    setLoading(true);
+    const { data: memberships } = await supabase.from("club_members").select("club_id").eq("user_id", userId);
+    if (memberships?.length) {
+      const clubIds = memberships.map(m => m.club_id);
+      const { data: clubsData } = await supabase.from("clubs").select("*").in("id", clubIds).order("created_at", { ascending: false });
+      const enriched = await Promise.all((clubsData || []).map(async (club) => {
+        const [{ data: members }, { data: movies }] = await Promise.all([
+          supabase.from("club_members").select("user_id, role").eq("club_id", club.id),
+          supabase.from("club_movies").select("id, tmdb_id").eq("club_id", club.id),
+        ]);
+        const memberIds = (members || []).map(m => m.user_id);
+        const { data: profiles } = await supabase.from("profiles").select("*").in("user_id", memberIds);
+        return { ...club, members: (members || []).map(m => ({ ...m, profile: (profiles || []).find(p => p.user_id === m.user_id) })), movieCount: (movies || []).length, movieIds: [...new Set((movies || []).map(m => m.tmdb_id))].slice(0, 5) };
+      }));
+      setClubs(enriched);
+    } else { setClubs([]); }
+    const { data: invData } = await supabase.from("club_invites").select("*, clubs(name)").eq("invited_user_id", userId).eq("status", "pending");
+    setInvites(invData || []);
+    setLoading(false);
+  }, [userId]);
+  useEffect(() => { load(); }, [load]);
+  const createClub = async (name, description) => {
+    const { data: club, error } = await supabase.from("clubs").insert({ name, description, created_by: userId }).select().single();
+    if (error) throw error;
+    await supabase.from("club_members").insert({ club_id: club.id, user_id: userId, role: "owner" });
+    await load(); return club;
+  };
+  const inviteFriend = async (clubId, friendUserId) => {
+    const { error } = await supabase.from("club_invites").insert({ club_id: clubId, invited_by: userId, invited_user_id: friendUserId });
+    if (error) throw error;
+  };
+  const acceptInvite = async (inviteId, clubId) => {
+    await supabase.from("club_invites").update({ status: "accepted" }).eq("id", inviteId);
+    await supabase.from("club_members").insert({ club_id: clubId, user_id: userId });
+    await load();
+  };
+  const declineInvite = async (inviteId) => {
+    await supabase.from("club_invites").update({ status: "declined" }).eq("id", inviteId);
+    await load();
+  };
+  const joinByCode = async (code) => {
+    const { data: club } = await supabase.from("clubs").select("id").eq("invite_code", code).single();
+    if (!club) throw new Error("Código inválido");
+    const { data: existing } = await supabase.from("club_members").select("id").eq("club_id", club.id).eq("user_id", userId).maybeSingle();
+    if (existing) throw new Error("Você já é membro deste club");
+    await supabase.from("club_members").insert({ club_id: club.id, user_id: userId });
+    await load(); return club;
+  };
+  return { clubs, loading, invites, createClub, inviteFriend, acceptInvite, declineInvite, joinByCode, reload: load };
+}
+
+function useClubDetail(clubId, userId) {
+  const [club, setClub] = useState(null);
+  const [members, setMembers] = useState([]);
+  const [movies, setMovies] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const load = useCallback(async () => {
+    if (!clubId) return;
+    setLoading(true);
+    const [{ data: clubData }, { data: membersData }, { data: moviesData }] = await Promise.all([
+      supabase.from("clubs").select("*").eq("id", clubId).single(),
+      supabase.from("club_members").select("*").eq("club_id", clubId),
+      supabase.from("club_movies").select("*").eq("club_id", clubId).order("added_at", { ascending: false }),
+    ]);
+    setClub(clubData);
+    const memberIds = (membersData || []).map(m => m.user_id);
+    const { data: profiles } = await supabase.from("profiles").select("*").in("user_id", memberIds);
+    setMembers((membersData || []).map(m => ({ ...m, profile: (profiles || []).find(p => p.user_id === m.user_id) })));
+    setMovies(moviesData || []);
+    setLoading(false);
+  }, [clubId]);
+  useEffect(() => { load(); }, [load]);
+  const addMovie = async (tmdbId, title, posterUrl) => {
+    const { error } = await supabase.from("club_movies").insert({ club_id: clubId, user_id: userId, tmdb_id: tmdbId, title, poster_url: posterUrl });
+    if (error) { if (error.code === "23505") throw new Error("Filme já adicionado"); throw error; }
+    await load();
+  };
+  const removeMovie = async (movieId) => { await supabase.from("club_movies").delete().eq("id", movieId); await load(); };
+  return { club, members, movies, loading, addMovie, removeMovie, reload: load };
+}
+
+// ─────────────────────────────────────────────
+//  GROUPS PAGE (Clubs)
+// ─────────────────────────────────────────────
+function GroupsPage({ setPage, setSelectedGroup, auth: authCtx }) {
+  const userId = authCtx?.user?.id;
+  const { clubs, loading, invites, createClub, joinByCode, acceptInvite, declineInvite } = useClubs(userId);
   const [showCreate, setShowCreate] = useState(false);
   const [name, setName] = useState("");
+  const [desc, setDesc] = useState("");
+  const [joinCode, setJoinCode] = useState("");
+  const [creating, setCreating] = useState(false);
+  const handleCreate = async () => {
+    if (!name.trim()) { toast.error("Dê um nome ao seu club"); return; }
+    setCreating(true);
+    try { await createClub(name.trim(), desc.trim() || null); toast.success("Club criado!"); setName(""); setDesc(""); setShowCreate(false); } catch (e) { toast.error("Erro ao criar club"); }
+    setCreating(false);
+  };
+  const handleJoin = async () => {
+    if (!joinCode.trim()) return;
+    try { let code = joinCode.trim(); if (code.includes("club=")) code = new URL(code).searchParams.get("club") || code; await joinByCode(code); toast.success("Você entrou no club!"); setJoinCode(""); } catch (e) { toast.error(e.message || "Erro ao entrar no club"); }
+  };
   return (
     <div style={{ paddingTop: 80, paddingBottom: 60 }}>
       <div style={{ maxWidth: 960, margin: "0 auto", padding: "0 32px" }}>
@@ -2467,46 +2572,52 @@ function GroupsPage({ setPage, setSelectedGroup }) {
           </div>
           <Btn variant="gold" onClick={() => setShowCreate(true)}><PlusIcon /> Criar Club</Btn>
         </div>
-        {showCreate && (
-          <div style={{ background: C.bgCard, border: `1px solid ${C.gold}`, borderRadius: 16, padding: 24, marginBottom: 22, animation: "fadeIn 0.2s ease" }}>
-            <h3 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 15, color: C.text, marginBottom: 16 }}>Novo Club</h3>
-            <div style={{ display: "flex", gap: 12 }}>
-              <TextInput label="Nome do Club" value={name} onChange={setName} placeholder="Ex: Cinéphiles de Sexta" style={{ flex: 1 }} />
-              <TextInput label="Convidar (username)" value="" onChange={() => { }} placeholder="@username" style={{ flex: 1 }} />
-            </div>
-            <div style={{ display: "flex", gap: 10, marginTop: 14 }}>
-              <Btn variant="gold" size="sm">Criar</Btn>
-              <Btn variant="ghost" size="sm" onClick={() => setShowCreate(false)}>Cancelar</Btn>
+        {invites.length > 0 && (
+          <div style={{ marginBottom: 24 }}>
+            <p style={{ fontSize: 13, fontWeight: 600, color: C.gold, marginBottom: 12 }}>Convites Pendentes</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {invites.map(inv => (
+                <div key={inv.id} style={{ background: C.bgCard, border: `1px solid ${C.gold}40`, borderRadius: 14, padding: 18, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <div><p style={{ fontSize: 14, fontWeight: 600, color: C.text }}>{inv.clubs?.name || "Club"}</p><p style={{ fontSize: 11, color: C.textMuted }}>Você foi convidado para este club</p></div>
+                  <div style={{ display: "flex", gap: 8 }}><Btn variant="gold" size="sm" onClick={() => acceptInvite(inv.id, inv.club_id)}>Aceitar</Btn><Btn variant="ghost" size="sm" onClick={() => declineInvite(inv.id)}>Recusar</Btn></div>
+                </div>
+              ))}
             </div>
           </div>
         )}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 16 }}>
-          {MOCK_GROUPS.map(group => {
-            const members = MOCK_USERS.filter(u => group.members.includes(u.id));
-            const allIds = [...new Set(Object.values(GROUP_RECS[group.id] || {}).flat())];
-            return (
-              <div key={group.id} className="card-hover" onClick={() => { setSelectedGroup(group); setPage("group"); }}
-                style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 16, padding: 22, cursor: "pointer" }}>
+        <div style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 16, padding: 20, marginBottom: 24 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}><Link2 size={14} /><h3 style={{ fontSize: 14, fontWeight: 600, color: C.text }}>Entrar em um Club</h3></div>
+          <div style={{ display: "flex", gap: 8 }}>
+            <input value={joinCode} onChange={e => setJoinCode(e.target.value)} placeholder="Cole o link ou código do club..." style={{ flex: 1, padding: "10px 14px", borderRadius: 8, background: C.bgDeep, border: `1px solid ${C.border}`, color: C.text, fontSize: 13, outline: "none" }} onFocus={e => e.target.style.borderColor = C.gold} onBlur={e => e.target.style.borderColor = C.border} onKeyDown={e => { if (e.key === "Enter") handleJoin(); }} />
+            <Btn variant="gold" size="sm" onClick={handleJoin} disabled={!joinCode.trim()}>Entrar</Btn>
+          </div>
+        </div>
+        {showCreate && (
+          <div style={{ background: C.bgCard, border: `1px solid ${C.gold}`, borderRadius: 16, padding: 24, marginBottom: 22, animation: "fadeIn 0.2s ease" }}>
+            <h3 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 15, color: C.text, marginBottom: 16 }}>Novo Club</h3>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}><TextInput label="Nome do Club" value={name} onChange={setName} placeholder="Ex: Cinéphiles de Sexta" /><TextInput label="Descrição (opcional)" value={desc} onChange={setDesc} placeholder="Do que se trata esse club?" /></div>
+            <div style={{ display: "flex", gap: 10, marginTop: 14 }}><Btn variant="gold" size="sm" onClick={handleCreate} disabled={creating}>{creating ? <Spinner size={14} /> : "Criar"}</Btn><Btn variant="ghost" size="sm" onClick={() => setShowCreate(false)}>Cancelar</Btn></div>
+          </div>
+        )}
+        {loading ? (
+          <div style={{ display: "flex", justifyContent: "center", padding: "60px 0" }}><Spinner size={32} /></div>
+        ) : clubs.length > 0 ? (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 16 }}>
+            {clubs.map(club => (
+              <div key={club.id} className="card-hover" onClick={() => { setSelectedGroup(club); setPage("group"); }} style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 16, padding: 22, cursor: "pointer" }}>
                 <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 14 }}>
-                  <div>
-                    <h3 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 15, fontWeight: 600, color: C.text, marginBottom: 4 }}>{group.name}</h3>
-                    <p style={{ fontSize: 12, color: C.textDim }}>{members.length} membros · {allIds.length} filmes</p>
-                  </div>
-                  <div style={{ display: "flex" }}>{members.slice(0, 3).map((m, i) => <div key={m.id} style={{ marginLeft: i > 0 ? -8 : 0, zIndex: 3 - i }}><Avatar user={m} size={28} /></div>)}</div>
+                  <div><h3 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 15, fontWeight: 600, color: C.text, marginBottom: 4 }}>{club.name}</h3><p style={{ fontSize: 12, color: C.textDim }}>{club.members.length} membros · {club.movieCount} filmes</p></div>
+                  <div style={{ display: "flex" }}>{club.members.slice(0, 3).map((m, i) => { const ini = (m.profile?.display_name || "?").slice(0, 2).toUpperCase(); return (<div key={m.user_id} style={{ marginLeft: i > 0 ? -8 : 0, zIndex: 3 - i, width: 28, height: 28, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, color: C.bgDeep, background: m.profile?.avatar_url ? "transparent" : `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`, border: `2px solid ${C.bgCard}`, overflow: "hidden" }}>{m.profile?.avatar_url ? <img src={m.profile.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : ini}</div>); })}</div>
                 </div>
-                <div style={{ display: "flex", gap: 6, marginBottom: 14 }}>
-                  {allIds.slice(0, 5).map(id => (
-                    <div key={id} style={{ width: 46, height: 68, borderRadius: 5, background: C.bgDeep, border: `1px solid ${C.border}`, overflow: "hidden", flexShrink: 0 }}>
-                      <MiniPoster tmdbId={id} />
-                    </div>
-                  ))}
-                  {allIds.length > 5 && <div style={{ width: 46, height: 68, borderRadius: 5, background: C.accentSoft, border: `1px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, color: C.textMuted }}>+{allIds.length - 5}</div>}
-                </div>
+                {club.movieIds.length > 0 && (<div style={{ display: "flex", gap: 6, marginBottom: 14 }}>{club.movieIds.map(id => (<div key={id} style={{ width: 46, height: 68, borderRadius: 5, background: C.bgDeep, border: `1px solid ${C.border}`, overflow: "hidden", flexShrink: 0 }}><MiniPoster tmdbId={id} /></div>))}</div>)}
+                {club.description && <p style={{ fontSize: 12, color: C.textMuted, marginBottom: 10 }}>{club.description}</p>}
                 <span style={{ fontSize: 12, color: C.gold }}>Ver club →</span>
               </div>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div style={{ textAlign: "center", padding: "60px 20px" }}><div style={{ marginBottom: 12 }}><Film size={40} style={{ color: "#4A5E72" }} /></div><p style={{ color: C.textMuted, fontSize: 15, fontWeight: 500 }}>Nenhum club ainda</p><p style={{ color: C.textDim, fontSize: 13, marginTop: 4 }}>Crie um club e convide seus amigos!</p></div>
+        )}
       </div>
     </div>
   );
@@ -2515,93 +2626,70 @@ function GroupsPage({ setPage, setSelectedGroup }) {
 // ─────────────────────────────────────────────
 //  GROUP DETAIL PAGE
 // ─────────────────────────────────────────────
-function GroupPage({ group, setPage, setSelectedMovie }) {
-  const g = group || MOCK_GROUPS[0];
-  const members = MOCK_USERS.filter(u => g.members.includes(u.id));
-  const recIds = GROUP_RECS[g.id] || {};
-  const [movieMap, setMovieMap] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [genres, setGenres] = useState(["Todos"]);
-  const [genreF, setGenreF] = useState("Todos");
-  const [search, setSearch] = useState("");
-  const [sort, setSort] = useState("default");
-
+function GroupPage({ group, setPage, setSelectedMovie, auth: authCtx }) {
+  const userId = authCtx?.user?.id;
+  const clubId = group?.id;
+  const { club, members, movies, loading, addMovie, removeMovie } = useClubDetail(clubId, userId);
+  const { friends } = useFriendships(userId);
+  const { inviteFriend } = useClubs(userId);
+  const [showAddMovie, setShowAddMovie] = useState(false);
+  const [movieSearch, setMovieSearch] = useState("");
+  const [movieResults, setMovieResults] = useState([]);
+  const [movieSearchLoading, setMovieSearchLoading] = useState(false);
+  const [showInvite, setShowInvite] = useState(false);
+  const [friendProfiles, setFriendProfiles] = useState([]);
+  const debRef = useRef(null);
   useEffect(() => {
-    const allIds = [...new Set(Object.values(recIds).flat())];
-    Promise.all(allIds.map(id =>
-      cachedFetch(`detail_${id}`, () =>
-        tmdbProxy({ data: { path: `/movie/${id}`, params: {} } })
-      ).then(normalizeTmdb).catch(() => null)
-    )).then(movies => {
-      const map = {};
-      allIds.forEach((id, i) => { if (movies[i]) map[id] = movies[i]; });
-      setMovieMap(map);
-      const gs = ["Todos", ...new Set(Object.values(map).map(m => m.genre).filter(Boolean))];
-      setGenres(gs);
-      setLoading(false);
-    });
-  }, [g.id]);
-
+    if (!showInvite || !friends.length || !userId) return;
+    const friendIds = friends.map(f => f.user_a_id === userId ? f.user_b_id : f.user_a_id);
+    const existingMemberIds = members.map(m => m.user_id);
+    const invitableIds = friendIds.filter(id => !existingMemberIds.includes(id));
+    if (!invitableIds.length) { setFriendProfiles([]); return; }
+    supabase.from("profiles").select("*").in("user_id", invitableIds).then(({ data }) => setFriendProfiles(data || []));
+  }, [showInvite, friends, members, userId]);
+  useEffect(() => {
+    if (debRef.current) clearTimeout(debRef.current);
+    if (!movieSearch.trim()) { setMovieResults([]); return; }
+    debRef.current = setTimeout(async () => { setMovieSearchLoading(true); const res = await tmdb.search(movieSearch.trim()); setMovieResults((res?.results || []).slice(0, 10)); setMovieSearchLoading(false); }, 400);
+    return () => { if (debRef.current) clearTimeout(debRef.current); };
+  }, [movieSearch]);
+  const handleAddMovie = async (movie) => { try { await addMovie(movie.id, movie.title, tmdb.poster(movie.poster_path)); toast.success(`"${movie.title}" adicionado ao club!`); } catch (e) { toast.error(e.message || "Erro ao adicionar filme"); } };
+  const handleInvite = async (friendUserId) => { try { await inviteFriend(clubId, friendUserId); toast.success("Convite enviado!"); } catch (e) { if (e.code === "23505") toast.info("Convite já enviado"); else toast.error("Erro ao enviar convite"); } };
+  const handleCopyInviteLink = () => { if (!club) return; const url = `${window.location.origin}?club=${club.invite_code}`; navigator.clipboard.writeText(url).then(() => toast.success("Link do club copiado!")).catch(() => toast.error("Erro ao copiar")); };
+  if (!clubId) return null;
+  const moviesByUser = {};
+  movies.forEach(m => { if (!moviesByUser[m.user_id]) moviesByUser[m.user_id] = []; moviesByUser[m.user_id].push(m); });
   return (
     <div style={{ paddingTop: 80, paddingBottom: 60 }}>
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 32px" }}>
-        <div style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 20, padding: "26px 28px", marginBottom: 26 }}>
-          <button onClick={() => setPage("groups")} style={{ display: "flex", alignItems: "center", gap: 6, color: C.textMuted, fontSize: 13, marginBottom: 14 }}><BackIcon /> Meus Clubs</button>
-          <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 24, fontWeight: 700, color: C.text, marginBottom: 8 }}>{g.name}</h1>
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-            {members.map(m => <div key={m.id} style={{ display: "flex", alignItems: "center", gap: 6 }}><Avatar user={m} size={22} /><span style={{ fontSize: 12, color: C.textMuted }}>{m.name}</span></div>)}
-          </div>
-        </div>
-
-        <div style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 14, padding: "12px 18px", marginBottom: 26, display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
-          <div style={{ position: "relative", flex: 1, minWidth: 160 }}>
-            <div style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}><SearchSVG size={13} /></div>
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar no club…"
-              style={{ width: "100%", paddingLeft: 30, paddingRight: 12, paddingTop: 7, paddingBottom: 7, borderRadius: 8, background: C.bgDeep, border: `1px solid ${C.border}`, color: C.text, fontSize: 12, outline: "none" }} />
-          </div>
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-            {genres.map(g2 => (
-              <button key={g2} onClick={() => setGenreF(g2)} style={{ padding: "5px 12px", borderRadius: 20, fontSize: 11, fontWeight: 500, whiteSpace: "nowrap", transition: "all 0.2s", background: genreF === g2 ? C.gold : C.bgDeep, color: genreF === g2 ? C.bgDeep : C.textMuted, border: `1px solid ${genreF === g2 ? C.gold : C.border}` }}>{g2}</button>
-            ))}
-          </div>
-          <select value={sort} onChange={e => setSort(e.target.value)} style={{ padding: "7px 12px", borderRadius: 8, fontSize: 12, background: C.bgDeep, border: `1px solid ${C.border}`, color: C.textMuted, outline: "none" }}>
-            <option value="default">Padrão</option>
-            <option value="rating">Melhor nota</option>
-            <option value="year">Mais recente</option>
-            <option value="popularity">Popularidade</option>
-          </select>
-        </div>
-
-        {loading ? (
-          <div style={{ display: "flex", justifyContent: "center", padding: "60px 0" }}>
-            <div style={{ textAlign: "center" }}><Spinner size={36} /><p style={{ color: C.textMuted, marginTop: 12, fontSize: 13 }}>Carregando…</p></div>
-          </div>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 40 }}>
-            {members.map(member => {
-              const ids = recIds[member.id] || [];
-              let movies = ids.map(id => movieMap[id]).filter(Boolean);
-              if (genreF !== "Todos") movies = movies.filter(m => m.genre === genreF);
-              if (search) movies = movies.filter(m => m.title.toLowerCase().includes(search.toLowerCase()));
-              if (sort === "rating") movies = [...movies].sort((a, b) => (b.rating || 0) - (a.rating || 0));
-              if (sort === "year") movies = [...movies].sort((a, b) => (b.year || 0) - (a.year || 0));
-              if (sort === "popularity") movies = [...movies].sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
-              if (!movies.length) return null;
-              return (
-                <div key={member.id}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16, paddingBottom: 14, borderBottom: `1px solid ${C.border}` }}>
-                    <Avatar user={member} size={46} />
-                    <div>
-                      <h3 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 15, fontWeight: 600, color: C.text, marginBottom: 2 }}>{member.name}</h3>
-                      <p style={{ fontSize: 12, color: C.textMuted }}>@{member.username} · {movies.length} recomendaç{movies.length === 1 ? "ão" : "ões"}</p>
-                    </div>
-                  </div>
-                  <Carousel movies={movies} onMovieClick={(mv) => { setSelectedMovie(mv); setPage("movie"); }} />
-                </div>
-              );
-            })}
-          </div>
-        )}
+        {loading ? (<div style={{ display: "flex", justifyContent: "center", padding: "60px 0" }}><Spinner size={36} /></div>) : (<>
+            <div style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 20, padding: "26px 28px", marginBottom: 26 }}>
+              <button onClick={() => setPage("groups")} style={{ display: "flex", alignItems: "center", gap: 6, color: C.textMuted, fontSize: 13, marginBottom: 14 }}><BackIcon /> Meus Clubs</button>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+                <div><h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 24, fontWeight: 700, color: C.text, marginBottom: 4 }}>{club?.name}</h1>{club?.description && <p style={{ fontSize: 13, color: C.textMuted, marginBottom: 8 }}>{club.description}</p>}</div>
+                <div style={{ display: "flex", gap: 8 }}><Btn variant="gold" size="sm" onClick={() => setShowAddMovie(true)}><PlusIcon /> Adicionar Filme</Btn><Btn variant="ghost" size="sm" onClick={() => setShowInvite(true)}><Users size={13} /> Convidar</Btn><Btn variant="ghost" size="sm" onClick={handleCopyInviteLink}><Link2 size={13} /> Link</Btn></div>
+              </div>
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 14 }}>
+                {members.map(m => { const ini = (m.profile?.display_name || "?").slice(0, 2).toUpperCase(); return (<div key={m.user_id} style={{ display: "flex", alignItems: "center", gap: 6 }}><div style={{ width: 24, height: 24, borderRadius: "50%", overflow: "hidden", background: m.profile?.avatar_url ? "transparent" : `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`, border: `2px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 700, color: C.bgDeep }}>{m.profile?.avatar_url ? <img src={m.profile.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : ini}</div><span style={{ fontSize: 12, color: C.textMuted }}>{m.profile?.display_name || "Membro"}</span>{m.role === "owner" && <span style={{ fontSize: 9, color: C.gold, fontWeight: 600 }}>DONO</span>}</div>); })}
+              </div>
+            </div>
+            {movies.length > 0 ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: 40 }}>
+                {members.map(member => { const memberMovies = moviesByUser[member.user_id] || []; if (!memberMovies.length) return null; const ini = (member.profile?.display_name || "?").slice(0, 2).toUpperCase(); return (
+                    <div key={member.user_id}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16, paddingBottom: 14, borderBottom: `1px solid ${C.border}` }}>
+                        <div style={{ width: 46, height: 46, borderRadius: "50%", overflow: "hidden", background: member.profile?.avatar_url ? "transparent" : `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`, border: `2px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 700, color: C.bgDeep }}>{member.profile?.avatar_url ? <img src={member.profile.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : ini}</div>
+                        <div><h3 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 15, fontWeight: 600, color: C.text, marginBottom: 2 }}>{member.profile?.display_name || "Membro"}</h3><p style={{ fontSize: 12, color: C.textMuted }}>{memberMovies.length} filme{memberMovies.length !== 1 ? "s" : ""}</p></div>
+                      </div>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: 16 }}>
+                        {memberMovies.map(mv => (<div key={mv.id} style={{ position: "relative" }} className="movie-card-netflix"><div style={{ cursor: "pointer" }} onClick={() => { setSelectedMovie({ tmdbId: mv.tmdb_id, title: mv.title, poster: mv.poster_url }); setPage("movie"); }}><div style={{ width: "100%", aspectRatio: "2/3", borderRadius: 12, overflow: "hidden", background: C.bgCard, border: `1px solid ${C.border}` }}>{mv.poster_url ? <img src={mv.poster_url} alt={mv.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", opacity: 0.3 }}><Film size={32} /></div>}</div><p style={{ fontSize: 12, fontWeight: 500, color: C.text, marginTop: 8, lineHeight: 1.3 }}>{mv.title}</p></div>{mv.user_id === userId && (<button onClick={(e) => { e.stopPropagation(); removeMovie(mv.id); }} style={{ position: "absolute", top: 8, right: 8, width: 26, height: 26, borderRadius: "50%", background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)", color: "#ef4444", fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid rgba(239,68,68,0.3)", cursor: "pointer" }}>✕</button>)}</div>))}
+                      </div>
+                    </div>); })}
+              </div>
+            ) : (<div style={{ textAlign: "center", padding: "60px 20px" }}><div style={{ marginBottom: 12 }}><Film size={40} style={{ color: "#4A5E72" }} /></div><p style={{ color: C.textMuted, fontSize: 15, fontWeight: 500 }}>Nenhum filme adicionado ainda</p><p style={{ color: C.textDim, fontSize: 13, marginTop: 4 }}>Clique em "Adicionar Filme" para começar!</p></div>)}
+            {showAddMovie && (<div style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }} onClick={() => setShowAddMovie(false)}><div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }} /><div style={{ position: "relative", background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 20, padding: 28, width: "100%", maxWidth: 500, maxHeight: "80vh", overflowY: "auto" }} onClick={e => e.stopPropagation()}><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}><h3 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 18, fontWeight: 700, color: C.text }}>Adicionar Filme</h3><button onClick={() => setShowAddMovie(false)} style={{ width: 32, height: 32, borderRadius: "50%", background: C.bgDeep, border: `1px solid ${C.border}`, color: C.textMuted, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>✕</button></div><input value={movieSearch} onChange={e => setMovieSearch(e.target.value)} placeholder="Buscar filme..." style={{ width: "100%", padding: "12px 16px", borderRadius: 10, background: C.bgDeep, border: `1px solid ${C.border}`, color: C.text, fontSize: 14, outline: "none", marginBottom: 16 }} onFocus={e => e.target.style.borderColor = C.gold} onBlur={e => e.target.style.borderColor = C.border} />{movieSearchLoading ? <div style={{ display: "flex", justifyContent: "center", padding: 20 }}><Spinner size={24} /></div> : (<div style={{ display: "flex", flexDirection: "column", gap: 8 }}>{movieResults.map(m => (<div key={m.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: 12, borderRadius: 10, background: C.bgDeep, border: `1px solid ${C.border}`, cursor: "pointer", transition: "all 0.2s" }} className="card-hover" onClick={() => { handleAddMovie(m); setShowAddMovie(false); setMovieSearch(""); setMovieResults([]); }}><div style={{ width: 40, height: 60, borderRadius: 6, overflow: "hidden", flexShrink: 0, background: C.bgCard }}>{m.poster_path ? <img src={tmdb.poster(m.poster_path)} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <Film size={20} />}</div><div style={{ flex: 1, minWidth: 0 }}><p style={{ fontSize: 14, fontWeight: 600, color: C.text }}>{m.title}</p><p style={{ fontSize: 11, color: C.textDim }}>{m.release_date?.slice(0, 4)}</p></div><PlusIcon /></div>))}</div>)}</div></div>)}
+            {showInvite && (<div style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }} onClick={() => setShowInvite(false)}><div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }} /><div style={{ position: "relative", background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 20, padding: 28, width: "100%", maxWidth: 500, maxHeight: "80vh", overflowY: "auto" }} onClick={e => e.stopPropagation()}><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}><h3 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 18, fontWeight: 700, color: C.text }}>Convidar Amigos</h3><button onClick={() => setShowInvite(false)} style={{ width: 32, height: 32, borderRadius: "50%", background: C.bgDeep, border: `1px solid ${C.border}`, color: C.textMuted, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>✕</button></div><div style={{ marginBottom: 20, padding: 14, borderRadius: 10, background: C.bgDeep, border: `1px solid ${C.border}` }}><p style={{ fontSize: 12, color: C.textMuted, marginBottom: 8 }}>Compartilhe o link de convite:</p><Btn variant="gold" size="sm" onClick={handleCopyInviteLink}><Link2 size={13} /> Copiar Link do Club</Btn></div>{friendProfiles.length > 0 ? (<div style={{ display: "flex", flexDirection: "column", gap: 8 }}>{friendProfiles.map(fp => { const ini = (fp.display_name || "?").slice(0, 2).toUpperCase(); return (<div key={fp.user_id} style={{ display: "flex", alignItems: "center", gap: 12, padding: 12, borderRadius: 10, background: C.bgDeep, border: `1px solid ${C.border}` }}><div style={{ width: 36, height: 36, borderRadius: "50%", overflow: "hidden", background: fp.avatar_url ? "transparent" : `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`, border: `2px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, color: C.bgDeep }}>{fp.avatar_url ? <img src={fp.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : ini}</div><div style={{ flex: 1, minWidth: 0 }}><p style={{ fontSize: 14, fontWeight: 600, color: C.text }}>{fp.display_name || "Sem nome"}</p>{fp.username && <p style={{ fontSize: 11, color: C.gold }}>@{fp.username}</p>}</div><Btn variant="gold" size="sm" onClick={() => handleInvite(fp.user_id)}>Convidar</Btn></div>); })}</div>) : (<div style={{ textAlign: "center", padding: "30px 0", color: C.textDim }}><p style={{ fontSize: 13 }}>Nenhum amigo disponível para convidar</p><p style={{ fontSize: 11, marginTop: 4 }}>Adicione amigos primeiro na aba Social</p></div>)}</div></div>)}
+          </>)}
       </div>
     </div>
   );
@@ -2819,14 +2907,25 @@ export default function MovieClubApp() {
     if (!authCtx.user) return;
     const params = new URLSearchParams(window.location.search);
     const profileId = params.get("profile");
+    const clubCode = params.get("club");
     if (profileId) {
       window.history.replaceState({}, "", window.location.pathname);
-      if (profileId === authCtx.user.id) {
-        setPage("profile");
-      } else {
-        setViewProfileUserId(profileId);
-        setPage("view-profile");
-      }
+      if (profileId === authCtx.user.id) { setPage("profile"); }
+      else { setViewProfileUserId(profileId); setPage("view-profile"); }
+    }
+    if (clubCode) {
+      window.history.replaceState({}, "", window.location.pathname);
+      setPage("groups");
+      setTimeout(async () => {
+        try {
+          const { data: club } = await supabase.from("clubs").select("id").eq("invite_code", clubCode).single();
+          if (!club) { toast.error("Código de club inválido"); return; }
+          const { data: existing } = await supabase.from("club_members").select("id").eq("club_id", club.id).eq("user_id", authCtx.user.id).maybeSingle();
+          if (existing) { toast.info("Você já é membro deste club!"); return; }
+          await supabase.from("club_members").insert({ club_id: club.id, user_id: authCtx.user.id });
+          toast.success("Você entrou no club! 🎉");
+        } catch (e) { toast.error("Erro ao entrar no club"); }
+      }, 500);
     }
   }, [authCtx.user]);
 
