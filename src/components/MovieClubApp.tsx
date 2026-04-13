@@ -575,7 +575,7 @@ function Navbar({ page, setPage, hasKeys, apiStatus }) {
           }}
             onMouseEnter={e => { if (page !== id) e.currentTarget.style.color = C.text; }}
             onMouseLeave={e => { if (page !== id) e.currentTarget.style.color = C.textMuted; }}>
-            <span style={{ fontSize: 15 }}>{icon}</span>
+            {icon ? <img src={icon} alt="" style={{ width: 22, height: 22, objectFit: "contain" }} /> : <span style={{ fontSize: 15 }}>🔍</span>}
             {label}
           </button>
         ))}
