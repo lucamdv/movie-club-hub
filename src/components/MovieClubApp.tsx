@@ -14,6 +14,8 @@ import monkeyPopcorn from "@/assets/monkey-popcorn.png";
 import monkeyDetective from "@/assets/monkey-detective.png";
 import monkeyStar from "@/assets/monkey-star.png";
 import monkeyAstronaut from "@/assets/monkey-astronaut.png";
+import monkeyGym from "@/assets/monkey-gym.png";
+import monkeyEars from "@/assets/monkey-ears.png";
 import monkeyStrong from "@/assets/monkey-strong.png";
 import monkeyShy from "@/assets/monkey-shy.png";
 
