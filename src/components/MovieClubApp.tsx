@@ -1176,16 +1176,27 @@ function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx }) {
                 </div>
               </Section>
             )}
-            <Section title="Reviews da Comunidade">
-              {watched && (
-                <div style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 14, padding: 20, marginBottom: 16 }}>
-                  <p style={{ fontSize: 13, color: C.textMuted, marginBottom: 10 }}>Sua avaliação</p>
-                  <StarRating value={rating} max={5} size={22} interactive onChange={setRating} />
-                  <textarea value={review} onChange={e => setReview(e.target.value)} placeholder="Escreva sua review…" rows={3}
-                    style={{ width: "100%", marginTop: 12, padding: "10px 14px", borderRadius: 8, background: C.bgDeep, border: `1px solid ${C.border}`, color: C.text, fontSize: 13, resize: "vertical", outline: "none" }} />
-                  <Btn variant="gold" style={{ marginTop: 10 }} size="sm">Publicar</Btn>
+            <Section title="Sua Avaliação">
+              <div style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 14, padding: 20, marginBottom: 16 }}>
+                <p style={{ fontSize: 13, color: C.textMuted, marginBottom: 10 }}>
+                  {existingRating ? `Sua nota: ${Number(existingRating.rating).toFixed(1)} ★` : "Arraste para avaliar"}
+                </p>
+                <StarRating value={localRating} max={5} size={28} interactive onChange={setLocalRating} />
+                <textarea value={review} onChange={e => setReview(e.target.value)} placeholder="Escreva sua review (opcional)…" rows={3}
+                  style={{ width: "100%", marginTop: 12, padding: "10px 14px", borderRadius: 8, background: C.bgDeep, border: `1px solid ${C.border}`, color: C.text, fontSize: 13, resize: "vertical", outline: "none" }} />
+                <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+                  <Btn variant="gold" size="sm" disabled={!localRating} onClick={async () => {
+                    const tmdbId = m.tmdbId || m.id;
+                    await upsertRating(tmdbId, localRating, review, m.title, m.poster);
+                  }}>{existingRating ? "Atualizar" : "Publicar"}</Btn>
+                  {existingRating && <Btn variant="ghost" size="sm" onClick={async () => {
+                    await (await import("@/integrations/supabase/client")).supabase.from("ratings").delete().eq("id", existingRating.id);
+                    setLocalRating(0); setReview("");
+                  }}>Remover</Btn>}
                 </div>
-              )}
+              </div>
+            </Section>
+            <Section title="Reviews da Comunidade">
               {reviews.map((r, i) => (
                 <div key={i} style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 14, padding: 20, marginBottom: 12 }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
@@ -1198,7 +1209,7 @@ function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx }) {
                   <p style={{ fontSize: 14, color: C.textMuted, lineHeight: 1.7, fontStyle: "italic" }}>"{r.text}"</p>
                 </div>
               ))}
-              {reviews.length === 0 && !watched && <p style={{ color: C.textDim, textAlign: "center", padding: 40 }}>Nenhuma review ainda.</p>}
+              {reviews.length === 0 && <p style={{ color: C.textDim, textAlign: "center", padding: 40 }}>Nenhuma review ainda.</p>}
             </Section>
           </div>
           <div>
