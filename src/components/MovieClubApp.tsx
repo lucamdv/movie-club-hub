@@ -515,112 +515,49 @@ function Navbar({ page, setPage, hasKeys, apiStatus }) {
 }
 
 // ─────────────────────────────────────────────
-//  SETTINGS PAGE
+//  SETTINGS PAGE (server-side keys)
 // ─────────────────────────────────────────────
-function SettingsPage({ keys, saveKeys, onApiStatus }) {
-  const [draft, setDraft] = useState({...keys});
-  const [saved, setSaved] = useState(false);
-  const [testing, setTesting] = useState({});
+function SettingsPage({ apiStatus }) {
+  const [testing, setTesting] = useState(false);
   const [results, setResults] = useState({});
 
-  const testKey = async (which) => {
-    setTesting(t=>({...t,[which]:true})); setResults(r=>({...r,[which]:null}));
+  const testApis = async () => {
+    setTesting(true); setResults({});
     try {
-      let msg, ok=false;
-      if (which==="tmdb") {
-        const r = await fetch(`${TMDB_BASE}/movie/popular?api_key=${draft.tmdb}&language=pt-BR`);
-        const d = await r.json();
-        ok = !!d.results;
-        msg = ok ? `✓ Válida — TMDb respondeu com ${d.results.length} filmes` : `✗ ${d.status_message||"Chave inválida"}`;
-      } else if (which==="omdb") {
-        const r = await fetch(`https://www.omdbapi.com/?apikey=${draft.omdb}&t=Inception`);
-        const d = await r.json();
-        ok = d.Response === "True";
-        msg = ok ? `✓ Válida — "${d.Title}" (${d.Year}) encontrado` : `✗ ${d.Error||"Chave inválida"}`;
-      } else if (which==="streaming") {
-        const r = await fetch(`https://streaming-availability.p.rapidapi.com/shows/search/filters?country=br&show_type=movie`, {
-          headers:{"x-rapidapi-key":draft.streaming,"x-rapidapi-host":"streaming-availability.p.rapidapi.com"}
-        });
-        ok = r.ok;
-        msg = ok ? `✓ Válida — Streaming Availability respondeu (status ${r.status})` : `✗ Inválida (status ${r.status}) — verifique se assinou o plano na RapidAPI`;
-      }
-      setResults(r=>({...r,[which]:{ msg, ok }}));
-      onApiStatus?.(prev => ({...prev, [which]: ok}));
-    } catch(e) {
-      setResults(r=>({...r,[which]:{ msg:`✗ Erro de rede: ${e.message}`, ok:false }}));
-    }
-    setTesting(t=>({...t,[which]:false}));
+      const tmdbRes = await tmdb.popular();
+      setResults(r => ({...r, tmdb: { ok: !!tmdbRes?.results, msg: tmdbRes?.results ? `✓ TMDb respondeu com ${tmdbRes.results.length} filmes` : "✗ Falha na resposta" }}));
+    } catch(e) { setResults(r => ({...r, tmdb: { ok: false, msg: `✗ Erro: ${e.message}` }})); }
+    try {
+      const omdbRes = await omdb.byTitle("Inception", 2010);
+      setResults(r => ({...r, omdb: { ok: !!omdbRes?.Title, msg: omdbRes?.Title ? `✓ OMDb: "${omdbRes.Title}" (${omdbRes.Year})` : "✗ Sem resposta (chave pode não estar configurada)" }}));
+    } catch(e) { setResults(r => ({...r, omdb: { ok: false, msg: `✗ Erro: ${e.message}` }})); }
+    setTesting(false);
   };
 
-  const handleSave = () => { saveKeys(draft); setSaved(true); setTimeout(()=>setSaved(false),2500); };
-
   const APIS = [
-    {
-      key:"tmdb", label:"TMDb API", color:"#01B4E4",
-      desc:"The Movie Database — fonte principal: pôsteres, metadados, elenco, trailers, busca e recomendações. Gratuita, sem limite prático de requests.",
-      placeholder:"Ex: a1b2c3d4e5f6g7h8i9j0...",
-      link:"https://www.themoviedb.org/settings/api",
-      steps:[
-        "Acesse themoviedb.org e crie uma conta gratuita",
-        "Vá em Configurações → API (menu lateral)",
-        "Clique em 'Create' → escolha 'Developer'",
-        "Preencha o formulário (pode usar 'Personal Project')",
-        "Copie a 'API Key (v3 auth)'"
-      ],
-      note:"Plano gratuito — sem limite de requests.",
-    },
-    {
-      key:"omdb", label:"OMDb API", color:"#F5C518",
-      desc:"Open Movie Database — camada de enriquecimento: rating IMDb, Rotten Tomatoes, Metacritic, bilheteria, prêmios e classificação etária.",
-      placeholder:"Ex: a1b2c3d4...",
-      link:"http://www.omdbapi.com/apikey.aspx",
-      steps:[
-        "Acesse omdbapi.com/apikey.aspx",
-        "Escolha o plano FREE (1.000 req/dia) ou Patreon ($1/mês = 100k req)",
-        "Informe seu email e finalize",
-        "Acesse seu email e ative a chave no link enviado",
-        "Copie sua API Key"
-      ],
-      note:"Plano FREE: 1.000 req/dia. Pago a partir de $1/mês.",
-    },
-    {
-      key:"streaming", label:"Streaming Availability (RapidAPI)", color:"#0055DA",
-      desc:"Onde assistir no Brasil — verifica disponibilidade em Netflix, Prime Video, Disney+, Max, Apple TV+, Globoplay, MUBI e mais, com link direto para cada plataforma.",
-      placeholder:"Cole sua RapidAPI Key aqui...",
-      link:"https://rapidapi.com/movie-of-the-night-movie-of-the-night-default/api/streaming-availability",
-      steps:[
-        "Acesse rapidapi.com e crie uma conta gratuita",
-        "Pesquise 'Streaming Availability' no marketplace",
-        "Clique em 'Subscribe to Test' → escolha o plano Basic (gratuito)",
-        "Acesse rapidapi.com/developer/apps → copie sua 'Application Key'",
-        "Cole a chave aqui (é a mesma para todas as APIs da RapidAPI)"
-      ],
-      note:"Plano Basic FREE: 100 req/mês. Pro: $9.99/mês = 5.000 req.",
-    },
+    { key:"tmdb", label:"TMDb API", color:"#01B4E4", desc:"Pôsteres, metadados, elenco, trailers, busca e recomendações.", secret:"TMDB_API_KEY" },
+    { key:"omdb", label:"OMDb API", color:"#F5C518", desc:"Ratings IMDb, Rotten Tomatoes, Metacritic, bilheteria e prêmios.", secret:"OMDB_API_KEY" },
+    { key:"streaming", label:"Streaming Availability", color:"#0055DA", desc:"Onde assistir no Brasil — Netflix, Prime, Disney+, Max e mais.", secret:"STREAMING_AVAILABILITY_API_KEY" },
   ];
 
   return (
     <div style={{ paddingTop:80, paddingBottom:80 }}>
       <div style={{ maxWidth:720, margin:"0 auto", padding:"0 28px" }}>
-
-        {/* Header */}
         <div style={{ marginBottom:32 }}>
           <h1 style={{ fontFamily:"'Cinzel',serif", fontSize:26, fontWeight:700, color:C.text, marginBottom:8 }}>
-            Configurar <span style={{ color:C.gold }}>APIs</span>
+            Status das <span style={{ color:C.gold }}>APIs</span>
           </h1>
           <p style={{ color:C.textMuted, fontSize:14, lineHeight:1.7 }}>
-            As chaves são armazenadas <strong style={{ color:C.text }}>apenas no seu navegador</strong> (localStorage) e jamais são enviadas a servidores externos. O MovieClub usa suas chaves diretamente para fazer chamadas às APIs.
+            As chaves de API estão configuradas de forma segura no <strong style={{ color:C.text }}>servidor</strong>. Elas nunca são expostas ao navegador.
           </p>
         </div>
 
-        {/* API Status Summary */}
         <div style={{ display:"flex", gap:10, marginBottom:28, padding:16, borderRadius:14, background:C.bgCard, border:`1px solid ${C.border}` }}>
           {APIS.map(api => {
-            const isSet = !!(draft[api.key]);
             const result = results[api.key];
-            const status = result?.ok ? "ok" : result?.ok === false ? "error" : isSet ? "set" : "missing";
-            const colors = { ok: C.success, error: C.red, set: C.gold, missing: C.textDim };
-            const labels = { ok: "Ativa", error: "Erro", set: "Configurada", missing: "Não configurada" };
+            const status = result?.ok ? "ok" : result?.ok === false ? "error" : "configured";
+            const colors = { ok: C.success, error: C.red, configured: C.gold };
+            const labels = { ok: "Ativa", error: "Erro", configured: "Configurada" };
             return (
               <div key={api.key} style={{ flex:1, textAlign:"center", padding:"10px 8px", borderRadius:10, background:C.bgDeep, border:`1px solid ${status==="ok"?C.success:status==="error"?C.red:C.border}`, transition:"border-color 0.3s" }}>
                 <div style={{ width:8, height:8, borderRadius:"50%", background:colors[status], margin:"0 auto 6px" }}/>
@@ -631,57 +568,20 @@ function SettingsPage({ keys, saveKeys, onApiStatus }) {
           })}
         </div>
 
-        <div style={{ display:"flex", flexDirection:"column", gap:20 }}>
+        <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
           {APIS.map(api => {
             const result = results[api.key];
-            const isOk = result?.ok;
             return (
-              <div key={api.key} style={{ background:C.bgCard, border:`1px solid ${draft[api.key]?C.borderHover:C.border}`, borderRadius:16, padding:24, transition:"border-color 0.3s" }}>
-                {/* Header */}
+              <div key={api.key} style={{ background:C.bgCard, border:`1px solid ${C.border}`, borderRadius:16, padding:24 }}>
                 <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:6 }}>
                   <div style={{ width:10, height:10, borderRadius:"50%", background:api.color, flexShrink:0 }}/>
                   <h3 style={{ fontSize:15, fontWeight:600, color:C.text }}>{api.label}</h3>
-                  {draft[api.key] && <Badge color="rgba(34,197,94,0.1)" textColor={C.success} small>Configurada</Badge>}
+                  <Badge color="rgba(34,197,94,0.1)" textColor={C.success} small>Servidor</Badge>
                 </div>
-                <p style={{ fontSize:13, color:C.textMuted, marginBottom:16, lineHeight:1.6, paddingLeft:20 }}>{api.desc}</p>
-
-                {/* Step-by-step guide */}
-                <details style={{ marginBottom:16 }}>
-                  <summary style={{ fontSize:12, color:api.color, cursor:"pointer", fontWeight:500, paddingLeft:20, outline:"none", userSelect:"none" }}>
-                    Como obter esta chave (passo a passo) ↓
-                  </summary>
-                  <ol style={{ marginTop:10, paddingLeft:36, display:"flex", flexDirection:"column", gap:5 }}>
-                    {api.steps.map((step,i) => (
-                      <li key={i} style={{ fontSize:12, color:C.textMuted, lineHeight:1.6 }}>{step}</li>
-                    ))}
-                  </ol>
-                  <a href={api.link} target="_blank" rel="noopener noreferrer"
-                    style={{ display:"inline-flex", alignItems:"center", gap:4, marginTop:10, marginLeft:20, fontSize:12, color:api.color, fontWeight:500 }}>
-                    Ir para o site oficial ↗
-                  </a>
-                </details>
-
-                {/* Input + Test */}
-                <div style={{ display:"flex", gap:8 }}>
-                  <input type="password" value={draft[api.key]||""} onChange={e=>setDraft(d=>({...d,[api.key]:e.target.value}))}
-                    placeholder={api.placeholder}
-                    style={{ flex:1, padding:"9px 14px", borderRadius:8, background:C.bgDeep, border:`1px solid ${C.border}`, color:C.text, fontSize:12, outline:"none", fontFamily:"monospace", letterSpacing:"0.05em", transition:"border-color 0.2s" }}
-                    onFocus={e=>e.target.style.borderColor=api.color}
-                    onBlur={e=>e.target.style.borderColor=C.border}/>
-                  <button onClick={()=>testKey(api.key)} disabled={!draft[api.key]||testing[api.key]}
-                    style={{ padding:"9px 18px", borderRadius:8, fontSize:12, fontWeight:600, background:`${api.color}20`, color:api.color, border:`1px solid ${api.color}40`, opacity:!draft[api.key]?0.4:1, display:"flex", alignItems:"center", gap:5, whiteSpace:"nowrap", transition:"all 0.2s" }}
-                    onMouseEnter={e=>{ if(draft[api.key]) e.currentTarget.style.background=`${api.color}35`; }}
-                    onMouseLeave={e=>{ e.currentTarget.style.background=`${api.color}20`; }}>
-                    {testing[api.key]?<Spinner size={12}/>:<><CheckIcon/> Testar</>}
-                  </button>
-                </div>
-
-                {/* Note */}
-                <p style={{ fontSize:11, color:C.textDim, marginTop:8, paddingLeft:2 }}>{api.note}</p>
-
-                {/* Result */}
+                <p style={{ fontSize:13, color:C.textMuted, marginBottom:10, lineHeight:1.6, paddingLeft:20 }}>{api.desc}</p>
+                <p style={{ fontSize:11, color:C.textDim, paddingLeft:20, fontFamily:"monospace" }}>Secret: {api.secret}</p>
                 {result && (
-                  <p style={{ marginTop:10, fontSize:12, fontWeight:500, color:isOk?C.success:C.red, padding:"7px 12px", borderRadius:8, background:isOk?"rgba(34,197,94,0.07)":"rgba(239,68,68,0.07)", border:`1px solid ${isOk?"rgba(34,197,94,0.2)":"rgba(239,68,68,0.2)"}` }}>
+                  <p style={{ marginTop:10, fontSize:12, fontWeight:500, color:result.ok?C.success:C.red, padding:"7px 12px", borderRadius:8, background:result.ok?"rgba(34,197,94,0.07)":"rgba(239,68,68,0.07)", border:`1px solid ${result.ok?"rgba(34,197,94,0.2)":"rgba(239,68,68,0.2)"}` }}>
                     {result.msg}
                   </p>
                 )}
@@ -690,27 +590,8 @@ function SettingsPage({ keys, saveKeys, onApiStatus }) {
           })}
         </div>
 
-        {/* Save */}
-        <div style={{ marginTop:28, display:"flex", gap:12, alignItems:"center" }}>
-          <Btn variant="gold" onClick={handleSave}>{saved?<><CheckIcon/> Salvo!</>:"Salvar Chaves"}</Btn>
-          <Btn variant="ghost" onClick={()=>{ setDraft({tmdb:"",omdb:"",streaming:""}); saveKeys({tmdb:"",omdb:"",streaming:""}); setResults({}); }}>Limpar tudo</Btn>
-        </div>
-
-        {/* Demo mode note */}
-        <div style={{ marginTop:28, padding:20, borderRadius:14, background:"rgba(201,168,76,0.05)", border:`1px solid rgba(201,168,76,0.18)` }}>
-          <p style={{ fontSize:13, color:C.gold, fontWeight:600, marginBottom:8 }}>🎭 Modo Demonstração</p>
-          <div style={{ display:"flex", flexDirection:"column", gap:5 }}>
-            {[
-              ["TMDb", "Usa chave pública com acesso limitado de leitura. Funciona para demo, mas pode ter rate limiting."],
-              ["OMDb", "Sem chave: ratings do IMDb, Rotten Tomatoes e Metacritic não aparecem na página do filme."],
-              ["Streaming", "Sem chave: seção 'Onde Assistir no Brasil' exibe aviso de não disponível."],
-            ].map(([api,note]) => (
-              <div key={api} style={{ display:"flex", gap:8 }}>
-                <span style={{ fontSize:12, color:C.gold, fontWeight:600, minWidth:60 }}>{api}</span>
-                <span style={{ fontSize:12, color:C.textMuted, lineHeight:1.5 }}>{note}</span>
-              </div>
-            ))}
-          </div>
+        <div style={{ marginTop:28 }}>
+          <Btn variant="gold" onClick={testApis}>{testing?<><Spinner size={14}/> Testando…</>:<><CheckIcon/> Testar APIs</>}</Btn>
         </div>
       </div>
     </div>
