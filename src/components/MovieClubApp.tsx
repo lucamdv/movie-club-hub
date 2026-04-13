@@ -2252,29 +2252,9 @@ function FriendsPage({ setPage, setSelectedMovie, auth: authCtx, onViewProfile }
     supabase.from("profiles").select("*").in("user_id", ids).then(({ data }) => setFriendProfiles(data || []));
   }, [friends, userId]);
 
-  const handleGenerateLink = async () => {
-    try {
-      const link = await createLink();
-      const url = `${window.location.origin}?friend=${link.code}`;
-      setGeneratedLink(url);
-      toast.success("Link de amizade gerado!");
-    } catch (e) { toast.error("Erro ao gerar link"); }
-  };
-
-  const handleAcceptCode = async () => {
-    if (!friendCode.trim()) return;
-    try {
-      // Extract code from URL or raw code
-      let code = friendCode.trim();
-      if (code.includes("friend=")) code = new URL(code).searchParams.get("friend") || code;
-      await acceptLink(code);
-      toast.success("Amizade aceita! 🎉");
-      setFriendCode("");
-    } catch (e) { toast.error(e.message || "Erro ao aceitar link"); }
-  };
-
-  const copyToClipboard = (text) => {
-    navigator.clipboard.writeText(text).then(() => toast.success("Link copiado!")).catch(() => toast.error("Erro ao copiar"));
+  const handleShareProfile = () => {
+    const url = `${window.location.origin}?profile=${userId}`;
+    navigator.clipboard.writeText(url).then(() => toast.success("Link do perfil copiado!")).catch(() => toast.error("Erro ao copiar"));
   };
 
   const getAvatarForProfile = (profile) => {
