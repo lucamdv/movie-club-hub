@@ -182,11 +182,11 @@
 /* ─── Netflix Carousel ─── */
 .carousel-row {
   display: flex;
-  gap: 16px;
+  gap: 14px;
   overflow-x: auto;
   scroll-behavior: smooth;
   scroll-snap-type: x proximity;
-  padding: 12px 4px 20px;
+  padding: 12px 8px 24px;
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
@@ -201,37 +201,37 @@
   top: 50%;
   transform: translateY(-50%);
   z-index: 10;
-  width: 40px;
-  height: 80px;
+  width: 44px;
+  height: 88px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0,0,0,0.7);
+  background: rgba(15,25,35,0.85);
+  backdrop-filter: blur(8px);
   border: none;
   color: #F0EDE6;
   font-size: 20px;
   cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.25s;
+  transition: opacity 0.3s, background 0.3s;
   border-radius: 4px;
 }
 .carousel-wrapper:hover .carousel-btn { opacity: 1; }
-.carousel-btn:hover { background: rgba(201,168,76,0.4); }
-.carousel-btn-left { left: 0; border-radius: 0 4px 4px 0; }
-.carousel-btn-right { right: 0; border-radius: 4px 0 0 4px; }
+.carousel-btn:hover { background: rgba(201,168,76,0.3); color: #C9A84C; }
+.carousel-btn-left { left: 0; border-radius: 0 8px 8px 0; }
+.carousel-btn-right { right: 0; border-radius: 8px 0 0 8px; }
 
 /* ─── Movie Card Netflix ─── */
 .movie-card-netflix {
   flex-shrink: 0;
   cursor: pointer;
-  transition: transform 0.3s ease, z-index 0s 0.3s;
+  transition: transform 0.35s cubic-bezier(0.23,1,0.32,1), z-index 0s 0.35s;
   position: relative;
   will-change: transform;
 }
 .movie-card-netflix:hover {
-  transform: scale(1.06);
+  transform: scale(1.08);
   z-index: 5;
-  transition: transform 0.3s ease, z-index 0s;
+  transition: transform 0.35s cubic-bezier(0.23,1,0.32,1), z-index 0s;
 }
 .movie-card-netflix:hover .movie-card-overlay {
   opacity: 1;
@@ -241,10 +241,10 @@
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 12px;
-  background: linear-gradient(transparent, rgba(0,0,0,0.92));
+  padding: 14px;
+  background: linear-gradient(transparent, rgba(0,0,0,0.95));
   opacity: 0;
-  transition: opacity 0.3s;
+  transition: opacity 0.35s;
   border-radius: 0 0 10px 10px;
 }
 
