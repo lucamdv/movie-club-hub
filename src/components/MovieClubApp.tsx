@@ -1035,9 +1035,70 @@ function HeroBanner({ movies, onSelect }) {
 // ─────────────────────────────────────────────
 //  HOME PAGE (Netflix layout)
 // ─────────────────────────────────────────────
-function HomePage({ setPage, setSelectedMovie }) {
+function Top10Card({ movie, rank, onClick }) {
+  return (
+    <div onClick={onClick} style={{ display: "flex", alignItems: "center", cursor: "pointer", flexShrink: 0, position: "relative", width: 200 }} className="movie-card-netflix">
+      <span style={{
+        fontSize: 82, fontWeight: 900, fontFamily: "'Outfit', sans-serif",
+        color: "transparent", WebkitTextStroke: `2px ${C.gold}`,
+        lineHeight: 1, position: "absolute", left: -8, bottom: -8, zIndex: 2,
+        textShadow: `0 0 20px rgba(201,168,76,0.2)`,
+      }}>{rank}</span>
+      <div style={{ width: 130, height: 195, borderRadius: 10, overflow: "hidden", marginLeft: 40, border: `1px solid ${C.border}`, background: C.bgCard, position: "relative", zIndex: 1 }}>
+        {movie.poster ? <img src={movie.posterHD || movie.poster} alt={movie.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> :
+          <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: 28, opacity: 0.3 }}>🎬</span></div>}
+        {movie.rating && (
+          <div style={{ position: "absolute", top: 6, right: 6, background: "rgba(9,21,35,0.85)", color: C.gold, fontSize: 11, fontWeight: 700, padding: "3px 7px", borderRadius: 6 }}>★ {movie.rating}</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function useRecommendations(userId) {
+  const { ratings } = useRatings(userId);
+  const [recs, setRecs] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!ratings.length) { setRecs([]); return; }
+    let alive = true;
+    setLoading(true);
+
+    // Get top rated movies by the user (4+) and fetch recommendations from TMDb
+    const topRated = ratings.filter(r => Number(r.rating) >= 4).slice(0, 3);
+    if (!topRated.length) { setLoading(false); return; }
+
+    const ratedIds = new Set(ratings.map(r => r.tmdb_id));
+
+    Promise.all(topRated.map(r =>
+      tmdb.get(`/movie/${r.tmdb_id}/recommendations`).catch(() => null)
+    )).then(results => {
+      if (!alive) return;
+      const allRecs = results
+        .filter(Boolean)
+        .flatMap(r => r.results || [])
+        .map(normalizeTmdb)
+        .filter(Boolean)
+        .filter(m => !ratedIds.has(m.id)); // exclude already rated
+      // Deduplicate
+      const seen = new Set();
+      const unique = allRecs.filter(m => { if (seen.has(m.id)) return false; seen.add(m.id); return true; });
+      setRecs(unique.slice(0, 20));
+      setLoading(false);
+    }).catch(() => { if (alive) setLoading(false); });
+
+    return () => { alive = false; };
+  }, [ratings]);
+
+  return { recs, loading };
+}
+
+function HomePage({ setPage, setSelectedMovie, auth: authCtx }) {
   const [genres, setGenres] = useState([]);
   const [activeG, setActiveG] = useState(null);
+  const [top10, setTop10] = useState([]);
+  const [top10Loading, setTop10Loading] = useState(true);
 
   const trendingFetcher = useCallback((p) => tmdb.trending(p), []);
   const popularFetcher = useCallback((p) => tmdb.popular(p), []);
@@ -1046,6 +1107,18 @@ function HomePage({ setPage, setSelectedMovie }) {
   const trend = usePaginatedMovies(trendingFetcher);
   const pop = usePaginatedMovies(popularFetcher);
   const top = usePaginatedMovies(topRatedFetcher);
+
+  const { recs, loading: recsLoading } = useRecommendations(authCtx?.user?.id);
+
+  // Top 10 weekly
+  useEffect(() => {
+    setTop10Loading(true);
+    tmdb.get("/trending/movie/week").then(d => {
+      const movies = (d.results || []).slice(0, 10).map(normalizeTmdb).filter(Boolean);
+      setTop10(movies);
+      setTop10Loading(false);
+    }).catch(() => setTop10Loading(false));
+  }, []);
 
   const [genreMovs, setGenreMovs] = useState([]);
   const [genrePage, setGenrePage] = useState(1);
@@ -1080,6 +1153,30 @@ function HomePage({ setPage, setSelectedMovie }) {
       )}
 
       <div style={{ maxWidth: 1400, margin: "0 auto", padding: "0 40px" }}>
+        {/* Top 10 Weekly */}
+        <Section title="🔥 Top 10 da Semana">
+          {top10Loading ? (
+            <div style={{ display: "flex", gap: 12 }}>{Array(5).fill(0).map((_, i) => <SkeletonCard key={i} w={130} />)}</div>
+          ) : (
+            <Carousel>
+              {top10.map((m, i) => (
+                <Top10Card key={m.id} movie={m} rank={i + 1} onClick={() => go(m)} />
+              ))}
+            </Carousel>
+          )}
+        </Section>
+
+        {/* Personalized Recommendations */}
+        {recs.length > 0 && (
+          <Section title="🎯 Recomendados para Você">
+            {recsLoading ? (
+              <div style={{ display: "flex", gap: 12 }}>{Array(8).fill(0).map((_, i) => <SkeletonCard key={i} />)}</div>
+            ) : (
+              <Carousel movies={recs} onMovieClick={go} />
+            )}
+          </Section>
+        )}
+
         {/* Trending Carousel */}
         <Section title="Em Alta Agora" action={{ label: "Buscar", onClick: () => setPage("search") }}>
           {trend.loading
