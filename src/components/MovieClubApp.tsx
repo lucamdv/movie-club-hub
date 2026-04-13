@@ -470,7 +470,7 @@ function MiniPoster({ tmdbId }) {
   useEffect(() => {
     if (!tmdbId) return;
     cachedFetch(`mini_${tmdbId}`, ()=>
-      fetch(`${TMDB_BASE}/movie/${tmdbId}?api_key=${tmdb.key()}&language=pt-BR`).then(r=>r.json())
+      tmdbProxy({ data: { path: `/movie/${tmdbId}`, params: {} } })
     ).then(d=>{ if(d?.poster_path) setPoster(tmdb.poster(d.poster_path,"w92")); }).catch(()=>{});
   }, [tmdbId]);
   return poster ? <img src={poster} alt="" style={{ width:"100%", height:"100%", objectFit:"cover" }}/> : null;
