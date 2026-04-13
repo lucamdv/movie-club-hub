@@ -534,7 +534,13 @@ function Carousel({ children, movies, onMovieClick }) {
 //  NAVBAR (transparent + blur)
 // ─────────────────────────────────────────────
 function Navbar({ page, setPage, hasKeys, apiStatus }) {
-  const items = [["home", "Discover"], ["profile", "Perfil"], ["groups", "Clubs"], ["search", "Buscar"]];
+  // Monkey mascots: wizard=discover, speak-no-evil=profile, see-no-evil=clubs
+  const items = [
+    ["home", "Discover", "🙈"],
+    ["profile", "Perfil", "🙊"],
+    ["groups", "Clubs", "🙉"],
+    ["search", "Buscar", "🔍"],
+  ];
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 40);
@@ -552,23 +558,21 @@ function Navbar({ page, setPage, hasKeys, apiStatus }) {
       padding: "0 32px", height: 64, transition: "all 0.35s ease",
     }}>
       <button onClick={() => setPage("home")} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        {/* 4-point star */}
-        <svg width={24} height={24} viewBox="0 0 24 24" fill={C.gold}>
-          <path d="M12 0L14.5 9.5L24 12L14.5 14.5L12 24L9.5 14.5L0 12L9.5 9.5Z" />
-        </svg>
-        <span style={{ fontFamily: "'Playfair Display',serif", fontSize: 18, fontWeight: 800, color: C.gold, letterSpacing: "0.1em" }}>MOVIECLUB</span>
+        <img src={logoText} alt="MovieClub" style={{ height: 32, filter: "drop-shadow(0 0 8px rgba(201,168,76,0.2))" }} />
       </button>
 
-      <div style={{ display: "flex", gap: 0 }}>
-        {items.map(([id, label]) => (
+      <div style={{ display: "flex", gap: 4 }}>
+        {items.map(([id, label, icon]) => (
           <button key={id} onClick={() => setPage(id)} style={{
-            padding: "8px 20px", fontSize: 13, fontWeight: 500,
+            padding: "8px 18px", fontSize: 13, fontWeight: 600,
             color: page === id ? C.gold : C.textMuted,
             borderBottom: page === id ? `2px solid ${C.gold}` : "2px solid transparent",
             transition: "all 0.2s", background: "transparent",
+            display: "flex", alignItems: "center", gap: 6,
           }}
             onMouseEnter={e => { if (page !== id) e.currentTarget.style.color = C.text; }}
             onMouseLeave={e => { if (page !== id) e.currentTarget.style.color = C.textMuted; }}>
+            <span style={{ fontSize: 15 }}>{icon}</span>
             {label}
           </button>
         ))}
