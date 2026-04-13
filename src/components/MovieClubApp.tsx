@@ -875,16 +875,6 @@ function Navbar({ page, setPage, hasKeys, apiStatus }) {
         })}
       </div>
 
-      <button onClick={() => setPage("settings")} style={{
-        display: "flex", alignItems: "center", gap: 7, padding: "6px 14px", borderRadius: 8,
-        background: "transparent", border: `1px solid ${C.border}`,
-        color: C.textMuted, fontSize: 12, transition: "all 0.2s",
-      }}
-        onMouseEnter={e => { e.currentTarget.style.borderColor = C.gold; e.currentTarget.style.color = C.text; }}
-        onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.color = C.textMuted; }}>
-        <KeyIcon />
-        <span>APIs</span>
-      </button>
     </nav>
   );
 }
