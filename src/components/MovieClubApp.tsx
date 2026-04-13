@@ -2859,6 +2859,7 @@ export default function MovieClubApp() {
         {page === "home" && <HomePage setPage={setPage} setSelectedMovie={setSM} auth={authCtx} />}
         {page === "profile" && <ProfilePage setPage={setPage} isOwnProfile auth={authCtx} setSelectedMovie={setSM} />}
         {page === "movie" && <MoviePage movieInit={selectedMovie} setPage={setPage} setSelectedMovie={setSM} auth={authCtx} />}
+        {page === "friends" && <FriendsPage setPage={setPage} setSelectedMovie={setSM} auth={authCtx} />}
         {page === "groups" && <GroupsPage setPage={setPage} setSelectedGroup={setSG} />}
         {page === "group" && <GroupPage group={selectedGroup} setPage={setPage} setSelectedMovie={setSM} />}
         {page === "search" && <SearchPage setPage={setPage} setSelectedMovie={setSM} />}
