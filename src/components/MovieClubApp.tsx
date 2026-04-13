@@ -1640,10 +1640,9 @@ function ProfileEditModal({ profile, user, onClose, onSave }) {
                 <button key={m.id} onClick={() => setAvatarUrl(m.src)} style={{
                   padding: 8, borderRadius: 14, border: avatarUrl === m.src ? `2px solid ${C.gold}` : `1px solid ${C.border}`,
                   background: avatarUrl === m.src ? `${C.gold}15` : C.bgDeep,
-                  cursor: "pointer", transition: "all 0.2s", display: "flex", flexDirection: "column", alignItems: "center", gap: 4
+                  cursor: "pointer", transition: "all 0.2s", display: "flex", alignItems: "center", justifyContent: "center"
                 }}>
                   <img src={m.src} alt={m.label} loading="lazy" width={64} height={64} style={{ borderRadius: 10 }} />
-                  <span style={{ fontSize: 10, color: avatarUrl === m.src ? C.gold : C.textDim, fontWeight: 500 }}>{m.label}</span>
                 </button>
               ))}
             </div>
