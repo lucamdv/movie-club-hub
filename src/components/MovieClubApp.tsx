@@ -2989,6 +2989,11 @@ function QuickRatePage({ setPage, setSelectedMovie, auth }) {
     setLocalRating(stars);
     try {
       await upsertRating(current.id, stars, null, current.title, tmdb.poster(current.poster_path));
+      setSessionStats(prev => {
+        const exists = prev.rated.find(r => r.id === current.id);
+        if (exists) return { ...prev, rated: prev.rated.map(r => r.id === current.id ? { ...r, stars } : r) };
+        return { ...prev, rated: [...prev.rated, { id: current.id, title: current.title, poster: tmdb.poster(current.poster_path), stars }] };
+      });
       toast.success(`${stars} estrela${stars !== 1 ? "s" : ""} para ${current.title}`);
     } catch { toast.error("Erro ao avaliar"); }
   };
