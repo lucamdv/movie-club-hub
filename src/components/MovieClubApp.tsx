@@ -17,6 +17,9 @@ import monkeyStar from "@/assets/monkey-star.png";
 import monkeyAstronaut from "@/assets/monkey-astronaut.png";
 
 const MONKEY_AVATARS = [
+  { id: "mascot-wizard", src: mascotWizard, label: "Mágico" },
+  { id: "mascot-speak", src: mascotSpeak, label: "Falante" },
+  { id: "mascot-see", src: mascotSee, label: "Observador" },
   { id: "director", src: monkeyDirector, label: "Diretor" },
   { id: "popcorn", src: monkeyPopcorn, label: "Pipoca" },
   { id: "wizard", src: monkeyWizard, label: "Mago" },
