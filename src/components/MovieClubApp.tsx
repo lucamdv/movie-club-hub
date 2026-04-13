@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { tmdbProxy, omdbProxy, streamingProxy } from "@/lib/movie-api.functions";
 import logoMain from "@/assets/logo-main.png";
