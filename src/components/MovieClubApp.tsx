@@ -364,8 +364,11 @@ function useAuth() {
   }, []);
 
   const signUp = async (email, password, name, username) => {
-    const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { full_name: name }, emailRedirectTo: window.location.origin } });
+    const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { full_name: name } } });
     if (error) throw error;
+    if (!data.session) {
+      throw new Error("Conta criada mas não foi possível fazer login automático. Tente fazer login manualmente.");
+    }
     if (data.user && username) {
       await supabase.from("profiles").update({ username, display_name: name }).eq("user_id", data.user.id);
     }
@@ -1891,10 +1894,10 @@ export default function MovieClubApp() {
   const handleSplashDone = useCallback(() => setShowSplash(false), []);
 
   const handleLogin = async (email, password) => {
-    try { setAuthError(""); await authCtx.signIn(email, password); } catch (e) { setAuthError(e.message || "Erro ao entrar"); throw e; }
+    try { setAuthError(""); await authCtx.signIn(email, password); toast.success("Login realizado com sucesso!"); } catch (e) { const msg = e.message || "Erro ao entrar"; setAuthError(msg); toast.error(msg); throw e; }
   };
   const handleSignup = async (email, password, name, username) => {
-    try { setAuthError(""); await authCtx.signUp(email, password, name, username); } catch (e) { setAuthError(e.message || "Erro ao cadastrar"); throw e; }
+    try { setAuthError(""); await authCtx.signUp(email, password, name, username); toast.success("Conta criada com sucesso! Bem-vindo(a)!"); } catch (e) { const msg = e.message || "Erro ao cadastrar"; setAuthError(msg); toast.error(msg); throw e; }
   };
 
   if (showSplash) return <SplashScreen onFinish={handleSplashDone} />;
