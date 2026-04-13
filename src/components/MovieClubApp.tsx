@@ -459,7 +459,7 @@ function MovieCard({ movie, size="md", onClick }) {
     <div className="card-hover" onClick={onClick} style={{ width:w, flexShrink:0, cursor:"pointer", display:"flex", flexDirection:"column", gap:6 }}>
       <div style={{ width:w, height:h, borderRadius:8, background:C.bgCard, border:`1px solid ${C.border}`, overflow:"hidden", position:"relative" }}>
         {movie.poster
-          ? <img src={movie.poster} alt={movie.title} style={{ width:"100%", height:"100%", objectFit:"cover" }} onError={e=>e.target.style.display="none"}/>
+          ? <img src={movie.poster} alt={movie.title} loading="lazy" style={{ width:"100%", height:"100%", objectFit:"cover" }} onError={e=>e.target.style.display="none"}/>
           : <div style={{ width:"100%", height:"100%", display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:6, padding:8 }}>
               <span style={{ fontSize:24, opacity:0.4 }}>🎬</span>
               <p style={{ fontSize:10, color:C.textDim, textAlign:"center", lineHeight:1.3 }}>{movie.title}</p>
