@@ -1706,7 +1706,7 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
   const displayName = profile?.display_name || authCtx?.user?.email || "Usuário";
   const initials = displayName.slice(0, 2).toUpperCase();
   const uname = profile?.username || authCtx?.user?.email?.split("@")[0] || "user";
-  const bio = profile?.bio || "Cinéfilo apaixonado por boas histórias 🎬";
+  const bio = profile?.bio || "";
   const avgRating = ratings.length > 0 ? (ratings.reduce((s, r) => s + Number(r.rating), 0) / ratings.length).toFixed(1) : "—";
 
   // Top 3 recent posters for banner collage
