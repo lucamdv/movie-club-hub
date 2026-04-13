@@ -1725,11 +1725,14 @@ function LoginPage({ onLogin, onSignup, error }) {
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
+    if (!email || !pass) { toast.error("Preencha email e senha"); return; }
+    if (mode === "signup" && pass.length < 6) { toast.error("A senha deve ter pelo menos 6 caracteres"); return; }
+    if (mode === "signup" && !name) { toast.error("Preencha seu nome"); return; }
     setLoading(true);
     try {
       if (mode === "login") await onLogin(email, pass);
       else await onSignup(email, pass, name, username);
-    } catch (e) { /* error handled in parent */ }
+    } catch (e) { /* error handled via toast in parent */ }
     setLoading(false);
   };
 
