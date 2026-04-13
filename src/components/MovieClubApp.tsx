@@ -814,9 +814,9 @@ function Navbar({ page, setPage, hasKeys, apiStatus }) {
   // Monkey mascots: wizard=discover, speak-no-evil=profile, see-no-evil=clubs
   const items = [
     ["home", "Discover", mascotWizard],
+    ["groups", "Clubs", mascotSee],
     ["profile", "Perfil", mascotSpeak],
     ["friends", "Amigos", null],
-    ["groups", "Clubs", mascotSee],
     ["search", "Buscar", null],
   ];
   const [scrolled, setScrolled] = useState(false);
