@@ -1145,7 +1145,11 @@ function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx }) {
               </div>
             )}
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-              <Btn variant={watched ? "ghost" : "gold"} onClick={() => setWatched(w => !w)}>{watched ? <><CheckIcon /> Assistido</> : <><PlusIcon /> Marcar Assistido</>}</Btn>
+              <Btn variant={inWatchlist ? "ghost" : "gold"} onClick={() => {
+                const tmdbId = m.tmdbId || m.id;
+                if (inWatchlist) removeFromWatchlist(tmdbId);
+                else addToWatchlist(tmdbId, m.title, m.poster);
+              }}>{inWatchlist ? <><CheckIcon /> Na Watchlist</> : <><PlusIcon /> Minha Lista</>}</Btn>
               <Btn variant="ghost" onClick={() => setLiked(l => !l)}><HeartIcon f={liked} /> Curtir</Btn>
               {m.trailer && <a href={`https://youtube.com/watch?v=${m.trailer}`} target="_blank" rel="noopener noreferrer"><Btn variant="ghost"><PlayIcon /> Trailer</Btn></a>}
             </div>
