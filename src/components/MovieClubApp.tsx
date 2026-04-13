@@ -1917,7 +1917,7 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
                   borderRight: i < arr.length - 1 ? `1px solid ${C.border}` : "none",
                   minWidth: 120
                 }}>
-                  <p style={{ fontSize: 11, marginBottom: 4 }}>{icon}</p>
+                  <div style={{ marginBottom: 4, display: "flex", justifyContent: "center", color: C.gold }}>{icon}</div>
                   <p style={{ fontSize: 22, fontWeight: 700, color: C.gold, fontFamily: "'Outfit', sans-serif" }}>{val}</p>
                   <p style={{ fontSize: 11, color: C.textMuted, marginTop: 2 }}>{label}</p>
                 </div>
