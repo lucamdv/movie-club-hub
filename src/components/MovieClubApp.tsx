@@ -2907,14 +2907,25 @@ export default function MovieClubApp() {
     if (!authCtx.user) return;
     const params = new URLSearchParams(window.location.search);
     const profileId = params.get("profile");
+    const clubCode = params.get("club");
     if (profileId) {
       window.history.replaceState({}, "", window.location.pathname);
-      if (profileId === authCtx.user.id) {
-        setPage("profile");
-      } else {
-        setViewProfileUserId(profileId);
-        setPage("view-profile");
-      }
+      if (profileId === authCtx.user.id) { setPage("profile"); }
+      else { setViewProfileUserId(profileId); setPage("view-profile"); }
+    }
+    if (clubCode) {
+      window.history.replaceState({}, "", window.location.pathname);
+      setPage("groups");
+      setTimeout(async () => {
+        try {
+          const { data: club } = await supabase.from("clubs").select("id").eq("invite_code", clubCode).single();
+          if (!club) { toast.error("Código de club inválido"); return; }
+          const { data: existing } = await supabase.from("club_members").select("id").eq("club_id", club.id).eq("user_id", authCtx.user.id).maybeSingle();
+          if (existing) { toast.info("Você já é membro deste club!"); return; }
+          await supabase.from("club_members").insert({ club_id: club.id, user_id: authCtx.user.id });
+          toast.success("Você entrou no club! 🎉");
+        } catch (e) { toast.error("Erro ao entrar no club"); }
+      }, 500);
     }
   }, [authCtx.user]);
 
