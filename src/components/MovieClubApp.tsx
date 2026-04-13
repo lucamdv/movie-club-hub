@@ -626,9 +626,9 @@ function HomePage({ setPage, setSelectedMovie }) {
     setLoading(true);
     Promise.all([tmdb.trending(),tmdb.popular(),tmdb.topRated(),tmdb.genres()])
       .then(([t,p,tr,g])=>{
-        setTrending((t.results||[]).slice(0,10).map(normalizeTmdb).filter(Boolean));
-        setPopular((p.results||[]).slice(0,12).map(normalizeTmdb).filter(Boolean));
-        setTopRated((tr.results||[]).slice(0,12).map(normalizeTmdb).filter(Boolean));
+        setTrending((t.results||[]).map(normalizeTmdb).filter(Boolean));
+        setPopular((p.results||[]).map(normalizeTmdb).filter(Boolean));
+        setTopRated((tr.results||[]).map(normalizeTmdb).filter(Boolean));
         setGenres(g.genres||[]);
         setLoading(false);
       }).catch(()=>setLoading(false));
@@ -638,7 +638,7 @@ function HomePage({ setPage, setSelectedMovie }) {
     if(!activeG) return;
     setLoadingG(true);
     tmdb.byGenre(activeG.id).then(d=>{
-      setGenreMovs((d.results||[]).slice(0,12).map(normalizeTmdb).filter(Boolean));
+      setGenreMovs((d.results||[]).map(normalizeTmdb).filter(Boolean));
       setLoadingG(false);
     }).catch(()=>setLoadingG(false));
   },[activeG]);
