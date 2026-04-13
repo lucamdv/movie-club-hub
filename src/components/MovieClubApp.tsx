@@ -1715,9 +1715,19 @@ function SplashScreen({ onFinish }) {
 // ─────────────────────────────────────────────
 //  LOGIN PAGE (redesigned)
 // ─────────────────────────────────────────────
-function LoginPage({ onLogin }) {
+function LoginPage({ onLogin, onSignup, error }) {
   const [mode, setMode] = useState("login");
   const [email, setEmail] = useState(""), [pass, setPass] = useState(""), [name, setName] = useState(""), [username, setUsername] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async () => {
+    setLoading(true);
+    try {
+      if (mode === "login") await onLogin(email, pass);
+      else await onSignup(email, pass, name, username);
+    } catch (e) { /* error handled in parent */ }
+    setLoading(false);
+  };
 
   return (
     <div style={{ minHeight: "100vh", background: C.bg, display: "flex", position: "relative", overflow: "hidden" }}>
