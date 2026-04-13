@@ -1336,13 +1336,9 @@ export default function MovieClubApp() {
   const [page, setPage]         = useState("home");
   const [selectedMovie, setSM]  = useState(null);
   const [selectedGroup, setSG]  = useState(null);
-  const [keys, saveKeys]        = useApiKeys();
   const [apiStatus, setApiStatus] = useState({ tmdb: false, omdb: false, streaming: false });
-  const hasKeys = !!(keys.tmdb||keys.omdb||keys.streaming);
 
-  // Global CSS is now in src/styles.css
-
-  // Probe TMDb on mount to verify demo key works
+  // Probe TMDb on mount to verify server key works
   useEffect(()=>{
     tmdb.popular().then(d=>{ if(d?.results) setApiStatus(s=>({...s,tmdb:true})); }).catch(()=>{});
   },[]);
@@ -1351,7 +1347,7 @@ export default function MovieClubApp() {
 
   return (
     <div style={{ minHeight:"100vh", background:C.bg }}>
-      <Navbar page={page} setPage={setPage} hasKeys={hasKeys} apiStatus={apiStatus}/>
+      <Navbar page={page} setPage={setPage} hasKeys={true} apiStatus={apiStatus}/>
       <div className="page-enter" key={page}>
         {page==="home"     && <HomePage     setPage={setPage} setSelectedMovie={setSM}/>}
         {page==="profile"  && <ProfilePage  user={MOCK_USERS[3]} setPage={setPage} isOwnProfile/>}
@@ -1360,7 +1356,7 @@ export default function MovieClubApp() {
         {page==="groups"   && <GroupsPage   setPage={setPage} setSelectedGroup={setSG}/>}
         {page==="group"    && <GroupPage    group={selectedGroup} setPage={setPage} setSelectedMovie={setSM}/>}
         {page==="search"   && <SearchPage   setPage={setPage} setSelectedMovie={setSM}/>}
-        {page==="settings" && <SettingsPage keys={keys} saveKeys={saveKeys} onApiStatus={setApiStatus}/>}
+        {page==="settings" && <SettingsPage apiStatus={apiStatus}/>}
       </div>
     </div>
   );
