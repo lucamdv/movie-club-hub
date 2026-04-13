@@ -1425,44 +1425,28 @@ function GroupPage({ group, setPage, setSelectedMovie }) {
 //  SPLASH SCREEN
 // ─────────────────────────────────────────────
 function SplashScreen({ onFinish }) {
-  const [phase, setPhase] = useState("in"); // in -> out
+  const [phase, setPhase] = useState("in");
 
   useEffect(() => {
-    const t1 = setTimeout(() => setPhase("out"), 2000);
-    const t2 = setTimeout(() => onFinish(), 2500);
+    const t1 = setTimeout(() => setPhase("out"), 2200);
+    const t2 = setTimeout(() => onFinish(), 2700);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [onFinish]);
 
   return (
     <div style={{
       position: "fixed", inset: 0, zIndex: 9999,
-      background: `radial-gradient(ellipse at center, ${C.bgCardHover}, ${C.bg})`,
+      background: `radial-gradient(ellipse at center, #1B2838, ${C.bg})`,
       display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
       animation: phase === "out" ? "splashFadeOut 0.5s ease forwards" : undefined,
     }}>
-      {/* 4-point star */}
-      <svg width={48} height={48} viewBox="0 0 24 24" fill={C.gold}
-        style={{ animation: "splashStarSpin 1s ease-out forwards", marginBottom: 24 }}>
-        <path d="M12 0L14.5 9.5L24 12L14.5 14.5L12 24L9.5 14.5L0 12L9.5 9.5Z" />
-      </svg>
-
-      {/* Logo */}
-      <h1 style={{
-        fontFamily: "'Playfair Display',serif", fontSize: 48, fontWeight: 900, color: C.gold,
-        letterSpacing: "0.15em", animation: "splashFadeIn 0.8s ease 0.3s both",
-      }}>
-        MOVIECLUB
-      </h1>
-
-      {/* Subtitle */}
-      <p style={{
-        fontFamily: "'Playfair Display',serif", fontSize: 12, color: C.goldDim,
-        textTransform: "uppercase", marginTop: 12,
-        animation: "splashSubtitle 1s ease 0.6s both",
-      }}>
-        Shared Film Platform
-      </p>
+      <img src={logoMain} alt="MovieClub Logo" style={{
+        width: 320, maxWidth: "80vw", animation: "splashFadeIn 1s ease 0.2s both",
+        filter: "drop-shadow(0 0 40px rgba(201,168,76,0.3))",
+      }} />
     </div>
+  );
+}
   );
 }
 
