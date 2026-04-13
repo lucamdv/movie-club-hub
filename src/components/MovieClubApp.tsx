@@ -564,32 +564,33 @@ function Navbar({ page, setPage, hasKeys, apiStatus }) {
         <img src={logoText} alt="MovieClub" style={{ height: 32, filter: "drop-shadow(0 0 8px rgba(201,168,76,0.2))" }} />
       </button>
 
-      <div style={{ display: "flex", gap: 2 }}>
+      <div style={{ display: "flex", gap: 6 }}>
         {items.map(([id, label, icon]) => {
           const active = page === id;
           return (
             <button key={id} onClick={() => setPage(id)} style={{
-              padding: "6px 16px", fontSize: 13, fontWeight: 600,
+              padding: "8px 18px", fontSize: 13, fontWeight: 600,
               color: active ? C.gold : C.textMuted,
-              background: active ? "rgba(201,168,76,0.08)" : "transparent",
-              borderRadius: 10,
-              borderBottom: "none",
-              transition: "all 0.25s", display: "flex", alignItems: "center", gap: 7,
+              background: active ? "rgba(201,168,76,0.1)" : "transparent",
+              borderRadius: 12,
+              transition: "all 0.25s", display: "flex", alignItems: "center", gap: 10,
+              fontFamily: "'DM Sans', sans-serif",
             }}
-              onMouseEnter={e => { if (!active) { e.currentTarget.style.color = C.text; e.currentTarget.style.background = "rgba(255,255,255,0.04)"; } }}
-              onMouseLeave={e => { if (!active) { e.currentTarget.style.color = C.textMuted; e.currentTarget.style.background = "transparent"; } }}>
+              onMouseEnter={e => { if (!active) { e.currentTarget.style.color = C.text; e.currentTarget.style.background = "rgba(255,255,255,0.05)"; } }}
+              onMouseLeave={e => { if (!active) { e.currentTarget.style.color = C.textMuted; e.currentTarget.style.background = active ? "rgba(201,168,76,0.1)" : "transparent"; } }}>
               {icon ? (
                 <div style={{
-                  width: 28, height: 28, borderRadius: "50%", overflow: "hidden",
-                  border: active ? `1.5px solid ${C.gold}` : "1.5px solid transparent",
+                  width: 36, height: 36, borderRadius: "50%", overflow: "hidden",
+                  border: active ? `2px solid ${C.gold}` : "2px solid rgba(255,255,255,0.1)",
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  background: active ? "rgba(201,168,76,0.12)" : "rgba(255,255,255,0.05)",
+                  background: active ? "rgba(201,168,76,0.15)" : "rgba(255,255,255,0.06)",
                   transition: "all 0.25s", flexShrink: 0,
+                  boxShadow: active ? "0 0 12px rgba(201,168,76,0.3)" : "none",
                 }}>
-                  <img src={icon} alt="" style={{ width: 22, height: 22, objectFit: "cover", borderRadius: "50%" }} />
+                  <img src={icon} alt="" style={{ width: 30, height: 30, objectFit: "cover", borderRadius: "50%" }} />
                 </div>
               ) : (
-                <span style={{ fontSize: 14 }}>🔍</span>
+                <span style={{ fontSize: 16 }}>🔍</span>
               )}
               {label}
             </button>
