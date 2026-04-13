@@ -264,23 +264,193 @@ const SkeletonCard = ({ w = 160 }) => (
 
 function StarRating({ value, max = 5, size = 14, interactive = false, onChange }) {
   const [hover, setHover] = useState(0);
+  const containerRef = useRef(null);
+
+  const getValueFromEvent = useCallback((e, starIndex) => {
+    if (!interactive) return;
+    const starEl = e.currentTarget;
+    const rect = starEl.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const half = x < rect.width / 2;
+    return starIndex + (half ? 0.5 : 1);
+  }, [interactive]);
+
+  const handleMouseMove = useCallback((e, i) => {
+    if (!interactive) return;
+    const val = getValueFromEvent(e, i);
+    setHover(val);
+  }, [interactive, getValueFromEvent]);
+
+  const handleClick = useCallback((e, i) => {
+    if (!interactive) return;
+    const val = getValueFromEvent(e, i);
+    onChange?.(val);
+  }, [interactive, getValueFromEvent, onChange]);
+
+  // Touch/drag support
+  const handleTouchMove = useCallback((e) => {
+    if (!interactive || !containerRef.current) return;
+    const touch = e.touches[0];
+    const stars = containerRef.current.querySelectorAll("[data-star]");
+    for (let i = stars.length - 1; i >= 0; i--) {
+      const rect = stars[i].getBoundingClientRect();
+      if (touch.clientX >= rect.left) {
+        const x = touch.clientX - rect.left;
+        const half = x < rect.width / 2;
+        const val = i + (half ? 0.5 : 1);
+        setHover(val);
+        onChange?.(val);
+        break;
+      }
+    }
+  }, [interactive, onChange]);
+
   return (
-    <div style={{ display: "flex", gap: 2 }}>
+    <div ref={containerRef} style={{ display: "flex", gap: 2, touchAction: "none" }}
+      onTouchMove={handleTouchMove} onTouchEnd={() => setHover(0)}>
       {Array.from({ length: max }, (_, i) => {
-        const filled = (hover || value) > i;
+        const displayVal = hover || value;
+        const full = displayVal >= i + 1;
+        const half = !full && displayVal >= i + 0.5;
         return (
-          <svg key={i} width={size} height={size} viewBox="0 0 24 24"
-            fill={filled ? C.gold : "none"} stroke={filled ? C.gold : C.textDim} strokeWidth="1.5"
-            style={{ cursor: interactive ? "pointer" : "default", transition: "transform 0.1s" }}
-            onMouseEnter={() => interactive && setHover(i + 1)}
+          <svg key={i} data-star={i} width={size} height={size} viewBox="0 0 24 24"
+            style={{ cursor: interactive ? "pointer" : "default", transition: "transform 0.15s", transform: (interactive && hover && (hover >= i + 0.5)) ? "scale(1.15)" : "scale(1)" }}
+            onMouseMove={(e) => handleMouseMove(e, i)}
             onMouseLeave={() => interactive && setHover(0)}
-            onClick={() => interactive && onChange?.(i + 1)}>
-            <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" />
+            onClick={(e) => handleClick(e, i)}>
+            <defs>
+              <linearGradient id={`half-${i}-${size}`}>
+                <stop offset="50%" stopColor={C.gold} />
+                <stop offset="50%" stopColor="transparent" />
+              </linearGradient>
+            </defs>
+            <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"
+              fill={full ? C.gold : half ? `url(#half-${i}-${size})` : "none"}
+              stroke={full || half ? C.gold : C.textDim} strokeWidth="1.5" />
           </svg>
         );
       })}
     </div>
   );
+}
+
+// ─────────────────────────────────────────────
+//  SUPABASE HOOKS
+// ─────────────────────────────────────────────
+function useAuth() {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState(null);
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      setUser(session?.user || null);
+      if (session?.user) {
+        const { data } = await supabase.from("profiles").select("*").eq("user_id", session.user.id).single();
+        setProfile(data);
+      } else {
+        setProfile(null);
+      }
+      setLoading(false);
+    });
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user || null);
+      if (session?.user) {
+        supabase.from("profiles").select("*").eq("user_id", session.user.id).single().then(({ data }) => setProfile(data));
+      }
+      setLoading(false);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const signUp = async (email, password, name, username) => {
+    const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { full_name: name }, emailRedirectTo: window.location.origin } });
+    if (error) throw error;
+    if (data.user && username) {
+      await supabase.from("profiles").update({ username, display_name: name }).eq("user_id", data.user.id);
+    }
+    return data;
+  };
+
+  const signIn = async (email, password) => {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    return data;
+  };
+
+  const signOut = async () => {
+    await supabase.auth.signOut();
+  };
+
+  return { user, profile, loading, signUp, signIn, signOut };
+}
+
+function useRatings(userId) {
+  const [ratings, setRatings] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const load = useCallback(async () => {
+    if (!userId) return;
+    setLoading(true);
+    const { data } = await supabase.from("ratings").select("*").eq("user_id", userId).order("updated_at", { ascending: false });
+    setRatings(data || []);
+    setLoading(false);
+  }, [userId]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const upsertRating = async (tmdbId, rating, review, title, posterUrl) => {
+    if (!userId) return;
+    const { error } = await supabase.from("ratings").upsert({
+      user_id: userId, tmdb_id: tmdbId, rating, review, title, poster_url: posterUrl,
+    }, { onConflict: "user_id,tmdb_id" });
+    if (error) throw error;
+    await load();
+  };
+
+  const deleteRating = async (tmdbId) => {
+    if (!userId) return;
+    await supabase.from("ratings").delete().eq("user_id", userId).eq("tmdb_id", tmdbId);
+    await load();
+  };
+
+  const getRating = (tmdbId) => ratings.find(r => r.tmdb_id === tmdbId);
+
+  return { ratings, loading, upsertRating, deleteRating, getRating, reload: load };
+}
+
+function useWatchlist(userId) {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const load = useCallback(async () => {
+    if (!userId) return;
+    setLoading(true);
+    const { data } = await supabase.from("watchlist").select("*").eq("user_id", userId).order("created_at", { ascending: false });
+    setItems(data || []);
+    setLoading(false);
+  }, [userId]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const add = async (tmdbId, title, posterUrl) => {
+    if (!userId) return;
+    const { error } = await supabase.from("watchlist").upsert({
+      user_id: userId, tmdb_id: tmdbId, title, poster_url: posterUrl,
+    }, { onConflict: "user_id,tmdb_id" });
+    if (error) throw error;
+    await load();
+  };
+
+  const remove = async (tmdbId) => {
+    if (!userId) return;
+    await supabase.from("watchlist").delete().eq("user_id", userId).eq("tmdb_id", tmdbId);
+    await load();
+  };
+
+  const isInList = (tmdbId) => items.some(i => i.tmdb_id === tmdbId);
+
+  return { items, loading, add, remove, isInList, reload: load };
 }
 
 function Avatar({ user, size = 40 }) {
