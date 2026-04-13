@@ -3261,6 +3261,7 @@ export default function MovieClubApp() {
       <Navbar page={page} setPage={setPage} hasKeys={true} apiStatus={apiStatus} />
       <div className="page-enter" key={page}>
         {page === "home" && <HomePage setPage={setPage} setSelectedMovie={setSM} auth={authCtx} />}
+        {page === "quickrate" && <QuickRatePage setPage={setPage} setSelectedMovie={setSM} auth={authCtx} />}
         {page === "profile" && <ProfilePage setPage={setPage} isOwnProfile auth={authCtx} setSelectedMovie={setSM} />}
         {page === "view-profile" && <ProfilePage setPage={setPage} auth={authCtx} setSelectedMovie={setSM} viewUserId={viewProfileUserId} />}
         {page === "movie" && <MoviePage movieInit={selectedMovie} setPage={setPage} setSelectedMovie={setSM} auth={authCtx} />}
