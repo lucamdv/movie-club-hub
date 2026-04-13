@@ -181,16 +181,16 @@
 /* ─── Netflix Carousel ─── */
 .carousel-row {
   display: flex;
-  gap: 12px;
+  gap: 16px;
   overflow-x: auto;
   scroll-behavior: smooth;
   scroll-snap-type: x proximity;
-  padding: 8px 0 16px;
+  padding: 12px 4px 20px;
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
 .carousel-row::-webkit-scrollbar { display: none; }
-.carousel-row > * { scroll-snap-align: start; }
+.carousel-row > * { scroll-snap-align: start; flex-shrink: 0; }
 
 .carousel-wrapper {
   position: relative;
@@ -225,9 +225,10 @@
   cursor: pointer;
   transition: transform 0.3s ease, z-index 0s 0.3s;
   position: relative;
+  will-change: transform;
 }
 .movie-card-netflix:hover {
-  transform: scale(1.08);
+  transform: scale(1.06);
   z-index: 5;
   transition: transform 0.3s ease, z-index 0s;
 }
@@ -239,11 +240,11 @@
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 10px;
+  padding: 12px;
   background: linear-gradient(transparent, rgba(0,0,0,0.92));
   opacity: 0;
   transition: opacity 0.3s;
-  border-radius: 0 0 8px 8px;
+  border-radius: 0 0 10px 10px;
 }
 
 /* ─── Gold shimmer button ─── */
