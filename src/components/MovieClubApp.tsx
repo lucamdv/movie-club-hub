@@ -1497,12 +1497,7 @@ export default function MovieClubApp() {
   const [apiStatus, setApiStatus] = useState({ tmdb: false, omdb: false, streaming: false });
   const hasKeys = !!(keys.tmdb||keys.omdb||keys.streaming);
 
-  useEffect(()=>{
-    const el = document.createElement("style");
-    el.textContent = GLOBAL_CSS;
-    document.head.appendChild(el);
-    return ()=>document.head.removeChild(el);
-  },[]);
+  // Global CSS is now in src/styles.css
 
   // Probe TMDb on mount to verify demo key works
   useEffect(()=>{
