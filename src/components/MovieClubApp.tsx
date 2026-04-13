@@ -1180,20 +1180,29 @@ function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx }) {
             <Section title="Sua Avaliação">
               <div style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 14, padding: 20, marginBottom: 16 }}>
                 <p style={{ fontSize: 13, color: C.textMuted, marginBottom: 10 }}>
-                  {existingRating ? `Sua nota: ${Number(existingRating.rating).toFixed(1)} ★` : "Arraste para avaliar"}
+                  {existingRating ? `Sua nota: ${Number(existingRating.rating).toFixed(1)} ★` : "Clique nas estrelas para avaliar"}
                 </p>
-                <StarRating value={localRating} max={5} size={28} interactive onChange={setLocalRating} />
+                <StarRating value={localRating} max={5} size={28} interactive onChange={async (val) => {
+                  setLocalRating(val);
+                  const tmdbId = m.tmdbId || m.id;
+                  try {
+                    await upsertRating(tmdbId, val, review, m.title, m.poster);
+                    toast.success(existingRating ? "Avaliação atualizada!" : "Avaliação publicada!");
+                  } catch (e) { toast.error("Erro ao salvar avaliação"); }
+                }} />
                 <textarea value={review} onChange={e => setReview(e.target.value)} placeholder="Escreva sua review (opcional)…" rows={3}
-                  style={{ width: "100%", marginTop: 12, padding: "10px 14px", borderRadius: 8, background: C.bgDeep, border: `1px solid ${C.border}`, color: C.text, fontSize: 13, resize: "vertical", outline: "none" }} />
+                  style={{ width: "100%", marginTop: 12, padding: "10px 14px", borderRadius: 8, background: C.bgDeep, border: `1px solid ${C.border}`, color: C.text, fontSize: 13, resize: "vertical", outline: "none" }}
+                  onBlur={async () => {
+                    if (localRating > 0 && review !== (existingRating?.review || "")) {
+                      const tmdbId = m.tmdbId || m.id;
+                      await upsertRating(tmdbId, localRating, review, m.title, m.poster).catch(() => {});
+                    }
+                  }} />
                 <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
-                  <Btn variant="gold" size="sm" disabled={!localRating} onClick={async () => {
-                    const tmdbId = m.tmdbId || m.id;
-                    await upsertRating(tmdbId, localRating, review, m.title, m.poster);
-                  }}>{existingRating ? "Atualizar" : "Publicar"}</Btn>
                   {existingRating && <Btn variant="ghost" size="sm" onClick={async () => {
                     await (await import("@/integrations/supabase/client")).supabase.from("ratings").delete().eq("id", existingRating.id);
-                    setLocalRating(0); setReview("");
-                  }}>Remover</Btn>}
+                    setLocalRating(0); setReview(""); toast.success("Avaliação removida");
+                  }}>Remover avaliação</Btn>}
                 </div>
               </div>
             </Section>
