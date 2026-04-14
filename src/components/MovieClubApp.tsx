@@ -7,8 +7,10 @@ import {
   Film, ClipboardList, Star, User, Users, Search, Handshake, Pencil, Link2,
   TrendingUp, Target, Radio, Calendar, X, Flame, UserRound, Bookmark,
   Clapperboard, Eye, EyeOff, Share2, ListVideo, Award, Zap, ChevronLeft,
-  ChevronRight, Plus, SkipForward
+  ChevronRight, Plus, SkipForward, Upload, CheckCircle, AlertCircle, Loader2
 } from "lucide-react";
+import JSZip from "jszip";
+import Papa from "papaparse";
 import logoMain from "@/assets/logo-main.png";
 import mascotsNav from "@/assets/mascots-nav.png";
 import logoText from "@/assets/logo-text.png";
