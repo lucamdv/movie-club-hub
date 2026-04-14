@@ -2167,6 +2167,7 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
                     const url = `${window.location.origin}?profile=${currentUserId}`;
                     navigator.clipboard.writeText(url).then(() => toast.success("Link do perfil copiado!")).catch(() => toast.error("Erro ao copiar"));
                   }}><Link2 size={13} /> Compartilhar Perfil</Btn>
+                  <Btn variant="ghost" size="sm" onClick={() => setShowImportModal(true)}><Upload size={13} /> Importar Dados</Btn>
                   <Btn variant="ghost" size="sm" onClick={() => authCtx?.signOut?.()}>Sair da conta</Btn>
                 </>
               )}
@@ -2181,6 +2182,10 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
             onClose={() => setShowEditModal(false)}
             onSave={authCtx?.updateProfile}
           />
+        )}
+
+        {showImportModal && !isViewingOther && (
+          <ImportDataModal userId={currentUserId} onClose={() => setShowImportModal(false)} />
         )}
 
         {/* Tabs + View Controls */}
