@@ -2026,6 +2026,7 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
   const [tab, setTab] = useState("ratings");
   const [viewMode, setViewMode] = useState("list");
   const [perPage, setPerPage] = useState(20);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
 
   // Follow hooks - use targetUserId for counts, currentUserId for actions
