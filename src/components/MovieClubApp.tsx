@@ -2025,7 +2025,6 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
   const { items: watchlistItems, loading: wlLoading, remove: removeFromWl } = useWatchlist(targetUserId);
   const [tab, setTab] = useState("ratings");
   const [viewMode, setViewMode] = useState("list");
-  const [perPage, setPerPage] = useState(20);
   const [showImportModal, setShowImportModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
 
@@ -2205,14 +2204,14 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
               }}>{label}</button>
             ))}
           </div>
-          <ViewToolbar viewMode={viewMode} setViewMode={setViewMode} perPage={perPage} setPerPage={setPerPage} />
+          <ViewToolbar viewMode={viewMode} setViewMode={setViewMode} showPerPage={false} />
         </div>
 
         {/* Ratings Tab */}
         {tab === "ratings" && (
           viewMode === "list" ? (
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-              {ratingsLoading ? <Spinner /> : ratings.length > 0 ? ratings.slice(0, perPage).map((r) => (
+{ratingsLoading ? <Spinner /> : ratings.length > 0 ? ratings.map((r) => (
                 <div key={r.id} style={{
                   background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 16,
                   padding: 18, display: "flex", gap: 16, alignItems: "center",
@@ -2240,7 +2239,7 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
             </div>
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: 18 }}>
-              {ratingsLoading ? <Spinner /> : ratings.length > 0 ? ratings.slice(0, perPage).map((r) => (
+{ratingsLoading ? <Spinner /> : ratings.length > 0 ? ratings.map((r) => (
                 <div key={r.id} className="movie-card-netflix" style={{ position: "relative" }}>
                   <div style={{ cursor: "pointer" }} onClick={() => { setSelectedMovie?.({ tmdbId: r.tmdb_id, title: r.title, poster: r.poster_url }); setPage("movie"); }}>
                     <div style={{ width: "100%", aspectRatio: "2/3", borderRadius: 12, overflow: "hidden", background: C.bgCard, border: `1px solid ${C.border}` }}>
@@ -2264,7 +2263,7 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
         {tab === "watchlist" && (
           viewMode === "grid" ? (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: 18 }}>
-              {wlLoading ? <Spinner /> : watchlistItems.length > 0 ? watchlistItems.slice(0, perPage).map((item) => (
+{wlLoading ? <Spinner /> : watchlistItems.length > 0 ? watchlistItems.map((item) => (
                 <div key={item.id} style={{ position: "relative" }} className="movie-card-netflix">
                   <div style={{ cursor: "pointer" }} onClick={() => { setSelectedMovie?.({ tmdbId: item.tmdb_id, title: item.title, poster: item.poster_url }); setPage("movie"); }}>
                     <div style={{ width: "100%", aspectRatio: "2/3", borderRadius: 12, overflow: "hidden", background: C.bgCard, border: `1px solid ${C.border}` }}>
@@ -2285,7 +2284,7 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
             </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-              {wlLoading ? <Spinner /> : watchlistItems.length > 0 ? watchlistItems.slice(0, perPage).map((item) => (
+{wlLoading ? <Spinner /> : watchlistItems.length > 0 ? watchlistItems.map((item) => (
                 <div key={item.id} style={{
                   background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 16,
                   padding: 18, display: "flex", gap: 16, alignItems: "center",
