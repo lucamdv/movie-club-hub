@@ -7,8 +7,10 @@ import {
   Film, ClipboardList, Star, User, Users, Search, Handshake, Pencil, Link2,
   TrendingUp, Target, Radio, Calendar, X, Flame, UserRound, Bookmark,
   Clapperboard, Eye, EyeOff, Share2, ListVideo, Award, Zap, ChevronLeft,
-  ChevronRight, Plus, SkipForward
+  ChevronRight, Plus, SkipForward, Upload, CheckCircle, AlertCircle, Loader2
 } from "lucide-react";
+import JSZip from "jszip";
+import Papa from "papaparse";
 import logoMain from "@/assets/logo-main.png";
 import mascotsNav from "@/assets/mascots-nav.png";
 import logoText from "@/assets/logo-text.png";
@@ -1659,6 +1661,214 @@ function SearchPage({ setPage, setSelectedMovie }) {
 }
 
 // ─────────────────────────────────────────────
+//  IMPORT DATA MODAL (Letterboxd ZIP)
+// ─────────────────────────────────────────────
+function ImportDataModal({ userId, onClose }) {
+  const [step, setStep] = useState("upload"); // upload | processing | done
+  const [progress, setProgress] = useState({ total: 0, matched: 0, imported: 0, failed: 0, current: "" });
+  const [summary, setSummary] = useState({ ratings: 0, watchlist: 0, reviews: 0, skipped: [] });
+  const fileRef = useRef(null);
+
+  async function processZip(file) {
+    setStep("processing");
+    try {
+      const zip = await JSZip.loadAsync(file);
+      const csvFiles = {};
+      const targetNames = ["ratings.csv", "reviews.csv", "watchlist.csv", "diary.csv"];
+      // Search all files in zip (including subdirectories)
+      const allFiles = [];
+      zip.forEach((path, entry) => { if (!entry.dir) allFiles.push({ path, entry }); });
+      for (const name of targetNames) {
+        const found = allFiles.find(f => f.path.toLowerCase().endsWith(name));
+        if (found) {
+          const text = await found.entry.async("text");
+          csvFiles[name] = Papa.parse(text, { header: true, skipEmptyLines: true }).data;
+        }
+      }
+
+      // Merge ratings + reviews + diary into unified list (dedup by Name+Year, prefer review)
+      const movieMap = new Map();
+      const addToMap = (rows, hasReview = false) => {
+        (rows || []).forEach(r => {
+          const name = r.Name?.trim();
+          const year = r.Year?.trim();
+          if (!name) return;
+          const key = `${name}::${year}`;
+          const existing = movieMap.get(key);
+          const rating = parseFloat(r.Rating) || 0;
+          const review = r.Review?.trim() || "";
+          if (!existing || (hasReview && review) || (!existing.review && rating > 0)) {
+            movieMap.set(key, { name, year, rating, review, date: r.Date || "" });
+          }
+        });
+      };
+      addToMap(csvFiles["ratings.csv"]);
+      addToMap(csvFiles["diary.csv"]);
+      addToMap(csvFiles["reviews.csv"], true);
+
+      // Watchlist
+      const watchlistEntries = (csvFiles["watchlist.csv"] || []).filter(r => r.Name?.trim()).map(r => ({
+        name: r.Name.trim(), year: r.Year?.trim()
+      }));
+
+      const allMovies = [...movieMap.values()];
+      const totalCount = allMovies.length + watchlistEntries.length;
+      setProgress(p => ({ ...p, total: totalCount }));
+
+      let importedRatings = 0, importedWl = 0, importedReviews = 0;
+      const skipped = [];
+
+      for (let i = 0; i < allMovies.length; i += 5) {
+        const batch = allMovies.slice(i, i + 5);
+        await Promise.all(batch.map(async (movie) => {
+          setProgress(p => ({ ...p, current: movie.name }));
+          try {
+            const searchParams = { query: movie.name };
+            if (movie.year) searchParams.year = movie.year;
+            const result = await tmdbProxy({ data: { path: "/search/movie", params: searchParams } });
+            const match = result?.results?.[0];
+            if (!match) { skipped.push(movie.name); setProgress(p => ({ ...p, failed: p.failed + 1 })); return; }
+            const posterUrl = match.poster_path ? `${TMDB_IMG}/w300${match.poster_path}` : null;
+            if (movie.rating > 0) {
+              await supabase.from("ratings").upsert({
+                user_id: userId, tmdb_id: match.id, rating: movie.rating,
+                review: movie.review || null, title: match.title, poster_url: posterUrl
+              }, { onConflict: "user_id,tmdb_id" });
+              importedRatings++;
+              if (movie.review) importedReviews++;
+            }
+            setProgress(p => ({ ...p, matched: p.matched + 1, imported: p.imported + 1 }));
+          } catch { skipped.push(movie.name); setProgress(p => ({ ...p, failed: p.failed + 1 })); }
+        }));
+        if (i + 5 < allMovies.length) await new Promise(r => setTimeout(r, 300));
+      }
+
+      for (let i = 0; i < watchlistEntries.length; i += 5) {
+        const batch = watchlistEntries.slice(i, i + 5);
+        await Promise.all(batch.map(async (movie) => {
+          setProgress(p => ({ ...p, current: movie.name }));
+          try {
+            const searchParams = { query: movie.name };
+            if (movie.year) searchParams.year = movie.year;
+            const result = await tmdbProxy({ data: { path: "/search/movie", params: searchParams } });
+            const match = result?.results?.[0];
+            if (!match) { skipped.push(movie.name); setProgress(p => ({ ...p, failed: p.failed + 1 })); return; }
+            const posterUrl = match.poster_path ? `${TMDB_IMG}/w300${match.poster_path}` : null;
+            await supabase.from("watchlist").upsert({
+              user_id: userId, tmdb_id: match.id, title: match.title, poster_url: posterUrl
+            }, { onConflict: "user_id,tmdb_id" });
+            importedWl++;
+            setProgress(p => ({ ...p, matched: p.matched + 1, imported: p.imported + 1 }));
+          } catch { skipped.push(movie.name); setProgress(p => ({ ...p, failed: p.failed + 1 })); }
+        }));
+        if (i + 5 < watchlistEntries.length) await new Promise(r => setTimeout(r, 300));
+      }
+
+      setSummary({ ratings: importedRatings, watchlist: importedWl, reviews: importedReviews, skipped });
+      setStep("done");
+    } catch (err) {
+      console.error("Import error:", err);
+      toast.error("Erro ao processar arquivo ZIP");
+      setStep("upload");
+    }
+  }
+
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }} onClick={onClose}>
+      <div style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 20, padding: 32, maxWidth: 500, width: "100%", maxHeight: "80vh", overflow: "auto" }} onClick={e => e.stopPropagation()}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+          <h2 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 22, fontWeight: 700, color: C.text }}>Importar Dados</h2>
+          <button onClick={onClose} style={{ background: "none", border: "none", color: C.textMuted, cursor: "pointer" }}><X size={20} /></button>
+        </div>
+
+        {step === "upload" && (
+          <div>
+            <p style={{ color: C.textMuted, fontSize: 14, lineHeight: 1.6, marginBottom: 16 }}>
+              Importe suas avaliações, reviews e watchlist de outros apps como <span style={{ color: C.gold, fontWeight: 600 }}>Letterboxd</span>.
+            </p>
+            <p style={{ color: C.textMuted, fontSize: 13, marginBottom: 20 }}>
+              Exporte seus dados no app original (geralmente em Configurações → Exportar) e faça upload do arquivo <code style={{ background: C.bgDeep, padding: "2px 6px", borderRadius: 4, color: C.gold }}>.zip</code> aqui.
+            </p>
+            <div style={{
+              border: `2px dashed ${C.border}`, borderRadius: 16, padding: "40px 20px",
+              textAlign: "center", cursor: "pointer", transition: "border-color 0.2s"
+            }}
+            onClick={() => fileRef.current?.click()}
+            onDragOver={e => { e.preventDefault(); e.currentTarget.style.borderColor = C.gold; }}
+            onDragLeave={e => { e.currentTarget.style.borderColor = C.border; }}
+            onDrop={e => { e.preventDefault(); e.currentTarget.style.borderColor = C.border; const f = e.dataTransfer.files[0]; if (f) processZip(f); }}>
+              <Upload size={40} style={{ color: C.gold, marginBottom: 12 }} />
+              <p style={{ color: C.text, fontWeight: 600, fontSize: 15, marginBottom: 4 }}>Arraste o arquivo ZIP aqui</p>
+              <p style={{ color: C.textMuted, fontSize: 13 }}>ou clique para selecionar</p>
+              <input ref={fileRef} type="file" accept=".zip" hidden onChange={e => { const f = e.target.files?.[0]; if (f) processZip(f); }} />
+            </div>
+
+            <div style={{ marginTop: 20, padding: 16, background: C.bgDeep, borderRadius: 12, border: `1px solid ${C.border}` }}>
+              <p style={{ fontSize: 12, fontWeight: 600, color: C.gold, marginBottom: 8 }}>Arquivos suportados no ZIP:</p>
+              {["ratings.csv — Avaliações com notas", "reviews.csv — Reviews com texto", "watchlist.csv — Lista para assistir", "diary.csv — Diário de filmes"].map(t => (
+                <p key={t} style={{ fontSize: 12, color: C.textMuted, marginBottom: 3 }}>• {t}</p>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {step === "processing" && (
+          <div style={{ textAlign: "center" }}>
+            <Loader2 size={40} style={{ color: C.gold, marginBottom: 16, animation: "spin 1s linear infinite" }} />
+            <p style={{ color: C.text, fontWeight: 600, fontSize: 16, marginBottom: 8 }}>Importando dados...</p>
+            <p style={{ color: C.textMuted, fontSize: 13, marginBottom: 20 }}>{progress.current}</p>
+            <div style={{ background: C.bgDeep, borderRadius: 8, height: 8, overflow: "hidden", marginBottom: 16 }}>
+              <div style={{
+                height: "100%", borderRadius: 8,
+                background: `linear-gradient(90deg, ${C.goldDim}, ${C.gold})`,
+                width: progress.total > 0 ? `${Math.round((progress.imported + progress.failed) / progress.total * 100)}%` : "0%",
+                transition: "width 0.3s ease"
+              }} />
+            </div>
+            <div style={{ display: "flex", justifyContent: "center", gap: 24 }}>
+              {[["Encontrados", progress.total, C.text], ["Importados", progress.imported, C.success], ["Falhas", progress.failed, C.red]].map(([l, v, c]) => (
+                <div key={l}>
+                  <p style={{ fontSize: 20, fontWeight: 700, color: c, fontFamily: "'Outfit', sans-serif" }}>{v}</p>
+                  <p style={{ fontSize: 11, color: C.textMuted }}>{l}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {step === "done" && (
+          <div style={{ textAlign: "center" }}>
+            <CheckCircle size={48} style={{ color: C.success, marginBottom: 16 }} />
+            <p style={{ color: C.text, fontWeight: 700, fontSize: 20, marginBottom: 20, fontFamily: "'Outfit', sans-serif" }}>Importação Concluída!</p>
+            <div style={{ display: "flex", justifyContent: "center", gap: 20, marginBottom: 24 }}>
+              {[["Avaliações", summary.ratings, Star], ["Reviews", summary.reviews, Pencil], ["Watchlist", summary.watchlist, Bookmark]].map(([l, v, Icon]) => (
+                <div key={l} style={{ background: C.bgDeep, borderRadius: 12, padding: "14px 20px", border: `1px solid ${C.border}` }}>
+                  <Icon size={18} style={{ color: C.gold, marginBottom: 6 }} />
+                  <p style={{ fontSize: 22, fontWeight: 700, color: C.gold, fontFamily: "'Outfit', sans-serif" }}>{v}</p>
+                  <p style={{ fontSize: 11, color: C.textMuted }}>{l}</p>
+                </div>
+              ))}
+            </div>
+            {summary.skipped.length > 0 && (
+              <div style={{ textAlign: "left", background: C.bgDeep, borderRadius: 12, padding: 16, border: `1px solid ${C.border}`, marginBottom: 20 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+                  <AlertCircle size={14} style={{ color: C.orange }} />
+                  <p style={{ fontSize: 12, fontWeight: 600, color: C.orange }}>{summary.skipped.length} filme(s) não encontrado(s)</p>
+                </div>
+                <div style={{ maxHeight: 120, overflow: "auto" }}>
+                  {summary.skipped.map((s, i) => <p key={i} style={{ fontSize: 12, color: C.textMuted, marginBottom: 2 }}>• {s}</p>)}
+                </div>
+              </div>
+            )}
+            <Btn variant="gold" onClick={() => { onClose(); window.location.reload(); }}>Fechar</Btn>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
 //  PROFILE EDIT MODAL
 // ─────────────────────────────────────────────
 function ProfileEditModal({ profile, user, onClose, onSave }) {
@@ -1816,6 +2026,7 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
   const [tab, setTab] = useState("ratings");
   const [viewMode, setViewMode] = useState("list");
   const [perPage, setPerPage] = useState(20);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
 
   // Follow hooks - use targetUserId for counts, currentUserId for actions
@@ -1956,6 +2167,7 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
                     const url = `${window.location.origin}?profile=${currentUserId}`;
                     navigator.clipboard.writeText(url).then(() => toast.success("Link do perfil copiado!")).catch(() => toast.error("Erro ao copiar"));
                   }}><Link2 size={13} /> Compartilhar Perfil</Btn>
+                  <Btn variant="ghost" size="sm" onClick={() => setShowImportModal(true)}><Upload size={13} /> Importar Dados</Btn>
                   <Btn variant="ghost" size="sm" onClick={() => authCtx?.signOut?.()}>Sair da conta</Btn>
                 </>
               )}
@@ -1970,6 +2182,10 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
             onClose={() => setShowEditModal(false)}
             onSave={authCtx?.updateProfile}
           />
+        )}
+
+        {showImportModal && !isViewingOther && (
+          <ImportDataModal userId={currentUserId} onClose={() => setShowImportModal(false)} />
         )}
 
         {/* Tabs + View Controls */}
