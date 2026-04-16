@@ -376,6 +376,8 @@ function useAuth() {
   const [profile, setProfile] = useState(null);
   const userIdRef = useRef(null);
   const profileFetchedRef = useRef(null);
+  const sessionRestoredRef = useRef(false);
+  const fetchProfileRef = useRef(null);
 
   const fetchProfile = useCallback((userId) => {
     if (profileFetchedRef.current === userId) return;
@@ -384,6 +386,8 @@ function useAuth() {
       setProfile(data);
     });
   }, []);
+
+  fetchProfileRef.current = fetchProfile;
 
   useEffect(() => {
     let mounted = true;
@@ -394,32 +398,42 @@ function useAuth() {
       const u = session?.user || null;
       userIdRef.current = u?.id || null;
       setUser(u);
-      if (u) fetchProfile(u.id);
+      if (u) fetchProfileRef.current(u.id);
       setLoading(false);
+      sessionRestoredRef.current = true;
     });
 
-    // 2. Listen only for meaningful auth changes (not token refreshes)
+    // 2. Listen only for meaningful auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (!mounted) return;
-
-      // Ignore token refresh events — they don't change the user
-      if (event === "TOKEN_REFRESHED") return;
+      
+      // Ignore these events completely
+      if (event === "TOKEN_REFRESHED" || event === "INITIAL_SESSION") return;
+      
+      // Wait for getSession to complete first
+      if (!sessionRestoredRef.current) return;
 
       const u = session?.user || null;
       const newId = u?.id || null;
 
-      // Only update state if the user actually changed
-      if (newId === userIdRef.current && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
+      // CRITICAL: Only clear user on explicit SIGNED_OUT
+      if (event === "SIGNED_OUT") {
+        userIdRef.current = null;
+        setUser(null);
+        setProfile(null);
+        profileFetchedRef.current = null;
+        return;
+      }
+
+      // For other events, only update if we have a valid user
+      if (!u) return; // Don't logout on null sessions from failed refreshes
+      
+      if (newId === userIdRef.current && event !== "USER_UPDATED") return;
 
       userIdRef.current = newId;
       setUser(u);
-      if (u) {
-        if (event === "USER_UPDATED") profileFetchedRef.current = null;
-        fetchProfile(u.id);
-      } else {
-        setProfile(null);
-        profileFetchedRef.current = null;
-      }
+      if (event === "USER_UPDATED") profileFetchedRef.current = null;
+      fetchProfileRef.current(u.id);
       setLoading(false);
     });
 
@@ -427,7 +441,7 @@ function useAuth() {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [fetchProfile]);
+  }, []); // Dependências vazias mantêm o listener estável
 
   const signUp = async (email, password, name, username) => {
     const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { full_name: name } } });
