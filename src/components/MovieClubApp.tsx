@@ -374,41 +374,59 @@ function useAuth() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState(null);
+  const userIdRef = useRef(null);
+  const profileFetchedRef = useRef(null);
 
   const fetchProfile = useCallback((userId) => {
+    if (profileFetchedRef.current === userId) return;
+    profileFetchedRef.current = userId;
     supabase.from("profiles").select("*").eq("user_id", userId).single().then(({ data }) => {
       setProfile(data);
     });
   }, []);
 
   useEffect(() => {
-    let ready = false;
+    let mounted = true;
 
     // 1. Restore session from storage first
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
       const u = session?.user || null;
+      userIdRef.current = u?.id || null;
       setUser(u);
       if (u) fetchProfile(u.id);
       setLoading(false);
-      ready = true;
     });
 
-    // 2. Listen for subsequent auth changes (sign in/out/token refresh)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    // 2. Listen only for meaningful auth changes (not token refreshes)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!mounted) return;
+
+      // Ignore token refresh events — they don't change the user
+      if (event === "TOKEN_REFRESHED") return;
+
       const u = session?.user || null;
+      const newId = u?.id || null;
+
+      // Only update state if the user actually changed
+      if (newId === userIdRef.current && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
+
+      userIdRef.current = newId;
       setUser(u);
       if (u) {
+        if (event === "USER_UPDATED") profileFetchedRef.current = null;
         fetchProfile(u.id);
       } else {
         setProfile(null);
+        profileFetchedRef.current = null;
       }
-      if (!ready) {
-        setLoading(false);
-        ready = true;
-      }
+      setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, [fetchProfile]);
 
   const signUp = async (email, password, name, username) => {
