@@ -31,7 +31,7 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "MovieClub" },
+      { title: "MovieClub" }, // O NOME DA PÁGINA FICA AQUI
       { name: "description", content: "Your cinephile social club — discover, rate & share films." },
       { name: "author", content: "MovieClub" },
       { property: "og:title", content: "MovieClub" },
@@ -44,6 +44,12 @@ export const Route = createRootRoute({
       {
         rel: "stylesheet",
         href: appCss,
+      },
+      // ADICIONE ESTE BLOCO ABAIXO PARA O FAVICON
+      {
+        rel: "icon",
+        type: "image/png",
+        href: "/logo-main.png",
       },
     ],
   }),

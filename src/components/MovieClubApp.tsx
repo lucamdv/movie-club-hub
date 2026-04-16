@@ -2,12 +2,44 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { tmdbProxy, omdbProxy, streamingProxy } from "@/lib/movie-api.functions";
 import {
-  Film, ClipboardList, Star, User, Users, Search, Handshake, Pencil, Link2,
-  TrendingUp, Target, Radio, Calendar, X, Flame, UserRound, Bookmark,
-  Clapperboard, Eye, EyeOff, Share2, ListVideo, Award, Zap, ChevronLeft,
-  ChevronRight, Plus, SkipForward, Upload, CheckCircle, AlertCircle, Loader2
+  tmdbProxy,
+  omdbProxy,
+  streamingProxy,
+} from "@/lib/movie-api.functions";
+import {
+  Film,
+  ClipboardList,
+  Star,
+  User,
+  Users,
+  Search,
+  Handshake,
+  Pencil,
+  Link2,
+  TrendingUp,
+  Target,
+  Radio,
+  Calendar,
+  X,
+  Flame,
+  UserRound,
+  Bookmark,
+  Clapperboard,
+  Eye,
+  EyeOff,
+  Share2,
+  ListVideo,
+  Award,
+  Zap,
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+  SkipForward,
+  Upload,
+  CheckCircle,
+  AlertCircle,
+  Loader2,
 } from "lucide-react";
 import JSZip from "jszip";
 import Papa from "papaparse";
@@ -46,14 +78,30 @@ const MONKEY_AVATARS = [
 //  DESIGN TOKENS
 // ─────────────────────────────────────────────
 const C = {
-  bg: "#0F1923", bgCard: "#162130", bgCardHover: "#1B2838", bgDeep: "#091523",
-  gold: "#C9A84C", goldLight: "#E2C97E", goldDim: "#8A6E30",
-  text: "#F0EDE6", textMuted: "#8A9BB0", textDim: "#4A5E72",
-  border: "#1E3347", borderHover: "#2A4660",
-  accent: "#2563EB", accentSoft: "#1E3A5F",
-  success: "#22C55E", red: "#EF4444", orange: "#F97316",
-  netflix: "#E50914", prime: "#00A8E1", disney: "#113CCF",
-  hbo: "#5822B4", apple: "#888888", paramount: "#0064FF", hulu: "#1CE783",
+  bg: "#0F1923",
+  bgCard: "#162130",
+  bgCardHover: "#1B2838",
+  bgDeep: "#091523",
+  gold: "#C9A84C",
+  goldLight: "#E2C97E",
+  goldDim: "#8A6E30",
+  text: "#F0EDE6",
+  textMuted: "#8A9BB0",
+  textDim: "#4A5E72",
+  border: "#1E3347",
+  borderHover: "#2A4660",
+  accent: "#2563EB",
+  accentSoft: "#1E3A5F",
+  success: "#22C55E",
+  red: "#EF4444",
+  orange: "#F97316",
+  netflix: "#E50914",
+  prime: "#00A8E1",
+  disney: "#113CCF",
+  hbo: "#5822B4",
+  apple: "#888888",
+  paramount: "#0064FF",
+  hulu: "#1CE783",
 };
 
 // ─────────────────────────────────────────────
@@ -80,23 +128,55 @@ const tmdb = {
     const apiPage2 = apiPage1 + 1;
     const [r1, r2] = await Promise.all([
       this.get(path, { ...extraParams, page: String(apiPage1) }),
-      this.get(path, { ...extraParams, page: String(apiPage2) }).catch(() => null),
+      this.get(path, { ...extraParams, page: String(apiPage2) }).catch(
+        () => null,
+      ),
     ]);
     const totalApiPages = Math.min(r1?.total_pages || 1, 500);
     const totalAppPages = Math.ceil(totalApiPages / 2);
     const results = [...(r1?.results || []), ...(r2?.results || [])];
-    return { results, appPage, totalAppPages, totalResults: r1?.total_results || 0 };
+    return {
+      results,
+      appPage,
+      totalAppPages,
+      totalResults: r1?.total_results || 0,
+    };
   },
-  poster(path, size = "w300") { return path ? `${TMDB_IMG}/${size}${path}` : null; },
-  backdrop(path, size = "w1280") { return path ? `${TMDB_IMG}/${size}${path}` : null; },
-  async trending(page = 1) { return this.getPage("/trending/movie/week", page); },
-  async popular(page = 1) { return this.getPage("/movie/popular", page); },
-  async topRated(page = 1) { return this.getPage("/movie/top_rated", page); },
-  async details(id) { return this.get(`/movie/${id}`, { append_to_response: "credits,videos,similar,recommendations" }); },
-  async search(q, page = 1) { return this.get("/search/movie", { query: q, page: String(page) }); },
-  async genres() { return this.get("/genre/movie/list"); },
-  async byGenre(gid, page = 1) { return this.getPage("/discover/movie", page, { with_genres: String(gid), sort_by: "popularity.desc" }); },
-  async upcoming(page = 1) { return this.getPage("/movie/upcoming", page); },
+  poster(path, size = "w300") {
+    return path ? `${TMDB_IMG}/${size}${path}` : null;
+  },
+  backdrop(path, size = "w1280") {
+    return path ? `${TMDB_IMG}/${size}${path}` : null;
+  },
+  async trending(page = 1) {
+    return this.getPage("/trending/movie/week", page);
+  },
+  async popular(page = 1) {
+    return this.getPage("/movie/popular", page);
+  },
+  async topRated(page = 1) {
+    return this.getPage("/movie/top_rated", page);
+  },
+  async details(id) {
+    return this.get(`/movie/${id}`, {
+      append_to_response: "credits,videos,similar,recommendations",
+    });
+  },
+  async search(q, page = 1) {
+    return this.get("/search/movie", { query: q, page: String(page) });
+  },
+  async genres() {
+    return this.get("/genre/movie/list");
+  },
+  async byGenre(gid, page = 1) {
+    return this.getPage("/discover/movie", page, {
+      with_genres: String(gid),
+      sort_by: "popularity.desc",
+    });
+  },
+  async upcoming(page = 1) {
+    return this.getPage("/movie/upcoming", page);
+  },
 };
 
 const omdb = {
@@ -104,14 +184,24 @@ const omdb = {
     const cacheKey = `omdb:${JSON.stringify(params)}`;
     return cachedFetch(cacheKey, () => omdbProxy({ data: { params } }));
   },
-  async byImdbId(id) { return this.get({ i: id, plot: "full" }); },
-  async byTitle(title, year) { return this.get({ t: title, plot: "short", ...(year ? { y: String(year) } : {}) }); },
+  async byImdbId(id) {
+    return this.get({ i: id, plot: "full" });
+  },
+  async byTitle(title, year) {
+    return this.get({
+      t: title,
+      plot: "short",
+      ...(year ? { y: String(year) } : {}),
+    });
+  },
 };
 
 const streaming = {
   async byTmdb(tmdbId, country = "br") {
     const cacheKey = `stream:${tmdbId}:${country}`;
-    return cachedFetch(cacheKey, () => streamingProxy({ data: { tmdbId: Number(tmdbId), country } }));
+    return cachedFetch(cacheKey, () =>
+      streamingProxy({ data: { tmdbId: Number(tmdbId), country } }),
+    );
   },
 };
 
@@ -121,14 +211,16 @@ const streaming = {
 function normalizeTmdb(raw) {
   if (!raw || raw.success === false) return null;
   return {
-    id: raw.id, tmdbId: raw.id, imdbId: raw.imdb_id || null,
+    id: raw.id,
+    tmdbId: raw.id,
+    imdbId: raw.imdb_id || null,
     title: raw.title || raw.original_title || "—",
     originalTitle: raw.original_title,
     year: raw.release_date ? +raw.release_date.slice(0, 4) : null,
     releaseDate: raw.release_date,
     overview: raw.overview,
     genre: raw.genres?.[0]?.name || "Outros",
-    genres: raw.genres?.map(g => g.name) || [],
+    genres: raw.genres?.map((g) => g.name) || [],
     rating: raw.vote_average ? +raw.vote_average.toFixed(1) : null,
     voteCount: raw.vote_count,
     popularity: raw.popularity,
@@ -140,15 +232,33 @@ function normalizeTmdb(raw) {
     status: raw.status,
     budget: raw.budget,
     revenue: raw.revenue,
-    cast: raw.credits?.cast?.slice(0, 10).map(c => ({
-      id: c.id, name: c.name, character: c.character,
-      photo: c.profile_path ? `${TMDB_IMG}/w185${c.profile_path}` : null,
-    })) || [],
-    director: raw.credits?.crew?.find(c => c.job === "Director")?.name || null,
-    writers: raw.credits?.crew?.filter(c => c.department === "Writing").slice(0, 2).map(c => c.name).join(", ") || null,
-    trailer: raw.videos?.results?.find(v => v.type === "Trailer" && v.site === "YouTube")?.key || null,
-    similar: (raw.similar?.results || []).slice(0, 8).map(normalizeTmdb).filter(Boolean),
-    recommendations: (raw.recommendations?.results || []).slice(0, 8).map(normalizeTmdb).filter(Boolean),
+    cast:
+      raw.credits?.cast?.slice(0, 10).map((c) => ({
+        id: c.id,
+        name: c.name,
+        character: c.character,
+        photo: c.profile_path ? `${TMDB_IMG}/w185${c.profile_path}` : null,
+      })) || [],
+    director:
+      raw.credits?.crew?.find((c) => c.job === "Director")?.name || null,
+    writers:
+      raw.credits?.crew
+        ?.filter((c) => c.department === "Writing")
+        .slice(0, 2)
+        .map((c) => c.name)
+        .join(", ") || null,
+    trailer:
+      raw.videos?.results?.find(
+        (v) => v.type === "Trailer" && v.site === "YouTube",
+      )?.key || null,
+    similar: (raw.similar?.results || [])
+      .slice(0, 8)
+      .map(normalizeTmdb)
+      .filter(Boolean),
+    recommendations: (raw.recommendations?.results || [])
+      .slice(0, 8)
+      .map(normalizeTmdb)
+      .filter(Boolean),
   };
 }
 
@@ -159,7 +269,8 @@ function mergeOmdb(movie, d) {
     imdbId: d.imdbID || movie.imdbId,
     imdbRating: d.imdbRating !== "N/A" ? parseFloat(d.imdbRating) : null,
     imdbVotes: d.imdbVotes !== "N/A" ? d.imdbVotes : null,
-    rottenTomatoes: d.Ratings?.find(r => r.Source === "Rotten Tomatoes")?.Value || null,
+    rottenTomatoes:
+      d.Ratings?.find((r) => r.Source === "Rotten Tomatoes")?.Value || null,
     metacritic: d.Metascore !== "N/A" ? d.Metascore : null,
     rated: d.Rated !== "N/A" ? d.Rated : null,
     awards: d.Awards !== "N/A" ? d.Awards : null,
@@ -185,25 +296,47 @@ const STREAM_META = {
 
 function parseStreamingServices(raw) {
   if (!raw) return [];
-  const br = raw.streamingOptions?.br || raw.streamingOptions?.us || raw.streamingInfo?.br || raw.streamingInfo?.us || {};
+  const br =
+    raw.streamingOptions?.br ||
+    raw.streamingOptions?.us ||
+    raw.streamingInfo?.br ||
+    raw.streamingInfo?.us ||
+    {};
   const opts = Array.isArray(br)
-    ? br.reduce((acc, s) => { if (!acc[s.service]) acc[s.service] = []; acc[s.service].push(s); return acc; }, {})
+    ? br.reduce((acc, s) => {
+        if (!acc[s.service]) acc[s.service] = [];
+        acc[s.service].push(s);
+        return acc;
+      }, {})
     : br;
-  return Object.entries(opts).flatMap(([svc, entries]) => {
-    const meta = STREAM_META[svc] || { name: svc, color: C.textDim, icon: svc[0]?.toUpperCase() || "?" };
-    const list = Array.isArray(entries) ? entries : [entries];
-    return list.slice(0, 1).map(entry => ({
-      service: svc, name: meta.name, color: meta.color, icon: meta.icon,
-      type: entry?.type || "subscription",
-      link: entry?.link || entry?.url || null,
-      quality: entry?.quality || entry?.videoQuality || null,
-      price: entry?.price?.formatted || (entry?.price ? `$${entry.price}` : null),
-      leaving: entry?.leaving ? new Date(entry.leaving * 1000).toLocaleDateString("pt-BR") : null,
-    }));
-  }).filter(s => s.name).sort((a, b) => {
-    const order = { subscription: 0, free: 0, rent: 1, buy: 2 };
-    return (order[a.type] ?? 3) - (order[b.type] ?? 3);
-  });
+  return Object.entries(opts)
+    .flatMap(([svc, entries]) => {
+      const meta = STREAM_META[svc] || {
+        name: svc,
+        color: C.textDim,
+        icon: svc[0]?.toUpperCase() || "?",
+      };
+      const list = Array.isArray(entries) ? entries : [entries];
+      return list.slice(0, 1).map((entry) => ({
+        service: svc,
+        name: meta.name,
+        color: meta.color,
+        icon: meta.icon,
+        type: entry?.type || "subscription",
+        link: entry?.link || entry?.url || null,
+        quality: entry?.quality || entry?.videoQuality || null,
+        price:
+          entry?.price?.formatted || (entry?.price ? `$${entry.price}` : null),
+        leaving: entry?.leaving
+          ? new Date(entry.leaving * 1000).toLocaleDateString("pt-BR")
+          : null,
+      }));
+    })
+    .filter((s) => s.name)
+    .sort((a, b) => {
+      const order = { subscription: 0, free: 0, rent: 1, buy: 2 };
+      return (order[a.type] ?? 3) - (order[b.type] ?? 3);
+    });
 }
 
 // ─────────────────────────────────────────────
@@ -216,20 +349,32 @@ function useMovieDetails(tmdbId) {
   useEffect(() => {
     if (!tmdbId) return;
     let alive = true;
-    setLoading(true); setMovie(null); setStreamServices([]);
-    tmdb.details(tmdbId).then(async raw => {
-      if (!alive) return;
-      const base = normalizeTmdb(raw);
-      setMovie(base); setLoading(false);
-      const [omdbRes, streamRes] = await Promise.allSettled([
-        base.imdbId ? omdb.byImdbId(base.imdbId) : omdb.byTitle(base.title, base.year),
-        streaming.byTmdb(tmdbId),
-      ]);
-      if (!alive) return;
-      setMovie(mergeOmdb(base, omdbRes.value));
-      setStreamServices(parseStreamingServices(streamRes.value));
-    }).catch(() => { if (alive) setLoading(false); });
-    return () => { alive = false; };
+    setLoading(true);
+    setMovie(null);
+    setStreamServices([]);
+    tmdb
+      .details(tmdbId)
+      .then(async (raw) => {
+        if (!alive) return;
+        const base = normalizeTmdb(raw);
+        setMovie(base);
+        setLoading(false);
+        const [omdbRes, streamRes] = await Promise.allSettled([
+          base.imdbId
+            ? omdb.byImdbId(base.imdbId)
+            : omdb.byTitle(base.title, base.year),
+          streaming.byTmdb(tmdbId),
+        ]);
+        if (!alive) return;
+        setMovie(mergeOmdb(base, omdbRes.value));
+        setStreamServices(parseStreamingServices(streamRes.value));
+      })
+      .catch(() => {
+        if (alive) setLoading(false);
+      });
+    return () => {
+      alive = false;
+    };
   }, [tmdbId]);
   return { movie, loading, streamServices };
 }
@@ -240,18 +385,30 @@ function usePaginatedMovies(fetcher) {
   const [totalPages, setTotalPages] = useState(1);
   const [totalResults, setTotalResults] = useState(0);
   const [loading, setLoading] = useState(true);
-  const load = useCallback((p) => {
-    setLoading(true);
-    fetcher(p).then(d => {
-      setMovies((d.results || []).map(normalizeTmdb).filter(Boolean));
-      setTotalPages(d.totalAppPages || 1);
-      setTotalResults(d.totalResults || 0);
-      setPage(d.appPage || p);
-      setLoading(false);
-    }).catch(() => setLoading(false));
-  }, [fetcher]);
-  useEffect(() => { load(1); }, [load]);
-  const goTo = useCallback((p) => { if (p >= 1 && p <= totalPages) load(p); }, [load, totalPages]);
+  const load = useCallback(
+    (p) => {
+      setLoading(true);
+      fetcher(p)
+        .then((d) => {
+          setMovies((d.results || []).map(normalizeTmdb).filter(Boolean));
+          setTotalPages(d.totalAppPages || 1);
+          setTotalResults(d.totalResults || 0);
+          setPage(d.appPage || p);
+          setLoading(false);
+        })
+        .catch(() => setLoading(false));
+    },
+    [fetcher],
+  );
+  useEffect(() => {
+    load(1);
+  }, [load]);
+  const goTo = useCallback(
+    (p) => {
+      if (p >= 1 && p <= totalPages) load(p);
+    },
+    [load, totalPages],
+  );
   return { movies, page, totalPages, totalResults, loading, goTo };
 }
 
@@ -259,22 +416,77 @@ function usePaginatedMovies(fetcher) {
 //  SOCIAL MOCK DATA
 // ─────────────────────────────────────────────
 const MOCK_USERS = [
-  { id: 1, name: "Alex Mercer", username: "alexm", initials: "AM", color: "#2563EB", reviews: 12, friends: 8 },
-  { id: 2, name: "Sofia Reyes", username: "sofiar", initials: "SR", color: "#9333EA", reviews: 27, friends: 15 },
-  { id: 3, name: "Kai Nakamura", username: "kain", initials: "KN", color: "#16A34A", reviews: 9, friends: 6 },
-  { id: 4, name: "Luca Mago", username: "lucamago", initials: "LM", color: C.gold, reviews: 19, friends: 11 },
+  {
+    id: 1,
+    name: "Alex Mercer",
+    username: "alexm",
+    initials: "AM",
+    color: "#2563EB",
+    reviews: 12,
+    friends: 8,
+  },
+  {
+    id: 2,
+    name: "Sofia Reyes",
+    username: "sofiar",
+    initials: "SR",
+    color: "#9333EA",
+    reviews: 27,
+    friends: 15,
+  },
+  {
+    id: 3,
+    name: "Kai Nakamura",
+    username: "kain",
+    initials: "KN",
+    color: "#16A34A",
+    reviews: 9,
+    friends: 6,
+  },
+  {
+    id: 4,
+    name: "Luca Mago",
+    username: "lucamago",
+    initials: "LM",
+    color: C.gold,
+    reviews: 19,
+    friends: 11,
+  },
 ];
 const MOCK_REVIEWS = [
-  { movieTmdbId: 872585, userId: 4, rating: 5, text: "Uma obra monumental. Nolan superou tudo. A cena da detonação é de tirar o fôlego.", date: "15 Jan 2024" },
-  { movieTmdbId: 693134, userId: 4, rating: 4, text: "Villeneuve consolida sua visão épica. A segunda parte entrega tudo que a primeira prometeu.", date: "3 Mar 2024" },
-  { movieTmdbId: 792307, userId: 4, rating: 5, text: "Lanthimos em sua melhor forma. Emma Stone está absolutamente fora de si.", date: "8 Fev 2024" },
+  {
+    movieTmdbId: 872585,
+    userId: 4,
+    rating: 5,
+    text: "Uma obra monumental. Nolan superou tudo. A cena da detonação é de tirar o fôlego.",
+    date: "15 Jan 2024",
+  },
+  {
+    movieTmdbId: 693134,
+    userId: 4,
+    rating: 4,
+    text: "Villeneuve consolida sua visão épica. A segunda parte entrega tudo que a primeira prometeu.",
+    date: "3 Mar 2024",
+  },
+  {
+    movieTmdbId: 792307,
+    userId: 4,
+    rating: 5,
+    text: "Lanthimos em sua melhor forma. Emma Stone está absolutamente fora de si.",
+    date: "8 Fev 2024",
+  },
 ];
 const MOCK_GROUPS = [
   { id: 1, name: "Cinéphiles do Recife", members: [1, 2, 3, 4] },
   { id: 2, name: "Weekend Watchlist", members: [1, 4] },
 ];
 const GROUP_RECS = {
-  1: { 1: [872585, 693134, 792307, 940551], 2: [872585, 976573, 1014577, 693134], 3: [507089, 940551, 872585, 792307], 4: [872585, 693134, 792307, 1011985] },
+  1: {
+    1: [872585, 693134, 792307, 940551],
+    2: [872585, 976573, 1014577, 693134],
+    3: [507089, 940551, 872585, 792307],
+    4: [872585, 693134, 792307, 1011985],
+  },
   2: { 1: [872585, 792307], 4: [693134, 940551] },
 };
 
@@ -282,84 +494,141 @@ const GROUP_RECS = {
 //  PRIMITIVES
 // ─────────────────────────────────────────────
 const Spinner = ({ size = 20 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={{ animation: "spin 0.75s linear infinite", flexShrink: 0 }}>
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    style={{ animation: "spin 0.75s linear infinite", flexShrink: 0 }}
+  >
     <circle cx="12" cy="12" r="10" stroke={C.border} strokeWidth="3" />
-    <path d="M12 2a10 10 0 0 1 10 10" stroke={C.gold} strokeWidth="3" strokeLinecap="round" />
+    <path
+      d="M12 2a10 10 0 0 1 10 10"
+      stroke={C.gold}
+      strokeWidth="3"
+      strokeLinecap="round"
+    />
   </svg>
 );
 
 const SkeletonCard = ({ w = 160 }) => (
-  <div style={{ display: "flex", flexDirection: "column", gap: 6, flexShrink: 0 }}>
-    <div className="skeleton" style={{ width: w, height: Math.round(w * 1.5), borderRadius: 8 }} />
-    <div className="skeleton" style={{ width: "80%", height: 12, borderRadius: 4 }} />
+  <div
+    style={{ display: "flex", flexDirection: "column", gap: 6, flexShrink: 0 }}
+  >
+    <div
+      className="skeleton"
+      style={{ width: w, height: Math.round(w * 1.5), borderRadius: 8 }}
+    />
+    <div
+      className="skeleton"
+      style={{ width: "80%", height: 12, borderRadius: 4 }}
+    />
   </div>
 );
 
-function StarRating({ value, max = 5, size = 14, interactive = false, onChange }) {
+function StarRating({
+  value,
+  max = 5,
+  size = 14,
+  interactive = false,
+  onChange,
+}) {
   const [hover, setHover] = useState(0);
   const containerRef = useRef(null);
 
-  const getValueFromEvent = useCallback((e, starIndex) => {
-    if (!interactive) return;
-    const starEl = e.currentTarget;
-    const rect = starEl.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const half = x < rect.width / 2;
-    return starIndex + (half ? 0.5 : 1);
-  }, [interactive]);
+  const getValueFromEvent = useCallback(
+    (e, starIndex) => {
+      if (!interactive) return;
+      const starEl = e.currentTarget;
+      const rect = starEl.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const half = x < rect.width / 2;
+      return starIndex + (half ? 0.5 : 1);
+    },
+    [interactive],
+  );
 
-  const handleMouseMove = useCallback((e, i) => {
-    if (!interactive) return;
-    const val = getValueFromEvent(e, i);
-    setHover(val);
-  }, [interactive, getValueFromEvent]);
+  const handleMouseMove = useCallback(
+    (e, i) => {
+      if (!interactive) return;
+      const val = getValueFromEvent(e, i);
+      setHover(val);
+    },
+    [interactive, getValueFromEvent],
+  );
 
-  const handleClick = useCallback((e, i) => {
-    if (!interactive) return;
-    const val = getValueFromEvent(e, i);
-    onChange?.(val);
-  }, [interactive, getValueFromEvent, onChange]);
+  const handleClick = useCallback(
+    (e, i) => {
+      if (!interactive) return;
+      const val = getValueFromEvent(e, i);
+      onChange?.(val);
+    },
+    [interactive, getValueFromEvent, onChange],
+  );
 
   // Touch/drag support
-  const handleTouchMove = useCallback((e) => {
-    if (!interactive || !containerRef.current) return;
-    const touch = e.touches[0];
-    const stars = containerRef.current.querySelectorAll("[data-star]");
-    for (let i = stars.length - 1; i >= 0; i--) {
-      const rect = stars[i].getBoundingClientRect();
-      if (touch.clientX >= rect.left) {
-        const x = touch.clientX - rect.left;
-        const half = x < rect.width / 2;
-        const val = i + (half ? 0.5 : 1);
-        setHover(val);
-        onChange?.(val);
-        break;
+  const handleTouchMove = useCallback(
+    (e) => {
+      if (!interactive || !containerRef.current) return;
+      const touch = e.touches[0];
+      const stars = containerRef.current.querySelectorAll("[data-star]");
+      for (let i = stars.length - 1; i >= 0; i--) {
+        const rect = stars[i].getBoundingClientRect();
+        if (touch.clientX >= rect.left) {
+          const x = touch.clientX - rect.left;
+          const half = x < rect.width / 2;
+          const val = i + (half ? 0.5 : 1);
+          setHover(val);
+          onChange?.(val);
+          break;
+        }
       }
-    }
-  }, [interactive, onChange]);
+    },
+    [interactive, onChange],
+  );
 
   return (
-    <div ref={containerRef} style={{ display: "flex", gap: 2, touchAction: "none" }}
-      onTouchMove={handleTouchMove} onTouchEnd={() => setHover(0)}>
+    <div
+      ref={containerRef}
+      style={{ display: "flex", gap: 2, touchAction: "none" }}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={() => setHover(0)}
+    >
       {Array.from({ length: max }, (_, i) => {
         const displayVal = hover || value;
         const full = displayVal >= i + 1;
         const half = !full && displayVal >= i + 0.5;
         return (
-          <svg key={i} data-star={i} width={size} height={size} viewBox="0 0 24 24"
-            style={{ cursor: interactive ? "pointer" : "default", transition: "transform 0.15s", transform: (interactive && hover && (hover >= i + 0.5)) ? "scale(1.15)" : "scale(1)" }}
+          <svg
+            key={i}
+            data-star={i}
+            width={size}
+            height={size}
+            viewBox="0 0 24 24"
+            style={{
+              cursor: interactive ? "pointer" : "default",
+              transition: "transform 0.15s",
+              transform:
+                interactive && hover && hover >= i + 0.5
+                  ? "scale(1.15)"
+                  : "scale(1)",
+            }}
             onMouseMove={(e) => handleMouseMove(e, i)}
             onMouseLeave={() => interactive && setHover(0)}
-            onClick={(e) => handleClick(e, i)}>
+            onClick={(e) => handleClick(e, i)}
+          >
             <defs>
               <linearGradient id={`half-${i}-${size}`}>
                 <stop offset="50%" stopColor={C.gold} />
                 <stop offset="50%" stopColor="transparent" />
               </linearGradient>
             </defs>
-            <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"
+            <polygon
+              points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"
               fill={full ? C.gold : half ? `url(#half-${i}-${size})` : "none"}
-              stroke={full || half ? C.gold : C.textDim} strokeWidth="1.5" />
+              stroke={full || half ? C.gold : C.textDim}
+              strokeWidth="1.5"
+            />
           </svg>
         );
       })}
@@ -382,9 +651,14 @@ function useAuth() {
   const fetchProfile = useCallback((userId) => {
     if (profileFetchedRef.current === userId) return;
     profileFetchedRef.current = userId;
-    supabase.from("profiles").select("*").eq("user_id", userId).single().then(({ data }) => {
-      setProfile(data);
-    });
+    supabase
+      .from("profiles")
+      .select("*")
+      .eq("user_id", userId)
+      .single()
+      .then(({ data }) => {
+        setProfile(data);
+      });
   }, []);
 
   fetchProfileRef.current = fetchProfile;
@@ -404,12 +678,14 @@ function useAuth() {
     });
 
     // 2. Listen only for meaningful auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
       if (!mounted) return;
-      
+
       // Ignore these events completely
       if (event === "TOKEN_REFRESHED" || event === "INITIAL_SESSION") return;
-      
+
       // Wait for getSession to complete first
       if (!sessionRestoredRef.current) return;
 
@@ -427,7 +703,7 @@ function useAuth() {
 
       // For other events, only update if we have a valid user
       if (!u) return; // Don't logout on null sessions from failed refreshes
-      
+
       if (newId === userIdRef.current && event !== "USER_UPDATED") return;
 
       userIdRef.current = newId;
@@ -444,19 +720,31 @@ function useAuth() {
   }, []); // Dependências vazias mantêm o listener estável
 
   const signUp = async (email, password, name, username) => {
-    const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { full_name: name } } });
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { full_name: name } },
+    });
     if (error) throw error;
     if (!data.session) {
-      throw new Error("Conta criada mas não foi possível fazer login automático. Tente fazer login manualmente.");
+      throw new Error(
+        "Conta criada mas não foi possível fazer login automático. Tente fazer login manualmente.",
+      );
     }
     if (data.user && username) {
-      await supabase.from("profiles").update({ username, display_name: name }).eq("user_id", data.user.id);
+      await supabase
+        .from("profiles")
+        .update({ username, display_name: name })
+        .eq("user_id", data.user.id);
     }
     return data;
   };
 
   const signIn = async (email, password) => {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
     if (error) throw error;
     return data;
   };
@@ -467,12 +755,24 @@ function useAuth() {
 
   const updateProfile = async (updates) => {
     if (!user) return;
-    const { error } = await supabase.from("profiles").update(updates).eq("user_id", user.id);
+    const { error } = await supabase
+      .from("profiles")
+      .update(updates)
+      .eq("user_id", user.id);
     if (error) throw error;
     fetchProfile(user.id);
   };
 
-  return { user, profile, loading, signUp, signIn, signOut, updateProfile, fetchProfile };
+  return {
+    user,
+    profile,
+    loading,
+    signUp,
+    signIn,
+    signOut,
+    updateProfile,
+    fetchProfile,
+  };
 }
 
 function useRatings(userId) {
@@ -482,31 +782,56 @@ function useRatings(userId) {
   const load = useCallback(async () => {
     if (!userId) return;
     setLoading(true);
-    const { data } = await supabase.from("ratings").select("*").eq("user_id", userId).order("updated_at", { ascending: false });
+    const { data } = await supabase
+      .from("ratings")
+      .select("*")
+      .eq("user_id", userId)
+      .order("updated_at", { ascending: false });
     setRatings(data || []);
     setLoading(false);
   }, [userId]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const upsertRating = async (tmdbId, rating, review, title, posterUrl) => {
     if (!userId) return;
-    const { error } = await supabase.from("ratings").upsert({
-      user_id: userId, tmdb_id: tmdbId, rating, review, title, poster_url: posterUrl,
-    }, { onConflict: "user_id,tmdb_id" });
+    const { error } = await supabase.from("ratings").upsert(
+      {
+        user_id: userId,
+        tmdb_id: tmdbId,
+        rating,
+        review,
+        title,
+        poster_url: posterUrl,
+      },
+      { onConflict: "user_id,tmdb_id" },
+    );
     if (error) throw error;
     await load();
   };
 
   const deleteRating = async (tmdbId) => {
     if (!userId) return;
-    await supabase.from("ratings").delete().eq("user_id", userId).eq("tmdb_id", tmdbId);
+    await supabase
+      .from("ratings")
+      .delete()
+      .eq("user_id", userId)
+      .eq("tmdb_id", tmdbId);
     await load();
   };
 
-  const getRating = (tmdbId) => ratings.find(r => r.tmdb_id === tmdbId);
+  const getRating = (tmdbId) => ratings.find((r) => r.tmdb_id === tmdbId);
 
-  return { ratings, loading, upsertRating, deleteRating, getRating, reload: load };
+  return {
+    ratings,
+    loading,
+    upsertRating,
+    deleteRating,
+    getRating,
+    reload: load,
+  };
 }
 
 function useWatchlist(userId) {
@@ -516,73 +841,203 @@ function useWatchlist(userId) {
   const load = useCallback(async () => {
     if (!userId) return;
     setLoading(true);
-    const { data } = await supabase.from("watchlist").select("*").eq("user_id", userId).order("created_at", { ascending: false });
+    const { data } = await supabase
+      .from("watchlist")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
     setItems(data || []);
     setLoading(false);
   }, [userId]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const add = async (tmdbId, title, posterUrl) => {
     if (!userId) return;
-    const { error } = await supabase.from("watchlist").upsert({
-      user_id: userId, tmdb_id: tmdbId, title, poster_url: posterUrl,
-    }, { onConflict: "user_id,tmdb_id" });
+    const { error } = await supabase.from("watchlist").upsert(
+      {
+        user_id: userId,
+        tmdb_id: tmdbId,
+        title,
+        poster_url: posterUrl,
+      },
+      { onConflict: "user_id,tmdb_id" },
+    );
     if (error) throw error;
     await load();
   };
 
   const remove = async (tmdbId) => {
     if (!userId) return;
-    await supabase.from("watchlist").delete().eq("user_id", userId).eq("tmdb_id", tmdbId);
+    await supabase
+      .from("watchlist")
+      .delete()
+      .eq("user_id", userId)
+      .eq("tmdb_id", tmdbId);
     await load();
   };
 
-  const isInList = (tmdbId) => items.some(i => i.tmdb_id === tmdbId);
+  const isInList = (tmdbId) => items.some((i) => i.tmdb_id === tmdbId);
 
   return { items, loading, add, remove, isInList, reload: load };
 }
 
 function Avatar({ user, size = 40 }) {
   return (
-    <div style={{ width: size, height: size, borderRadius: "50%", background: user?.color || C.accentSoft, display: "flex", alignItems: "center", justifyContent: "center", fontSize: size * 0.33, fontWeight: 600, color: "#fff", flexShrink: 0, border: `2px solid ${C.border}` }}>
+    <div
+      style={{
+        width: size,
+        height: size,
+        borderRadius: "50%",
+        background: user?.color || C.accentSoft,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: size * 0.33,
+        fontWeight: 600,
+        color: "#fff",
+        flexShrink: 0,
+        border: `2px solid ${C.border}`,
+      }}
+    >
       {user?.initials || "?"}
     </div>
   );
 }
 
-function Badge({ children, color = C.accentSoft, textColor = C.textMuted, small = false }) {
+function Badge({
+  children,
+  color = C.accentSoft,
+  textColor = C.textMuted,
+  small = false,
+}) {
   return (
-    <span style={{ background: color, color: textColor, fontSize: small ? 10 : 11, fontWeight: 500, padding: small ? "2px 7px" : "3px 10px", borderRadius: 20, whiteSpace: "nowrap" }}>
+    <span
+      style={{
+        background: color,
+        color: textColor,
+        fontSize: small ? 10 : 11,
+        fontWeight: 500,
+        padding: small ? "2px 7px" : "3px 10px",
+        borderRadius: 20,
+        whiteSpace: "nowrap",
+      }}
+    >
       {children}
     </span>
   );
 }
 
-function Btn({ children, onClick, variant = "ghost", size = "md", style: sx = {}, disabled = false }) {
-  const base = { display: "inline-flex", alignItems: "center", gap: 6, borderRadius: 10, fontSize: size === "sm" ? 12 : 13, fontWeight: 600, padding: size === "sm" ? "6px 14px" : "10px 22px", transition: "all 0.18s", opacity: disabled ? 0.5 : 1, cursor: disabled ? "not-allowed" : "pointer" };
+function Btn({
+  children,
+  onClick,
+  variant = "ghost",
+  size = "md",
+  style: sx = {},
+  disabled = false,
+}) {
+  const base = {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 6,
+    borderRadius: 10,
+    fontSize: size === "sm" ? 12 : 13,
+    fontWeight: 600,
+    padding: size === "sm" ? "6px 14px" : "10px 22px",
+    transition: "all 0.18s",
+    opacity: disabled ? 0.5 : 1,
+    cursor: disabled ? "not-allowed" : "pointer",
+  };
   const variants = {
-    gold: { background: `linear-gradient(135deg,${C.goldDim},${C.gold})`, color: C.bgDeep },
-    ghost: { background: C.bgCard, color: C.textMuted, border: `1px solid ${C.border}` },
-    outline: { background: "transparent", color: C.textMuted, border: `1px solid ${C.border}` },
+    gold: {
+      background: `linear-gradient(135deg,${C.goldDim},${C.gold})`,
+      color: C.bgDeep,
+    },
+    ghost: {
+      background: C.bgCard,
+      color: C.textMuted,
+      border: `1px solid ${C.border}`,
+    },
+    outline: {
+      background: "transparent",
+      color: C.textMuted,
+      border: `1px solid ${C.border}`,
+    },
   };
   return (
-    <button onClick={disabled ? undefined : onClick} style={{ ...base, ...variants[variant], ...sx }}
-      onMouseEnter={e => { if (!disabled) { e.currentTarget.style.opacity = "0.85"; e.currentTarget.style.transform = "translateY(-1px)"; } }}
-      onMouseLeave={e => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = ""; }}
-    >{children}</button>
+    <button
+      onClick={disabled ? undefined : onClick}
+      style={{ ...base, ...variants[variant], ...sx }}
+      onMouseEnter={(e) => {
+        if (!disabled) {
+          e.currentTarget.style.opacity = "0.85";
+          e.currentTarget.style.transform = "translateY(-1px)";
+        }
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.opacity = "1";
+        e.currentTarget.style.transform = "";
+      }}
+    >
+      {children}
+    </button>
   );
 }
 
-function TextInput({ label, value, onChange, placeholder, type = "text", note, style: sx = {} }) {
+function TextInput({
+  label,
+  value,
+  onChange,
+  placeholder,
+  type = "text",
+  note,
+  style: sx = {},
+}) {
   return (
     <div style={sx}>
-      {label && <label style={{ display: "block", fontSize: 12, color: C.textMuted, marginBottom: 6, fontWeight: 500 }}>{label}</label>}
-      <input type={type} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
-        style={{ width: "100%", padding: "12px 16px", borderRadius: 10, background: "rgba(9,21,35,0.6)", border: `1px solid ${C.border}`, color: C.text, fontSize: 14, outline: "none", transition: "border-color 0.2s, background 0.2s" }}
-        onFocus={e => { e.target.style.borderColor = C.gold; e.target.style.background = "rgba(9,21,35,0.8)"; }}
-        onBlur={e => { e.target.style.borderColor = C.border; e.target.style.background = "rgba(9,21,35,0.6)"; }} />
-      {note && <p style={{ fontSize: 11, color: C.textDim, marginTop: 4 }}>{note}</p>}
+      {label && (
+        <label
+          style={{
+            display: "block",
+            fontSize: 12,
+            color: C.textMuted,
+            marginBottom: 6,
+            fontWeight: 500,
+          }}
+        >
+          {label}
+        </label>
+      )}
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        style={{
+          width: "100%",
+          padding: "12px 16px",
+          borderRadius: 10,
+          background: "rgba(9,21,35,0.6)",
+          border: `1px solid ${C.border}`,
+          color: C.text,
+          fontSize: 14,
+          outline: "none",
+          transition: "border-color 0.2s, background 0.2s",
+        }}
+        onFocus={(e) => {
+          e.target.style.borderColor = C.gold;
+          e.target.style.background = "rgba(9,21,35,0.8)";
+        }}
+        onBlur={(e) => {
+          e.target.style.borderColor = C.border;
+          e.target.style.background = "rgba(9,21,35,0.6)";
+        }}
+      />
+      {note && (
+        <p style={{ fontSize: 11, color: C.textDim, marginTop: 4 }}>{note}</p>
+      )}
     </div>
   );
 }
@@ -590,13 +1045,43 @@ function TextInput({ label, value, onChange, placeholder, type = "text", note, s
 function Section({ title, children, action }) {
   return (
     <div style={{ marginBottom: 40 }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, padding: "0 4px" }}>
-        <h2 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 18, fontWeight: 700, color: C.text, display: "flex", alignItems: "center", gap: 10 }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: 16,
+          padding: "0 4px",
+        }}
+      >
+        <h2
+          style={{
+            fontFamily: "'Outfit', sans-serif",
+            fontSize: 18,
+            fontWeight: 700,
+            color: C.text,
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+          }}
+        >
           {title}
         </h2>
-        {action && <button onClick={action.onClick} style={{ fontSize: 12, color: C.gold, fontWeight: 500, transition: "opacity 0.2s" }}
-          onMouseEnter={e => e.currentTarget.style.opacity = "0.7"}
-          onMouseLeave={e => e.currentTarget.style.opacity = "1"}>{action.label} →</button>}
+        {action && (
+          <button
+            onClick={action.onClick}
+            style={{
+              fontSize: 12,
+              color: C.gold,
+              fontWeight: 500,
+              transition: "opacity 0.2s",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.7")}
+            onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+          >
+            {action.label} →
+          </button>
+        )}
       </div>
       {children}
     </div>
@@ -609,9 +1094,36 @@ function FilmStripBg() {
     <div className="film-strip-bg">
       <div className="film-strip-inner">
         {[...n, ...n].map((_, i) => (
-          <div key={i} style={{ width: 30, height: 44, background: C.bgDeep, borderRight: `2px solid ${C.border}`, display: "flex", flexDirection: "column", justifyContent: "space-between", padding: "5px 4px", flexShrink: 0 }}>
-            <div style={{ width: "100%", height: 7, background: C.border, borderRadius: 2 }} />
-            <div style={{ width: "100%", height: 7, background: C.border, borderRadius: 2 }} />
+          <div
+            key={i}
+            style={{
+              width: 30,
+              height: 44,
+              background: C.bgDeep,
+              borderRight: `2px solid ${C.border}`,
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
+              padding: "5px 4px",
+              flexShrink: 0,
+            }}
+          >
+            <div
+              style={{
+                width: "100%",
+                height: 7,
+                background: C.border,
+                borderRadius: 2,
+              }}
+            />
+            <div
+              style={{
+                width: "100%",
+                height: 7,
+                background: C.border,
+                borderRadius: 2,
+              }}
+            />
           </div>
         ))}
       </div>
@@ -623,34 +1135,105 @@ function FilmStripBg() {
 //  STREAMING BADGES
 // ─────────────────────────────────────────────
 function StreamingBadges({ services, loading }) {
-  if (loading) return (
-    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-      {[1, 2, 3].map(i => <div key={i} className="skeleton" style={{ width: 110, height: 36, borderRadius: 9 }} />)}
-    </div>
-  );
-  if (!services?.length) return (
-    <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", borderRadius: 9, background: "rgba(74,94,114,0.12)", border: `1px dashed ${C.border}` }}>
-      <Radio size={14} />
-      <p style={{ fontSize: 12, color: C.textDim, fontStyle: "italic" }}>Não encontrado em streaming no Brasil</p>
-    </div>
-  );
-  const typeLabel = { subscription: "Incluso", free: "Grátis", rent: "Aluguel", buy: "Comprar" };
+  if (loading)
+    return (
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        {[1, 2, 3].map((i) => (
+          <div
+            key={i}
+            className="skeleton"
+            style={{ width: 110, height: 36, borderRadius: 9 }}
+          />
+        ))}
+      </div>
+    );
+  if (!services?.length)
+    return (
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          padding: "8px 12px",
+          borderRadius: 9,
+          background: "rgba(74,94,114,0.12)",
+          border: `1px dashed ${C.border}`,
+        }}
+      >
+        <Radio size={14} />
+        <p style={{ fontSize: 12, color: C.textDim, fontStyle: "italic" }}>
+          Não encontrado em streaming no Brasil
+        </p>
+      </div>
+    );
+  const typeLabel = {
+    subscription: "Incluso",
+    free: "Grátis",
+    rent: "Aluguel",
+    buy: "Comprar",
+  };
   return (
     <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
       {services.map((s, i) => (
-        <a key={i} href={s.link || "#"} target="_blank" rel="noopener noreferrer"
-          style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "7px 13px", borderRadius: 9, background: `${s.color}18`, border: `1px solid ${s.color}40`, color: s.color, fontSize: 12, fontWeight: 600, textDecoration: "none", transition: "all 0.2s", flexDirection: "column", minWidth: 90 }}
-          onMouseEnter={e => { e.currentTarget.style.background = `${s.color}30`; e.currentTarget.style.transform = "translateY(-2px)"; }}
-          onMouseLeave={e => { e.currentTarget.style.background = `${s.color}18`; e.currentTarget.style.transform = ""; }}>
+        <a
+          key={i}
+          href={s.link || "#"}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 7,
+            padding: "7px 13px",
+            borderRadius: 9,
+            background: `${s.color}18`,
+            border: `1px solid ${s.color}40`,
+            color: s.color,
+            fontSize: 12,
+            fontWeight: 600,
+            textDecoration: "none",
+            transition: "all 0.2s",
+            flexDirection: "column",
+            minWidth: 90,
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = `${s.color}30`;
+            e.currentTarget.style.transform = "translateY(-2px)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = `${s.color}18`;
+            e.currentTarget.style.transform = "";
+          }}
+        >
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <span style={{ fontSize: 11, fontWeight: 900, lineHeight: 1 }}>{s.icon}</span>
+            <span style={{ fontSize: 11, fontWeight: 900, lineHeight: 1 }}>
+              {s.icon}
+            </span>
             <span style={{ fontSize: 12 }}>{s.name}</span>
           </div>
           <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-            <span style={{ fontSize: 10, opacity: 0.75, fontWeight: 500 }}>{s.price || typeLabel[s.type] || s.type}</span>
-            {s.quality && <span style={{ fontSize: 9, padding: "1px 5px", borderRadius: 3, background: `${s.color}30`, fontWeight: 700 }}>{s.quality}</span>}
+            <span style={{ fontSize: 10, opacity: 0.75, fontWeight: 500 }}>
+              {s.price || typeLabel[s.type] || s.type}
+            </span>
+            {s.quality && (
+              <span
+                style={{
+                  fontSize: 9,
+                  padding: "1px 5px",
+                  borderRadius: 3,
+                  background: `${s.color}30`,
+                  fontWeight: 700,
+                }}
+              >
+                {s.quality}
+              </span>
+            )}
           </div>
-          {s.leaving && <span style={{ fontSize: 9, color: C.orange, opacity: 0.9 }}>Sai em {s.leaving}</span>}
+          {s.leaving && (
+            <span style={{ fontSize: 9, color: C.orange, opacity: 0.9 }}>
+              Sai em {s.leaving}
+            </span>
+          )}
         </a>
       ))}
     </div>
@@ -662,22 +1245,103 @@ function StreamingBadges({ services, loading }) {
 // ─────────────────────────────────────────────
 function RatingsRow({ movie }) {
   const items = [
-    movie.rating && { src: "TMDb", val: `${movie.rating}`, suffix: "/10", pct: (movie.rating / 10) * 100, color: "#01B4E4", sub: movie.voteCount ? `${(movie.voteCount / 1000).toFixed(0)}k votos` : null },
-    movie.imdbRating && { src: "IMDb", val: `${movie.imdbRating}`, suffix: "/10", pct: (movie.imdbRating / 10) * 100, color: "#F5C518", sub: movie.imdbVotes },
-    movie.rottenTomatoes && { src: "RT", val: movie.rottenTomatoes.replace("%", ""), suffix: "%", pct: parseInt(movie.rottenTomatoes), color: parseInt(movie.rottenTomatoes) >= 60 ? C.orange : C.red, sub: "Rotten Tomatoes" },
-    movie.metacritic && { src: "MC", val: movie.metacritic, suffix: "/100", pct: parseInt(movie.metacritic), color: parseInt(movie.metacritic) >= 61 ? C.success : parseInt(movie.metacritic) >= 40 ? C.orange : C.red, sub: "Metacritic" },
+    movie.rating && {
+      src: "TMDb",
+      val: `${movie.rating}`,
+      suffix: "/10",
+      pct: (movie.rating / 10) * 100,
+      color: "#01B4E4",
+      sub: movie.voteCount
+        ? `${(movie.voteCount / 1000).toFixed(0)}k votos`
+        : null,
+    },
+    movie.imdbRating && {
+      src: "IMDb",
+      val: `${movie.imdbRating}`,
+      suffix: "/10",
+      pct: (movie.imdbRating / 10) * 100,
+      color: "#F5C518",
+      sub: movie.imdbVotes,
+    },
+    movie.rottenTomatoes && {
+      src: "RT",
+      val: movie.rottenTomatoes.replace("%", ""),
+      suffix: "%",
+      pct: parseInt(movie.rottenTomatoes),
+      color: parseInt(movie.rottenTomatoes) >= 60 ? C.orange : C.red,
+      sub: "Rotten Tomatoes",
+    },
+    movie.metacritic && {
+      src: "MC",
+      val: movie.metacritic,
+      suffix: "/100",
+      pct: parseInt(movie.metacritic),
+      color:
+        parseInt(movie.metacritic) >= 61
+          ? C.success
+          : parseInt(movie.metacritic) >= 40
+            ? C.orange
+            : C.red,
+      sub: "Metacritic",
+    },
   ].filter(Boolean);
   if (!items.length) return null;
   return (
     <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
       {items.map((b, i) => (
-        <div key={i} style={{ background: C.bgDeep, border: `1px solid ${C.border}`, borderRadius: 12, padding: "10px 16px", minWidth: 78, position: "relative", overflow: "hidden" }}>
-          <div style={{ position: "absolute", bottom: 0, left: 0, height: 3, width: `${Math.min(b.pct, 100)}%`, background: b.color, borderRadius: "0 2px 2px 0", opacity: 0.5 }} />
-          <p style={{ fontSize: 10, color: C.textDim, marginBottom: 4, fontWeight: 500 }}>{b.src}</p>
-          <p style={{ fontSize: 20, fontWeight: 700, color: b.color, fontFamily: "'Outfit', sans-serif", lineHeight: 1 }}>
-            {b.val}<span style={{ fontSize: 11, fontWeight: 400, opacity: 0.7 }}>{b.suffix}</span>
+        <div
+          key={i}
+          style={{
+            background: C.bgDeep,
+            border: `1px solid ${C.border}`,
+            borderRadius: 12,
+            padding: "10px 16px",
+            minWidth: 78,
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              height: 3,
+              width: `${Math.min(b.pct, 100)}%`,
+              background: b.color,
+              borderRadius: "0 2px 2px 0",
+              opacity: 0.5,
+            }}
+          />
+          <p
+            style={{
+              fontSize: 10,
+              color: C.textDim,
+              marginBottom: 4,
+              fontWeight: 500,
+            }}
+          >
+            {b.src}
           </p>
-          {b.sub && <p style={{ fontSize: 9, color: C.textDim, marginTop: 3 }}>{b.sub}</p>}
+          <p
+            style={{
+              fontSize: 20,
+              fontWeight: 700,
+              color: b.color,
+              fontFamily: "'Outfit', sans-serif",
+              lineHeight: 1,
+            }}
+          >
+            {b.val}
+            <span style={{ fontSize: 11, fontWeight: 400, opacity: 0.7 }}>
+              {b.suffix}
+            </span>
+          </p>
+          {b.sub && (
+            <p style={{ fontSize: 9, color: C.textDim, marginTop: 3 }}>
+              {b.sub}
+            </p>
+          )}
         </div>
       ))}
     </div>
@@ -694,7 +1358,11 @@ function isUpcoming(movie) {
 function formatReleaseDateBR(dateStr) {
   if (!dateStr) return "";
   const d = new Date(dateStr);
-  return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
+  return d.toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
 }
 
 function MovieCard({ movie, size = "md", onClick }) {
@@ -705,41 +1373,150 @@ function MovieCard({ movie, size = "md", onClick }) {
 
   return (
     <div className="movie-card-netflix" onClick={onClick} style={{ width: w }}>
-      <div style={{ width: w, height: h, borderRadius: 10, background: C.bgCard, border: `1px solid ${upcoming ? C.accent : C.border}`, overflow: "hidden", position: "relative" }}>
+      <div
+        style={{
+          width: w,
+          height: h,
+          borderRadius: 10,
+          background: C.bgCard,
+          border: `1px solid ${upcoming ? C.accent : C.border}`,
+          overflow: "hidden",
+          position: "relative",
+        }}
+      >
         {movie.poster ? (
-          <img src={movie.posterHD || movie.poster} alt={movie.title} loading="lazy"
+          <img
+            src={movie.posterHD || movie.poster}
+            alt={movie.title}
+            loading="lazy"
             onLoad={() => setImgLoaded(true)}
-            style={{ width: "100%", height: "100%", objectFit: "cover", filter: upcoming ? "brightness(0.7)" : "brightness(1.05) contrast(1.02)", opacity: imgLoaded ? 1 : 0, transition: "opacity 0.5s ease" }}
-            onError={e => e.target.style.display = "none"} />
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              filter: upcoming
+                ? "brightness(0.7)"
+                : "brightness(1.05) contrast(1.02)",
+              opacity: imgLoaded ? 1 : 0,
+              transition: "opacity 0.5s ease",
+            }}
+            onError={(e) => (e.target.style.display = "none")}
+          />
         ) : (
-          <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 6, padding: 8 }}>
+          <div
+            style={{
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexDirection: "column",
+              gap: 6,
+              padding: 8,
+            }}
+          >
             <Film size={28} style={{ opacity: 0.3 }} />
-            <p style={{ fontSize: 10, color: C.textDim, textAlign: "center", lineHeight: 1.3 }}>{movie.title}</p>
+            <p
+              style={{
+                fontSize: 10,
+                color: C.textDim,
+                textAlign: "center",
+                lineHeight: 1.3,
+              }}
+            >
+              {movie.title}
+            </p>
           </div>
         )}
         {!imgLoaded && movie.poster && (
-          <div className="skeleton" style={{ position: "absolute", inset: 0, borderRadius: 10 }} />
+          <div
+            className="skeleton"
+            style={{ position: "absolute", inset: 0, borderRadius: 10 }}
+          />
         )}
         {upcoming && (
-          <div style={{ position: "absolute", top: 0, left: 0, right: 0, background: "rgba(37,99,235,0.88)", color: "#fff", fontSize: 9, fontWeight: 700, padding: "4px 0", textAlign: "center", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              background: "rgba(37,99,235,0.88)",
+              color: "#fff",
+              fontSize: 9,
+              fontWeight: 700,
+              padding: "4px 0",
+              textAlign: "center",
+              textTransform: "uppercase",
+              letterSpacing: "0.08em",
+            }}
+          >
             EM BREVE
           </div>
         )}
         {upcoming && movie.releaseDate && (
-          <div style={{ position: "absolute", bottom: 6, left: 6, right: 6, background: "rgba(9,21,35,0.92)", color: C.accent, fontSize: 10, fontWeight: 600, padding: "3px 6px", borderRadius: 6, textAlign: "center" }}>
-            <Calendar size={12} style={{ display: "inline", verticalAlign: "middle" }} /> {formatReleaseDateBR(movie.releaseDate)}
+          <div
+            style={{
+              position: "absolute",
+              bottom: 6,
+              left: 6,
+              right: 6,
+              background: "rgba(9,21,35,0.92)",
+              color: C.accent,
+              fontSize: 10,
+              fontWeight: 600,
+              padding: "3px 6px",
+              borderRadius: 6,
+              textAlign: "center",
+            }}
+          >
+            <Calendar
+              size={12}
+              style={{ display: "inline", verticalAlign: "middle" }}
+            />{" "}
+            {formatReleaseDateBR(movie.releaseDate)}
           </div>
         )}
         {/* Hover overlay */}
         <div className="movie-card-overlay">
-          <p style={{ fontSize: 13, fontWeight: 600, color: C.text, lineHeight: 1.2, marginBottom: 4 }}>{movie.title}</p>
+          <p
+            style={{
+              fontSize: 13,
+              fontWeight: 600,
+              color: C.text,
+              lineHeight: 1.2,
+              marginBottom: 4,
+            }}
+          >
+            {movie.title}
+          </p>
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            {!upcoming && movie.rating && <span style={{ fontSize: 12, fontWeight: 700, color: C.gold }}>★ {movie.rating}</span>}
-            {movie.year && <span style={{ fontSize: 11, color: C.textMuted }}>{upcoming ? formatReleaseDateBR(movie.releaseDate) : movie.year}</span>}
+            {!upcoming && movie.rating && (
+              <span style={{ fontSize: 12, fontWeight: 700, color: C.gold }}>
+                ★ {movie.rating}
+              </span>
+            )}
+            {movie.year && (
+              <span style={{ fontSize: 11, color: C.textMuted }}>
+                {upcoming ? formatReleaseDateBR(movie.releaseDate) : movie.year}
+              </span>
+            )}
           </div>
         </div>
         {!upcoming && movie.rating && (
-          <div style={{ position: "absolute", top: 6, right: 6, background: "rgba(9,21,35,0.85)", color: C.gold, fontSize: 11, fontWeight: 700, padding: "3px 7px", borderRadius: 6 }}>
+          <div
+            style={{
+              position: "absolute",
+              top: 6,
+              right: 6,
+              background: "rgba(9,21,35,0.85)",
+              color: C.gold,
+              fontSize: 11,
+              fontWeight: 700,
+              padding: "3px 7px",
+              borderRadius: 6,
+            }}
+          >
             ★ {movie.rating}
           </div>
         )}
@@ -753,51 +1530,328 @@ function MiniPoster({ tmdbId }) {
   useEffect(() => {
     if (!tmdbId) return;
     cachedFetch(`mini_${tmdbId}`, () =>
-      tmdbProxy({ data: { path: `/movie/${tmdbId}`, params: {} } })
-    ).then(d => { if (d?.poster_path) setPoster(tmdb.poster(d.poster_path, "w92")); }).catch(() => { });
+      tmdbProxy({ data: { path: `/movie/${tmdbId}`, params: {} } }),
+    )
+      .then((d) => {
+        if (d?.poster_path) setPoster(tmdb.poster(d.poster_path, "w92"));
+      })
+      .catch(() => {});
   }, [tmdbId]);
-  return poster ? <img src={poster} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : null;
+  return poster ? (
+    <img
+      src={poster}
+      alt=""
+      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+    />
+  ) : null;
 }
 
 // ─────────────────────────────────────────────
 //  ICONS
 // ─────────────────────────────────────────────
-const BackIcon = () => <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>;
-const PlusIcon = () => <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>;
-const CheckIcon = () => <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg>;
-const UsersIcon = () => <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
-const LinkIcon = () => <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>;
-const CopyIcon = () => <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>;
-const UserPlusIcon = () => <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>;
-const UserCheckIcon = () => <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>;
-const ShareIcon = () => <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" /></svg>;
-const SearchSVG = ({ size = 16, color = C.textDim }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>;
-const KeyIcon = () => <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" /></svg>;
-const PlayIcon = () => <svg width={14} height={14} viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5,3 19,12 5,21" /></svg>;
-const HeartIcon = ({ f }) => <svg width={14} height={14} viewBox="0 0 24 24" fill={f ? C.red : "none"} stroke={f ? C.red : "currentColor"} strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></svg>;
-const ChevronLeftIcon = () => <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6" /></svg>;
-const GridIcon = () => <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>;
-const ListIcon = () => <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>;
+const BackIcon = () => (
+  <svg
+    width={15}
+    height={15}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+  >
+    <line x1="19" y1="12" x2="5" y2="12" />
+    <polyline points="12 19 5 12 12 5" />
+  </svg>
+);
+const PlusIcon = () => (
+  <svg
+    width={13}
+    height={13}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+  >
+    <line x1="12" y1="5" x2="12" y2="19" />
+    <line x1="5" y1="12" x2="19" y2="12" />
+  </svg>
+);
+const CheckIcon = () => (
+  <svg
+    width={13}
+    height={13}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+  >
+    <polyline points="20 6 9 17 4 12" />
+  </svg>
+);
+const UsersIcon = () => (
+  <svg
+    width={16}
+    height={16}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+  >
+    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+  </svg>
+);
+const LinkIcon = () => (
+  <svg
+    width={14}
+    height={14}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+  >
+    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+  </svg>
+);
+const CopyIcon = () => (
+  <svg
+    width={14}
+    height={14}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+  >
+    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+  </svg>
+);
+const UserPlusIcon = () => (
+  <svg
+    width={14}
+    height={14}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+  >
+    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+    <circle cx="8.5" cy="7" r="4" />
+    <line x1="20" y1="8" x2="20" y2="14" />
+    <line x1="23" y1="11" x2="17" y2="11" />
+  </svg>
+);
+const UserCheckIcon = () => (
+  <svg
+    width={14}
+    height={14}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+  >
+    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+    <circle cx="8.5" cy="7" r="4" />
+    <polyline points="17 11 19 13 23 9" />
+  </svg>
+);
+const ShareIcon = () => (
+  <svg
+    width={13}
+    height={13}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+  >
+    <circle cx="18" cy="5" r="3" />
+    <circle cx="6" cy="12" r="3" />
+    <circle cx="18" cy="19" r="3" />
+    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+  </svg>
+);
+const SearchSVG = ({ size = 16, color = C.textDim }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth="2"
+  >
+    <circle cx="11" cy="11" r="8" />
+    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+  </svg>
+);
+const KeyIcon = () => (
+  <svg
+    width={14}
+    height={14}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+  >
+    <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" />
+  </svg>
+);
+const PlayIcon = () => (
+  <svg
+    width={14}
+    height={14}
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    stroke="none"
+  >
+    <polygon points="5,3 19,12 5,21" />
+  </svg>
+);
+const HeartIcon = ({ f }) => (
+  <svg
+    width={14}
+    height={14}
+    viewBox="0 0 24 24"
+    fill={f ? C.red : "none"}
+    stroke={f ? C.red : "currentColor"}
+    strokeWidth="2"
+  >
+    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+  </svg>
+);
+const ChevronLeftIcon = () => (
+  <svg
+    width={22}
+    height={22}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+  >
+    <polyline points="15 18 9 12 15 6" />
+  </svg>
+);
+const GridIcon = () => (
+  <svg
+    width={15}
+    height={15}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+  >
+    <rect x="3" y="3" width="7" height="7" />
+    <rect x="14" y="3" width="7" height="7" />
+    <rect x="3" y="14" width="7" height="7" />
+    <rect x="14" y="14" width="7" height="7" />
+  </svg>
+);
+const ListIcon = () => (
+  <svg
+    width={15}
+    height={15}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+  >
+    <line x1="8" y1="6" x2="21" y2="6" />
+    <line x1="8" y1="12" x2="21" y2="12" />
+    <line x1="8" y1="18" x2="21" y2="18" />
+    <line x1="3" y1="6" x2="3.01" y2="6" />
+    <line x1="3" y1="12" x2="3.01" y2="12" />
+    <line x1="3" y1="18" x2="3.01" y2="18" />
+  </svg>
+);
 
 const PER_PAGE_OPTIONS = [20, 40, 60, 80];
 
-function ViewToolbar({ viewMode, setViewMode, perPage, setPerPage, showPerPage = true }) {
+function ViewToolbar({
+  viewMode,
+  setViewMode,
+  perPage,
+  setPerPage,
+  showPerPage = true,
+}) {
   return (
     <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
       {showPerPage && (
-        <select value={perPage} onChange={e => setPerPage(Number(e.target.value))}
-          style={{ padding: "6px 10px", borderRadius: 8, background: C.bgCard, border: `1px solid ${C.border}`, color: C.textMuted, fontSize: 12, outline: "none", cursor: "pointer" }}>
-          {PER_PAGE_OPTIONS.map(n => <option key={n} value={n}>{n} por pág.</option>)}
+        <select
+          value={perPage}
+          onChange={(e) => setPerPage(Number(e.target.value))}
+          style={{
+            padding: "6px 10px",
+            borderRadius: 8,
+            background: C.bgCard,
+            border: `1px solid ${C.border}`,
+            color: C.textMuted,
+            fontSize: 12,
+            outline: "none",
+            cursor: "pointer",
+          }}
+        >
+          {PER_PAGE_OPTIONS.map((n) => (
+            <option key={n} value={n}>
+              {n} por pág.
+            </option>
+          ))}
         </select>
       )}
-      <div style={{ display: "flex", background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 8, overflow: "hidden" }}>
-        <button onClick={() => setViewMode("grid")} style={{ padding: "6px 10px", background: viewMode === "grid" ? C.gold : "transparent", color: viewMode === "grid" ? C.bgDeep : C.textDim, transition: "all 0.2s", cursor: "pointer", display: "flex", alignItems: "center" }}><GridIcon /></button>
-        <button onClick={() => setViewMode("list")} style={{ padding: "6px 10px", background: viewMode === "list" ? C.gold : "transparent", color: viewMode === "list" ? C.bgDeep : C.textDim, transition: "all 0.2s", cursor: "pointer", display: "flex", alignItems: "center" }}><ListIcon /></button>
+      <div
+        style={{
+          display: "flex",
+          background: C.bgCard,
+          border: `1px solid ${C.border}`,
+          borderRadius: 8,
+          overflow: "hidden",
+        }}
+      >
+        <button
+          onClick={() => setViewMode("grid")}
+          style={{
+            padding: "6px 10px",
+            background: viewMode === "grid" ? C.gold : "transparent",
+            color: viewMode === "grid" ? C.bgDeep : C.textDim,
+            transition: "all 0.2s",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
+          <GridIcon />
+        </button>
+        <button
+          onClick={() => setViewMode("list")}
+          style={{
+            padding: "6px 10px",
+            background: viewMode === "list" ? C.gold : "transparent",
+            color: viewMode === "list" ? C.bgDeep : C.textDim,
+            transition: "all 0.2s",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
+          <ListIcon />
+        </button>
       </div>
     </div>
   );
 }
-const ChevronRightIcon = () => <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 6 15 12 9 18" /></svg>;
+const ChevronRightIcon = () => (
+  <svg
+    width={22}
+    height={22}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+  >
+    <polyline points="9 6 15 12 9 18" />
+  </svg>
+);
 
 // ─────────────────────────────────────────────
 //  NETFLIX CAROUSEL
@@ -830,14 +1884,61 @@ function Carousel({ children, movies, onMovieClick }) {
 
   return (
     <div className="carousel-wrapper">
-      <button className="carousel-btn carousel-btn-left" onClick={() => scroll(-1)} style={{ opacity: canLeft ? undefined : 0, pointerEvents: canLeft ? "auto" : "none" }}><ChevronLeft /></button>
+      <button
+        className="carousel-btn carousel-btn-left"
+        onClick={() => scroll(-1)}
+        style={{
+          opacity: canLeft ? undefined : 0,
+          pointerEvents: canLeft ? "auto" : "none",
+        }}
+      >
+        <ChevronLeft />
+      </button>
       <div ref={ref} className="carousel-row">
-        {children || movies?.map(m => <MovieCard key={m.id} movie={m} onClick={() => onMovieClick?.(m)} />)}
+        {children ||
+          movies?.map((m) => (
+            <MovieCard key={m.id} movie={m} onClick={() => onMovieClick?.(m)} />
+          ))}
       </div>
-      <button className="carousel-btn carousel-btn-right" onClick={() => scroll(1)} style={{ opacity: canRight ? undefined : 0, pointerEvents: canRight ? "auto" : "none" }}><ChevronRight /></button>
+      <button
+        className="carousel-btn carousel-btn-right"
+        onClick={() => scroll(1)}
+        style={{
+          opacity: canRight ? undefined : 0,
+          pointerEvents: canRight ? "auto" : "none",
+        }}
+      >
+        <ChevronRight />
+      </button>
       {/* Fade edges */}
-      {canLeft && <div style={{ position: "absolute", top: 0, bottom: 0, left: 0, width: 60, background: `linear-gradient(to right, ${C.bg}, transparent)`, pointerEvents: "none", zIndex: 5 }} />}
-      {canRight && <div style={{ position: "absolute", top: 0, bottom: 0, right: 0, width: 60, background: `linear-gradient(to left, ${C.bg}, transparent)`, pointerEvents: "none", zIndex: 5 }} />}
+      {canLeft && (
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            bottom: 0,
+            left: 0,
+            width: 60,
+            background: `linear-gradient(to right, ${C.bg}, transparent)`,
+            pointerEvents: "none",
+            zIndex: 5,
+          }}
+        />
+      )}
+      {canRight && (
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            bottom: 0,
+            right: 0,
+            width: 60,
+            background: `linear-gradient(to left, ${C.bg}, transparent)`,
+            pointerEvents: "none",
+            zIndex: 5,
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -863,42 +1964,109 @@ function Navbar({ page, setPage, hasKeys, apiStatus }) {
   }, []);
 
   return (
-    <nav style={{
-      position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
-      background: scrolled ? "rgba(15,25,35,0.95)" : "rgba(15,25,35,0.4)",
-      backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
-      borderBottom: scrolled ? `1px solid ${C.border}` : "1px solid transparent",
-      display: "flex", alignItems: "center", justifyContent: "space-between",
-      padding: "0 32px", height: 64, transition: "all 0.35s ease",
-    }}>
-      <button onClick={() => setPage("home")} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <img src={logoText} alt="MovieClub" style={{ height: 32, filter: "drop-shadow(0 0 8px rgba(201,168,76,0.2))" }} />
+    <nav
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 100,
+        background: scrolled ? "rgba(15,25,35,0.95)" : "rgba(15,25,35,0.4)",
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
+        borderBottom: scrolled
+          ? `1px solid ${C.border}`
+          : "1px solid transparent",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "0 32px",
+        height: 64,
+        transition: "all 0.35s ease",
+      }}
+    >
+      <button
+        onClick={() => setPage("home")}
+        style={{ display: "flex", alignItems: "center", gap: 10 }}
+      >
+        <img
+          src={logoText}
+          alt="MovieClub"
+          style={{
+            height: 32,
+            filter: "drop-shadow(0 0 8px rgba(201,168,76,0.2))",
+          }}
+        />
       </button>
 
       <div style={{ display: "flex", gap: 6 }}>
         {items.map(([id, label, icon]) => {
           const active = page === id;
           return (
-            <button key={id} onClick={() => setPage(id)} style={{
-              padding: "8px 18px", fontSize: 13, fontWeight: 600,
-              color: active ? C.gold : C.textMuted,
-              background: active ? "rgba(201,168,76,0.1)" : "transparent",
-              borderRadius: 12,
-              transition: "all 0.25s", display: "flex", alignItems: "center", gap: 10,
-              fontFamily: "'DM Sans', sans-serif",
-            }}
-              onMouseEnter={e => { if (!active) { e.currentTarget.style.color = C.text; e.currentTarget.style.background = "rgba(255,255,255,0.05)"; } }}
-              onMouseLeave={e => { if (!active) { e.currentTarget.style.color = C.textMuted; e.currentTarget.style.background = active ? "rgba(201,168,76,0.1)" : "transparent"; } }}>
+            <button
+              key={id}
+              onClick={() => setPage(id)}
+              style={{
+                padding: "8px 18px",
+                fontSize: 13,
+                fontWeight: 600,
+                color: active ? C.gold : C.textMuted,
+                background: active ? "rgba(201,168,76,0.1)" : "transparent",
+                borderRadius: 12,
+                transition: "all 0.25s",
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                fontFamily: "'DM Sans', sans-serif",
+              }}
+              onMouseEnter={(e) => {
+                if (!active) {
+                  e.currentTarget.style.color = C.text;
+                  e.currentTarget.style.background = "rgba(255,255,255,0.05)";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!active) {
+                  e.currentTarget.style.color = C.textMuted;
+                  e.currentTarget.style.background = active
+                    ? "rgba(201,168,76,0.1)"
+                    : "transparent";
+                }
+              }}
+            >
               {icon ? (
-                <div style={{
-                  width: 36, height: 36, borderRadius: "50%", overflow: "hidden",
-                  border: active ? `2px solid ${C.gold}` : "2px solid rgba(255,255,255,0.1)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  background: active ? "rgba(201,168,76,0.15)" : "rgba(255,255,255,0.06)",
-                  transition: "all 0.25s", flexShrink: 0,
-                  boxShadow: active ? "0 0 12px rgba(201,168,76,0.3)" : "none",
-                }}>
-                  <img src={icon} alt="" style={{ width: 30, height: 30, objectFit: "cover", borderRadius: "50%" }} />
+                <div
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: "50%",
+                    overflow: "hidden",
+                    border: active
+                      ? `2px solid ${C.gold}`
+                      : "2px solid rgba(255,255,255,0.1)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    background: active
+                      ? "rgba(201,168,76,0.15)"
+                      : "rgba(255,255,255,0.06)",
+                    transition: "all 0.25s",
+                    flexShrink: 0,
+                    boxShadow: active
+                      ? "0 0 12px rgba(201,168,76,0.3)"
+                      : "none",
+                  }}
+                >
+                  <img
+                    src={icon}
+                    alt=""
+                    style={{
+                      width: 30,
+                      height: 30,
+                      objectFit: "cover",
+                      borderRadius: "50%",
+                    }}
+                  />
                 </div>
               ) : id === "quickrate" ? (
                 <Zap size={16} />
@@ -912,7 +2080,6 @@ function Navbar({ page, setPage, hasKeys, apiStatus }) {
           );
         })}
       </div>
-
     </nav>
   );
 }
@@ -924,44 +2091,170 @@ function SettingsPage({ apiStatus }) {
   const [testing, setTesting] = useState(false);
   const [results, setResults] = useState({});
   const testApis = async () => {
-    setTesting(true); setResults({});
+    setTesting(true);
+    setResults({});
     try {
       const tmdbRes = await tmdb.popular();
-      setResults(r => ({ ...r, tmdb: { ok: !!tmdbRes?.results, msg: tmdbRes?.results ? `✓ TMDb respondeu com ${tmdbRes.results.length} filmes` : "✗ Falha na resposta" } }));
-    } catch (e) { setResults(r => ({ ...r, tmdb: { ok: false, msg: `✗ Erro: ${e.message}` } })); }
+      setResults((r) => ({
+        ...r,
+        tmdb: {
+          ok: !!tmdbRes?.results,
+          msg: tmdbRes?.results
+            ? `✓ TMDb respondeu com ${tmdbRes.results.length} filmes`
+            : "✗ Falha na resposta",
+        },
+      }));
+    } catch (e) {
+      setResults((r) => ({
+        ...r,
+        tmdb: { ok: false, msg: `✗ Erro: ${e.message}` },
+      }));
+    }
     try {
       const omdbRes = await omdb.byTitle("Inception", 2010);
-      setResults(r => ({ ...r, omdb: { ok: !!omdbRes?.Title, msg: omdbRes?.Title ? `✓ OMDb: "${omdbRes.Title}" (${omdbRes.Year})` : "✗ Sem resposta" } }));
-    } catch (e) { setResults(r => ({ ...r, omdb: { ok: false, msg: `✗ Erro: ${e.message}` } })); }
+      setResults((r) => ({
+        ...r,
+        omdb: {
+          ok: !!omdbRes?.Title,
+          msg: omdbRes?.Title
+            ? `✓ OMDb: "${omdbRes.Title}" (${omdbRes.Year})`
+            : "✗ Sem resposta",
+        },
+      }));
+    } catch (e) {
+      setResults((r) => ({
+        ...r,
+        omdb: { ok: false, msg: `✗ Erro: ${e.message}` },
+      }));
+    }
     setTesting(false);
   };
   const APIS = [
-    { key: "tmdb", label: "TMDb API", color: "#01B4E4", desc: "Pôsteres, metadados, elenco, trailers, busca e recomendações.", secret: "TMDB_API_KEY" },
-    { key: "omdb", label: "OMDb API", color: "#F5C518", desc: "Ratings IMDb, Rotten Tomatoes, Metacritic, bilheteria e prêmios.", secret: "OMDB_API_KEY" },
-    { key: "streaming", label: "Streaming Availability", color: "#0055DA", desc: "Onde assistir no Brasil — Netflix, Prime, Disney+, Max e mais.", secret: "STREAMING_AVAILABILITY_API_KEY" },
+    {
+      key: "tmdb",
+      label: "TMDb API",
+      color: "#01B4E4",
+      desc: "Pôsteres, metadados, elenco, trailers, busca e recomendações.",
+      secret: "TMDB_API_KEY",
+    },
+    {
+      key: "omdb",
+      label: "OMDb API",
+      color: "#F5C518",
+      desc: "Ratings IMDb, Rotten Tomatoes, Metacritic, bilheteria e prêmios.",
+      secret: "OMDB_API_KEY",
+    },
+    {
+      key: "streaming",
+      label: "Streaming Availability",
+      color: "#0055DA",
+      desc: "Onde assistir no Brasil — Netflix, Prime, Disney+, Max e mais.",
+      secret: "STREAMING_AVAILABILITY_API_KEY",
+    },
   ];
   return (
     <div style={{ paddingTop: 80, paddingBottom: 80 }}>
       <div style={{ maxWidth: 720, margin: "0 auto", padding: "0 28px" }}>
-        <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 26, fontWeight: 700, color: C.text, marginBottom: 8 }}>Status das <span style={{ color: C.gold }}>APIs</span></h1>
-        <p style={{ color: C.textMuted, fontSize: 14, lineHeight: 1.7, marginBottom: 28 }}>As chaves de API estão configuradas no <strong style={{ color: C.text }}>servidor</strong>.</p>
+        <h1
+          style={{
+            fontFamily: "'Outfit', sans-serif",
+            fontSize: 26,
+            fontWeight: 700,
+            color: C.text,
+            marginBottom: 8,
+          }}
+        >
+          Status das <span style={{ color: C.gold }}>APIs</span>
+        </h1>
+        <p
+          style={{
+            color: C.textMuted,
+            fontSize: 14,
+            lineHeight: 1.7,
+            marginBottom: 28,
+          }}
+        >
+          As chaves de API estão configuradas no{" "}
+          <strong style={{ color: C.text }}>servidor</strong>.
+        </p>
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          {APIS.map(api => {
+          {APIS.map((api) => {
             const result = results[api.key];
             return (
-              <div key={api.key} style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 16, padding: 24 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
-                  <div style={{ width: 10, height: 10, borderRadius: "50%", background: api.color, flexShrink: 0 }} />
-                  <h3 style={{ fontSize: 15, fontWeight: 600, color: C.text }}>{api.label}</h3>
+              <div
+                key={api.key}
+                style={{
+                  background: C.bgCard,
+                  border: `1px solid ${C.border}`,
+                  borderRadius: 16,
+                  padding: 24,
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    marginBottom: 6,
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 10,
+                      height: 10,
+                      borderRadius: "50%",
+                      background: api.color,
+                      flexShrink: 0,
+                    }}
+                  />
+                  <h3 style={{ fontSize: 15, fontWeight: 600, color: C.text }}>
+                    {api.label}
+                  </h3>
                 </div>
-                <p style={{ fontSize: 13, color: C.textMuted, marginBottom: 10, lineHeight: 1.6, paddingLeft: 20 }}>{api.desc}</p>
-                {result && <p style={{ marginTop: 10, fontSize: 12, fontWeight: 500, color: result.ok ? C.success : C.red, padding: "7px 12px", borderRadius: 8, background: result.ok ? "rgba(34,197,94,0.07)" : "rgba(239,68,68,0.07)" }}>{result.msg}</p>}
+                <p
+                  style={{
+                    fontSize: 13,
+                    color: C.textMuted,
+                    marginBottom: 10,
+                    lineHeight: 1.6,
+                    paddingLeft: 20,
+                  }}
+                >
+                  {api.desc}
+                </p>
+                {result && (
+                  <p
+                    style={{
+                      marginTop: 10,
+                      fontSize: 12,
+                      fontWeight: 500,
+                      color: result.ok ? C.success : C.red,
+                      padding: "7px 12px",
+                      borderRadius: 8,
+                      background: result.ok
+                        ? "rgba(34,197,94,0.07)"
+                        : "rgba(239,68,68,0.07)",
+                    }}
+                  >
+                    {result.msg}
+                  </p>
+                )}
               </div>
             );
           })}
         </div>
         <div style={{ marginTop: 28 }}>
-          <Btn variant="gold" onClick={testApis}>{testing ? <><Spinner size={14} /> Testando…</> : <><CheckIcon /> Testar APIs</>}</Btn>
+          <Btn variant="gold" onClick={testApis}>
+            {testing ? (
+              <>
+                <Spinner size={14} /> Testando…
+              </>
+            ) : (
+              <>
+                <CheckIcon /> Testar APIs
+              </>
+            )}
+          </Btn>
         </div>
       </div>
     </div>
@@ -975,12 +2268,20 @@ function PaginationBar({ page, totalPages, totalResults, onPageChange }) {
   if (totalPages <= 1) return null;
   const getVisiblePages = () => {
     const pages = [];
-    if (totalPages <= 7) { for (let i = 1; i <= totalPages; i++) pages.push(i); }
-    else {
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
       pages.push(1);
-      let start = Math.max(2, page - 2), end = Math.min(totalPages - 1, page + 2);
-      if (page <= 3) { start = 2; end = 5; }
-      if (page >= totalPages - 2) { start = totalPages - 4; end = totalPages - 1; }
+      let start = Math.max(2, page - 2),
+        end = Math.min(totalPages - 1, page + 2);
+      if (page <= 3) {
+        start = 2;
+        end = 5;
+      }
+      if (page >= totalPages - 2) {
+        start = totalPages - 4;
+        end = totalPages - 1;
+      }
       if (start > 2) pages.push("...");
       for (let i = start; i <= end; i++) pages.push(i);
       if (end < totalPages - 1) pages.push("...");
@@ -989,21 +2290,72 @@ function PaginationBar({ page, totalPages, totalResults, onPageChange }) {
     return pages;
   };
   const btnStyle = (active) => ({
-    padding: "6px 12px", borderRadius: 6, fontSize: 12, fontWeight: active ? 700 : 400,
-    background: active ? C.gold : C.bgCard, color: active ? C.bgDeep : C.textMuted,
-    border: `1px solid ${active ? C.gold : C.border}`, cursor: "pointer", transition: "all 0.2s", minWidth: 36, textAlign: "center",
+    padding: "6px 12px",
+    borderRadius: 6,
+    fontSize: 12,
+    fontWeight: active ? 700 : 400,
+    background: active ? C.gold : C.bgCard,
+    color: active ? C.bgDeep : C.textMuted,
+    border: `1px solid ${active ? C.gold : C.border}`,
+    cursor: "pointer",
+    transition: "all 0.2s",
+    minWidth: 36,
+    textAlign: "center",
   });
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, marginTop: 24 }}>
-      <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap", justifyContent: "center" }}>
-        <button onClick={() => onPageChange(page - 1)} disabled={page <= 1} style={{ ...btnStyle(false), opacity: page <= 1 ? 0.3 : 1 }}>← Anterior</button>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 10,
+        marginTop: 24,
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          gap: 6,
+          alignItems: "center",
+          flexWrap: "wrap",
+          justifyContent: "center",
+        }}
+      >
+        <button
+          onClick={() => onPageChange(page - 1)}
+          disabled={page <= 1}
+          style={{ ...btnStyle(false), opacity: page <= 1 ? 0.3 : 1 }}
+        >
+          ← Anterior
+        </button>
         {getVisiblePages().map((p, i) =>
-          p === "..." ? <span key={`e${i}`} style={{ color: C.textDim, fontSize: 12 }}>…</span>
-            : <button key={p} onClick={() => onPageChange(p)} style={btnStyle(p === page)}>{p}</button>
+          p === "..." ? (
+            <span key={`e${i}`} style={{ color: C.textDim, fontSize: 12 }}>
+              …
+            </span>
+          ) : (
+            <button
+              key={p}
+              onClick={() => onPageChange(p)}
+              style={btnStyle(p === page)}
+            >
+              {p}
+            </button>
+          ),
         )}
-        <button onClick={() => onPageChange(page + 1)} disabled={page >= totalPages} style={{ ...btnStyle(false), opacity: page >= totalPages ? 0.3 : 1 }}>Próxima →</button>
+        <button
+          onClick={() => onPageChange(page + 1)}
+          disabled={page >= totalPages}
+          style={{ ...btnStyle(false), opacity: page >= totalPages ? 0.3 : 1 }}
+        >
+          Próxima →
+        </button>
       </div>
-      <span style={{ fontSize: 11, color: C.textDim }}>Página {page.toLocaleString("pt-BR")} de {totalPages.toLocaleString("pt-BR")} — {totalResults.toLocaleString("pt-BR")} filmes</span>
+      <span style={{ fontSize: 11, color: C.textDim }}>
+        Página {page.toLocaleString("pt-BR")} de{" "}
+        {totalPages.toLocaleString("pt-BR")} —{" "}
+        {totalResults.toLocaleString("pt-BR")} filmes
+      </span>
     </div>
   );
 }
@@ -1017,54 +2369,200 @@ function HeroBanner({ movies, onSelect }) {
 
   useEffect(() => {
     if (movies.length <= 1) return;
-    const t = setInterval(() => setIdx(i => (i + 1) % Math.min(movies.length, 5)), 8000);
+    const t = setInterval(
+      () => setIdx((i) => (i + 1) % Math.min(movies.length, 5)),
+      8000,
+    );
     return () => clearInterval(t);
   }, [movies.length]);
 
   if (!hero) return null;
 
   return (
-    <div style={{ height: 520, position: "relative", overflow: "hidden", marginBottom: 0 }}>
+    <div
+      style={{
+        height: 520,
+        position: "relative",
+        overflow: "hidden",
+        marginBottom: 0,
+      }}
+    >
       {/* Backdrop with Ken Burns */}
       {hero.backdrop && (
-        <img key={hero.id} src={hero.backdrop} alt="" className="hero-backdrop"
-          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", opacity: 0.45 }} />
+        <img
+          key={hero.id}
+          src={hero.backdrop}
+          alt=""
+          className="hero-backdrop"
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            opacity: 0.45,
+          }}
+        />
       )}
       {/* Gradient overlays */}
-      <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to right, ${C.bg} 0%, rgba(15,25,35,0.6) 50%, rgba(15,25,35,0.1) 100%)` }} />
-      <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to top, ${C.bg} 0%, transparent 50%)` }} />
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: `linear-gradient(to right, ${C.bg} 0%, rgba(15,25,35,0.6) 50%, rgba(15,25,35,0.1) 100%)`,
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: `linear-gradient(to top, ${C.bg} 0%, transparent 50%)`,
+        }}
+      />
 
       {/* Content */}
-      <div style={{ position: "absolute", bottom: 80, left: 48, maxWidth: 560, zIndex: 1, animation: "fadeIn 0.5s ease" }} key={hero.id}>
+      <div
+        style={{
+          position: "absolute",
+          bottom: 80,
+          left: 48,
+          maxWidth: 560,
+          zIndex: 1,
+          animation: "fadeIn 0.5s ease",
+        }}
+        key={hero.id}
+      >
         <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-          <Badge color="rgba(201,168,76,0.15)" textColor={C.gold}>✦ Em Alta Esta Semana</Badge>
-          {hero.rating && <Badge color="rgba(201,168,76,0.1)" textColor={C.goldLight}>★ {hero.rating}/10</Badge>}
+          <Badge color="rgba(201,168,76,0.15)" textColor={C.gold}>
+            ✦ Em Alta Esta Semana
+          </Badge>
+          {hero.rating && (
+            <Badge color="rgba(201,168,76,0.1)" textColor={C.goldLight}>
+              ★ {hero.rating}/10
+            </Badge>
+          )}
         </div>
-        <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 42, fontWeight: 900, color: C.text, marginBottom: 8, lineHeight: 1.1, textShadow: "0 2px 20px rgba(0,0,0,0.5)" }}>{hero.title}</h1>
+        <h1
+          style={{
+            fontFamily: "'Outfit', sans-serif",
+            fontSize: 42,
+            fontWeight: 900,
+            color: C.text,
+            marginBottom: 8,
+            lineHeight: 1.1,
+            textShadow: "0 2px 20px rgba(0,0,0,0.5)",
+          }}
+        >
+          {hero.title}
+        </h1>
         {hero.overview && (
-          <p style={{ color: C.textMuted, fontSize: 14, lineHeight: 1.7, marginBottom: 24, display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{hero.overview}</p>
+          <p
+            style={{
+              color: C.textMuted,
+              fontSize: 14,
+              lineHeight: 1.7,
+              marginBottom: 24,
+              display: "-webkit-box",
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+            }}
+          >
+            {hero.overview}
+          </p>
         )}
         <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-          <Btn variant="gold" onClick={() => onSelect(hero)} style={{ padding: "12px 28px", fontSize: 14 }}><PlayIcon /> Ver Detalhes</Btn>
-          <Btn variant="ghost" onClick={() => onSelect(hero)} style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)" }}><PlusIcon /> Minha Lista</Btn>
+          <Btn
+            variant="gold"
+            onClick={() => onSelect(hero)}
+            style={{ padding: "12px 28px", fontSize: 14 }}
+          >
+            <PlayIcon /> Ver Detalhes
+          </Btn>
+          <Btn
+            variant="ghost"
+            onClick={() => onSelect(hero)}
+            style={{
+              background: "rgba(255,255,255,0.08)",
+              border: "1px solid rgba(255,255,255,0.15)",
+            }}
+          >
+            <PlusIcon /> Minha Lista
+          </Btn>
         </div>
       </div>
 
       {/* Hero indicators */}
-      <div style={{ position: "absolute", bottom: 28, left: 48, display: "flex", gap: 8, zIndex: 2 }}>
+      <div
+        style={{
+          position: "absolute",
+          bottom: 28,
+          left: 48,
+          display: "flex",
+          gap: 8,
+          zIndex: 2,
+        }}
+      >
         {movies.slice(0, 5).map((_, i) => (
-          <button key={i} onClick={() => setIdx(i)}
-            style={{ width: idx === i ? 28 : 8, height: 4, borderRadius: 2, background: idx === i ? C.gold : "rgba(255,255,255,0.3)", transition: "all 0.3s", cursor: "pointer" }} />
+          <button
+            key={i}
+            onClick={() => setIdx(i)}
+            style={{
+              width: idx === i ? 28 : 8,
+              height: 4,
+              borderRadius: 2,
+              background: idx === i ? C.gold : "rgba(255,255,255,0.3)",
+              transition: "all 0.3s",
+              cursor: "pointer",
+            }}
+          />
         ))}
       </div>
 
       {/* Mini posters right side */}
-      <div style={{ position: "absolute", right: 40, bottom: 60, display: "flex", gap: 10, alignItems: "flex-end", zIndex: 1 }}>
+      <div
+        style={{
+          position: "absolute",
+          right: 40,
+          bottom: 60,
+          display: "flex",
+          gap: 10,
+          alignItems: "flex-end",
+          zIndex: 1,
+        }}
+      >
         {movies.slice(0, 5).map((m, i) => (
-          <div key={m.id} onClick={() => { setIdx(i); }}
-            style={{ width: 72, cursor: "pointer", opacity: idx === i ? 1 : 0.5, transform: idx === i ? "scale(1.1)" : "scale(1)", transition: "all 0.3s" }}>
-            <div style={{ height: 108, borderRadius: 6, overflow: "hidden", border: idx === i ? `2px solid ${C.gold}` : `1px solid ${C.border}`, boxShadow: idx === i ? `0 0 20px rgba(201,168,76,0.3)` : "none" }}>
-              {m.poster && <img src={m.poster} alt={m.title} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
+          <div
+            key={m.id}
+            onClick={() => {
+              setIdx(i);
+            }}
+            style={{
+              width: 72,
+              cursor: "pointer",
+              opacity: idx === i ? 1 : 0.5,
+              transform: idx === i ? "scale(1.1)" : "scale(1)",
+              transition: "all 0.3s",
+            }}
+          >
+            <div
+              style={{
+                height: 108,
+                borderRadius: 6,
+                overflow: "hidden",
+                border:
+                  idx === i ? `2px solid ${C.gold}` : `1px solid ${C.border}`,
+                boxShadow: idx === i ? `0 0 20px rgba(201,168,76,0.3)` : "none",
+              }}
+            >
+              {m.poster && (
+                <img
+                  src={m.poster}
+                  alt={m.title}
+                  loading="lazy"
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                />
+              )}
             </div>
           </div>
         ))}
@@ -1078,18 +2576,83 @@ function HeroBanner({ movies, onSelect }) {
 // ─────────────────────────────────────────────
 function Top10Card({ movie, rank, onClick }) {
   return (
-    <div onClick={onClick} style={{ display: "flex", alignItems: "center", cursor: "pointer", flexShrink: 0, position: "relative", width: 200 }} className="movie-card-netflix">
-      <span style={{
-        fontSize: 82, fontWeight: 900, fontFamily: "'Outfit', sans-serif",
-        color: "transparent", WebkitTextStroke: `2px ${C.gold}`,
-        lineHeight: 1, position: "absolute", left: -8, bottom: -8, zIndex: 2,
-        textShadow: `0 0 20px rgba(201,168,76,0.2)`,
-      }}>{rank}</span>
-      <div style={{ width: 130, height: 195, borderRadius: 10, overflow: "hidden", marginLeft: 40, border: `1px solid ${C.border}`, background: C.bgCard, position: "relative", zIndex: 1 }}>
-        {movie.poster ? <img src={movie.posterHD || movie.poster} alt={movie.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> :
-          <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}><Film size={28} style={{ opacity: 0.3 }} /></div>}
+    <div
+      onClick={onClick}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        cursor: "pointer",
+        flexShrink: 0,
+        position: "relative",
+        width: 200,
+      }}
+      className="movie-card-netflix"
+    >
+      <span
+        style={{
+          fontSize: 82,
+          fontWeight: 900,
+          fontFamily: "'Outfit', sans-serif",
+          color: "transparent",
+          WebkitTextStroke: `2px ${C.gold}`,
+          lineHeight: 1,
+          position: "absolute",
+          left: -8,
+          bottom: -8,
+          zIndex: 2,
+          textShadow: `0 0 20px rgba(201,168,76,0.2)`,
+        }}
+      >
+        {rank}
+      </span>
+      <div
+        style={{
+          width: 130,
+          height: 195,
+          borderRadius: 10,
+          overflow: "hidden",
+          marginLeft: 40,
+          border: `1px solid ${C.border}`,
+          background: C.bgCard,
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
+        {movie.poster ? (
+          <img
+            src={movie.posterHD || movie.poster}
+            alt={movie.title}
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          />
+        ) : (
+          <div
+            style={{
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Film size={28} style={{ opacity: 0.3 }} />
+          </div>
+        )}
         {movie.rating && (
-          <div style={{ position: "absolute", top: 6, right: 6, background: "rgba(9,21,35,0.85)", color: C.gold, fontSize: 11, fontWeight: 700, padding: "3px 7px", borderRadius: 6 }}>★ {movie.rating}</div>
+          <div
+            style={{
+              position: "absolute",
+              top: 6,
+              right: 6,
+              background: "rgba(9,21,35,0.85)",
+              color: C.gold,
+              fontSize: 11,
+              fontWeight: 700,
+              padding: "3px 7px",
+              borderRadius: 6,
+            }}
+          >
+            ★ {movie.rating}
+          </div>
         )}
       </div>
     </div>
@@ -1102,34 +2665,70 @@ function useRecommendations(userId) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!ratings.length) { setRecs([]); return; }
+    if (!ratings.length) {
+      setRecs([]);
+      return;
+    }
     let alive = true;
     setLoading(true);
 
-    // Get top rated movies by the user (4+) and fetch recommendations from TMDb
-    const topRated = ratings.filter(r => Number(r.rating) >= 4).slice(0, 3);
-    if (!topRated.length) { setLoading(false); return; }
+    // 1. Calcula a média real de avaliações deste usuário
+    const userAverage =
+      ratings.reduce((sum, r) => sum + Number(r.rating), 0) / ratings.length;
 
-    const ratedIds = new Set(ratings.map(r => r.tmdb_id));
+    // 2. Filtra os filmes que estão ACIMA ou IGUAL à média do próprio usuário
+    let seedCandidates = ratings
+      .filter((r) => Number(r.rating) >= userAverage)
+      .sort((a, b) => Number(b.rating) - Number(a.rating)); // Ordena pelas maiores notas primeiro
 
-    Promise.all(topRated.map(r =>
-      tmdb.get(`/movie/${r.tmdb_id}/recommendations`).catch(() => null)
-    )).then(results => {
-      if (!alive) return;
-      const allRecs = results
-        .filter(Boolean)
-        .flatMap(r => r.results || [])
-        .map(normalizeTmdb)
-        .filter(Boolean)
-        .filter(m => !ratedIds.has(m.id)); // exclude already rated
-      // Deduplicate
-      const seen = new Set();
-      const unique = allRecs.filter(m => { if (seen.has(m.id)) return false; seen.add(m.id); return true; });
-      setRecs(unique.slice(0, 20));
+    // Fallback: se por acaso a filtragem falhar (ex: avaliou tudo com a mesma nota), usa todas as avaliações
+    if (!seedCandidates.length) {
+      seedCandidates = ratings.sort(
+        (a, b) => Number(b.rating) - Number(a.rating),
+      );
+    }
+
+    // 3. Pega os 3 melhores baseados no padrão do usuário para buscar as recomendações
+    const topRated = seedCandidates.slice(0, 3);
+
+    if (!topRated.length) {
       setLoading(false);
-    }).catch(() => { if (alive) setLoading(false); });
+      return;
+    }
 
-    return () => { alive = false; };
+    const ratedIds = new Set(ratings.map((r) => r.tmdb_id));
+
+    Promise.all(
+      topRated.map((r) =>
+        tmdb.get(`/movie/${r.tmdb_id}/recommendations`).catch(() => null),
+      ),
+    )
+      .then((results) => {
+        if (!alive) return;
+        const allRecs = results
+          .filter(Boolean)
+          .flatMap((r) => r.results || [])
+          .map(normalizeTmdb)
+          .filter(Boolean)
+          .filter((m) => !ratedIds.has(m.id)); // exclui os já avaliados
+
+        // Deduplicate
+        const seen = new Set();
+        const unique = allRecs.filter((m) => {
+          if (seen.has(m.id)) return false;
+          seen.add(m.id);
+          return true;
+        });
+        setRecs(unique.slice(0, 20));
+        setLoading(false);
+      })
+      .catch(() => {
+        if (alive) setLoading(false);
+      });
+
+    return () => {
+      alive = false;
+    };
   }, [ratings]);
 
   return { recs, loading };
@@ -1154,11 +2753,17 @@ function HomePage({ setPage, setSelectedMovie, auth: authCtx }) {
   // Top 10 weekly
   useEffect(() => {
     setTop10Loading(true);
-    tmdb.get("/trending/movie/week").then(d => {
-      const movies = (d.results || []).slice(0, 10).map(normalizeTmdb).filter(Boolean);
-      setTop10(movies);
-      setTop10Loading(false);
-    }).catch(() => setTop10Loading(false));
+    tmdb
+      .get("/trending/movie/week")
+      .then((d) => {
+        const movies = (d.results || [])
+          .slice(0, 10)
+          .map(normalizeTmdb)
+          .filter(Boolean);
+        setTop10(movies);
+        setTop10Loading(false);
+      })
+      .catch(() => setTop10Loading(false));
   }, []);
 
   const [genreMovs, setGenreMovs] = useState([]);
@@ -1169,19 +2774,32 @@ function HomePage({ setPage, setSelectedMovie, auth: authCtx }) {
 
   const loadGenre = useCallback((gid, p) => {
     setLoadingG(true);
-    tmdb.byGenre(gid, p).then(d => {
-      setGenreMovs((d.results || []).map(normalizeTmdb).filter(Boolean));
-      setGenrePage(d.appPage || p);
-      setGenreTotalPages(d.totalAppPages || 1);
-      setGenreTotalResults(d.totalResults || 0);
-      setLoadingG(false);
-    }).catch(() => setLoadingG(false));
+    tmdb
+      .byGenre(gid, p)
+      .then((d) => {
+        setGenreMovs((d.results || []).map(normalizeTmdb).filter(Boolean));
+        setGenrePage(d.appPage || p);
+        setGenreTotalPages(d.totalAppPages || 1);
+        setGenreTotalResults(d.totalResults || 0);
+        setLoadingG(false);
+      })
+      .catch(() => setLoadingG(false));
   }, []);
 
-  useEffect(() => { tmdb.genres().then(g => setGenres(g.genres || [])).catch(() => { }); }, []);
-  useEffect(() => { if (activeG) loadGenre(activeG.id, 1); }, [activeG, loadGenre]);
+  useEffect(() => {
+    tmdb
+      .genres()
+      .then((g) => setGenres(g.genres || []))
+      .catch(() => {});
+  }, []);
+  useEffect(() => {
+    if (activeG) loadGenre(activeG.id, 1);
+  }, [activeG, loadGenre]);
 
-  const go = m => { setSelectedMovie(m); setPage("movie"); };
+  const go = (m) => {
+    setSelectedMovie(m);
+    setPage("movie");
+  };
   const initialLoading = trend.loading && trend.movies.length === 0;
 
   return (
@@ -1190,18 +2808,50 @@ function HomePage({ setPage, setSelectedMovie, auth: authCtx }) {
       {trend.movies.length > 0 ? (
         <HeroBanner movies={trend.movies} onSelect={go} />
       ) : (
-        initialLoading && <div style={{ height: 520, display: "flex", alignItems: "center", justifyContent: "center" }}><Spinner size={36} /></div>
+        initialLoading && (
+          <div
+            style={{
+              height: 520,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Spinner size={36} />
+          </div>
+        )
       )}
 
       <div style={{ maxWidth: 1400, margin: "0 auto", padding: "0 40px" }}>
         {/* Top 10 Weekly */}
-        <Section title={<><Flame size={18} style={{ display: 'inline', color: '#EF4444' }} /> Top 10 da Semana</>}>
+        <Section
+          title={
+            <>
+              <Flame
+                size={18}
+                style={{ display: "inline", color: "#EF4444" }}
+              />{" "}
+              Top 10 da Semana
+            </>
+          }
+        >
           {top10Loading ? (
-            <div style={{ display: "flex", gap: 12 }}>{Array(5).fill(0).map((_, i) => <SkeletonCard key={i} w={130} />)}</div>
+            <div style={{ display: "flex", gap: 12 }}>
+              {Array(5)
+                .fill(0)
+                .map((_, i) => (
+                  <SkeletonCard key={i} w={130} />
+                ))}
+            </div>
           ) : (
             <Carousel>
               {top10.map((m, i) => (
-                <Top10Card key={m.id} movie={m} rank={i + 1} onClick={() => go(m)} />
+                <Top10Card
+                  key={m.id}
+                  movie={m}
+                  rank={i + 1}
+                  onClick={() => go(m)}
+                />
               ))}
             </Carousel>
           )}
@@ -1209,9 +2859,25 @@ function HomePage({ setPage, setSelectedMovie, auth: authCtx }) {
 
         {/* Personalized Recommendations */}
         {recs.length > 0 && (
-          <Section title={<><Target size={18} style={{ display: 'inline', color: '#C9A84C' }} /> Recomendados para Você</>}>
+          <Section
+            title={
+              <>
+                <Target
+                  size={18}
+                  style={{ display: "inline", color: "#C9A84C" }}
+                />{" "}
+                Recomendados para Você
+              </>
+            }
+          >
             {recsLoading ? (
-              <div style={{ display: "flex", gap: 12 }}>{Array(8).fill(0).map((_, i) => <SkeletonCard key={i} />)}</div>
+              <div style={{ display: "flex", gap: 12 }}>
+                {Array(8)
+                  .fill(0)
+                  .map((_, i) => (
+                    <SkeletonCard key={i} />
+                  ))}
+              </div>
             ) : (
               <Carousel movies={recs} onMovieClick={go} />
             )}
@@ -1219,59 +2885,151 @@ function HomePage({ setPage, setSelectedMovie, auth: authCtx }) {
         )}
 
         {/* Trending Carousel */}
-        <Section title="Em Alta Agora" action={{ label: "Buscar", onClick: () => setPage("search") }}>
-          {trend.loading
-            ? <div style={{ display: "flex", gap: 12 }}>{Array(8).fill(0).map((_, i) => <SkeletonCard key={i} />)}</div>
-            : <Carousel movies={trend.movies} onMovieClick={go} />
-          }
-          <PaginationBar page={trend.page} totalPages={trend.totalPages} totalResults={trend.totalResults} onPageChange={trend.goTo} />
+        <Section
+          title="Em Alta Agora"
+          action={{ label: "Buscar", onClick: () => setPage("search") }}
+        >
+          {trend.loading ? (
+            <div style={{ display: "flex", gap: 12 }}>
+              {Array(8)
+                .fill(0)
+                .map((_, i) => (
+                  <SkeletonCard key={i} />
+                ))}
+            </div>
+          ) : (
+            <Carousel movies={trend.movies} onMovieClick={go} />
+          )}
+          <PaginationBar
+            page={trend.page}
+            totalPages={trend.totalPages}
+            totalResults={trend.totalResults}
+            onPageChange={trend.goTo}
+          />
         </Section>
 
         {/* Genre explorer */}
         {genres.length > 0 && (
           <div style={{ marginBottom: 40 }}>
-            <h3 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 18, fontWeight: 700, color: C.text, marginBottom: 16 }}>Explorar por Gênero</h3>
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 20 }}>
-              {genres.map(g => (
-                <button key={g.id} onClick={() => setActiveG(activeG?.id === g.id ? null : g)}
-                  style={{ padding: "6px 16px", borderRadius: 20, fontSize: 12, fontWeight: 500, whiteSpace: "nowrap", transition: "all 0.2s", background: activeG?.id === g.id ? C.gold : C.bgCard, color: activeG?.id === g.id ? C.bgDeep : C.textMuted, border: `1px solid ${activeG?.id === g.id ? C.gold : C.border}` }}>
+            <h3
+              style={{
+                fontFamily: "'Outfit', sans-serif",
+                fontSize: 18,
+                fontWeight: 700,
+                color: C.text,
+                marginBottom: 16,
+              }}
+            >
+              Explorar por Gênero
+            </h3>
+            <div
+              style={{
+                display: "flex",
+                gap: 8,
+                flexWrap: "wrap",
+                marginBottom: 20,
+              }}
+            >
+              {genres.map((g) => (
+                <button
+                  key={g.id}
+                  onClick={() => setActiveG(activeG?.id === g.id ? null : g)}
+                  style={{
+                    padding: "6px 16px",
+                    borderRadius: 20,
+                    fontSize: 12,
+                    fontWeight: 500,
+                    whiteSpace: "nowrap",
+                    transition: "all 0.2s",
+                    background: activeG?.id === g.id ? C.gold : C.bgCard,
+                    color: activeG?.id === g.id ? C.bgDeep : C.textMuted,
+                    border: `1px solid ${activeG?.id === g.id ? C.gold : C.border}`,
+                  }}
+                >
                   {g.name}
                 </button>
               ))}
             </div>
-            {activeG && (
-              loadingG
-                ? <div style={{ display: "flex", gap: 12 }}>{Array(8).fill(0).map((_, i) => <SkeletonCard key={i} />)}</div>
-                : <>
+            {activeG &&
+              (loadingG ? (
+                <div style={{ display: "flex", gap: 12 }}>
+                  {Array(8)
+                    .fill(0)
+                    .map((_, i) => (
+                      <SkeletonCard key={i} />
+                    ))}
+                </div>
+              ) : (
+                <>
                   <Carousel movies={genreMovs} onMovieClick={go} />
-                  <PaginationBar page={genrePage} totalPages={genreTotalPages} totalResults={genreTotalResults} onPageChange={(p) => loadGenre(activeG.id, p)} />
+                  <PaginationBar
+                    page={genrePage}
+                    totalPages={genreTotalPages}
+                    totalResults={genreTotalResults}
+                    onPageChange={(p) => loadGenre(activeG.id, p)}
+                  />
                 </>
-            )}
+              ))}
           </div>
         )}
 
         {/* Popular Carousel */}
         <Section title="Mais Populares">
-          {pop.loading
-            ? <div style={{ display: "flex", gap: 12 }}>{Array(8).fill(0).map((_, i) => <SkeletonCard key={i} />)}</div>
-            : <Carousel movies={pop.movies} onMovieClick={go} />
-          }
-          <PaginationBar page={pop.page} totalPages={pop.totalPages} totalResults={pop.totalResults} onPageChange={pop.goTo} />
+          {pop.loading ? (
+            <div style={{ display: "flex", gap: 12 }}>
+              {Array(8)
+                .fill(0)
+                .map((_, i) => (
+                  <SkeletonCard key={i} />
+                ))}
+            </div>
+          ) : (
+            <Carousel movies={pop.movies} onMovieClick={go} />
+          )}
+          <PaginationBar
+            page={pop.page}
+            totalPages={pop.totalPages}
+            totalResults={pop.totalResults}
+            onPageChange={pop.goTo}
+          />
         </Section>
 
         {/* Top Rated Carousel */}
         <Section title="Melhor Avaliados">
-          {top.loading
-            ? <div style={{ display: "flex", gap: 12 }}>{Array(8).fill(0).map((_, i) => <SkeletonCard key={i} />)}</div>
-            : <Carousel movies={top.movies} onMovieClick={go} />
-          }
-          <PaginationBar page={top.page} totalPages={top.totalPages} totalResults={top.totalResults} onPageChange={top.goTo} />
+          {top.loading ? (
+            <div style={{ display: "flex", gap: 12 }}>
+              {Array(8)
+                .fill(0)
+                .map((_, i) => (
+                  <SkeletonCard key={i} />
+                ))}
+            </div>
+          ) : (
+            <Carousel movies={top.movies} onMovieClick={go} />
+          )}
+          <PaginationBar
+            page={top.page}
+            totalPages={top.totalPages}
+            totalResults={top.totalResults}
+            onPageChange={top.goTo}
+          />
         </Section>
       </div>
 
       {/* Branding footer */}
-      <div style={{ display: "flex", justifyContent: "center", padding: "40px 0 20px", opacity: 0.15 }}>
-        <img src={mascotsNav} alt="MovieClub Mascots" style={{ width: 200, filter: "grayscale(0.3)" }} />
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          padding: "40px 0 20px",
+          opacity: 0.15,
+        }}
+      >
+        <img
+          src={mascotsNav}
+          alt="MovieClub Mascots"
+          style={{ width: 200, filter: "grayscale(0.3)" }}
+        />
       </div>
       <FilmStripBg />
     </div>
@@ -1282,12 +3040,22 @@ function HomePage({ setPage, setSelectedMovie, auth: authCtx }) {
 //  MOVIE PAGE
 // ─────────────────────────────────────────────
 function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx }) {
-  const { movie, loading, streamServices } = useMovieDetails(movieInit?.tmdbId || movieInit?.id);
+  const { movie, loading, streamServices } = useMovieDetails(
+    movieInit?.tmdbId || movieInit?.id,
+  );
   const m = movie || movieInit;
   const [liked, setLiked] = useState(false);
   const [review, setReview] = useState("");
-  const { ratings: userRatings, upsertRating, getRating } = useRatings(authCtx?.user?.id);
-  const { isInList, add: addToWatchlist, remove: removeFromWatchlist } = useWatchlist(authCtx?.user?.id);
+  const {
+    ratings: userRatings,
+    upsertRating,
+    getRating,
+  } = useRatings(authCtx?.user?.id);
+  const {
+    isInList,
+    add: addToWatchlist,
+    remove: removeFromWatchlist,
+  } = useWatchlist(authCtx?.user?.id);
   const existingRating = m ? getRating(m.tmdbId || m.id) : null;
   const [localRating, setLocalRating] = useState(0);
   const inWatchlist = m ? isInList(m.tmdbId || m.id) : false;
@@ -1299,116 +3067,519 @@ function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx }) {
     }
   }, [existingRating]);
 
-  if (loading && !m) return (
-    <div style={{ paddingTop: 80, minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div style={{ textAlign: "center" }}><Spinner size={38} /><p style={{ color: C.textMuted, marginTop: 12, fontSize: 13 }}>Carregando…</p></div>
-    </div>
-  );
+  if (loading && !m)
+    return (
+      <div
+        style={{
+          paddingTop: 80,
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <div style={{ textAlign: "center" }}>
+          <Spinner size={38} />
+          <p style={{ color: C.textMuted, marginTop: 12, fontSize: 13 }}>
+            Carregando…
+          </p>
+        </div>
+      </div>
+    );
   if (!m) return null;
-  const reviews = MOCK_REVIEWS.filter(r => r.movieTmdbId === m.tmdbId).map(r => ({ ...r, user: MOCK_USERS.find(u => u.id === r.userId) }));
+  const reviews = MOCK_REVIEWS.filter((r) => r.movieTmdbId === m.tmdbId).map(
+    (r) => ({ ...r, user: MOCK_USERS.find((u) => u.id === r.userId) }),
+  );
 
   return (
     <div style={{ paddingTop: 60, paddingBottom: 60, minHeight: "100vh" }}>
       <div style={{ height: 420, position: "relative", overflow: "hidden" }}>
-        {m.backdrop
-          ? <img src={m.backdrop} alt="" className="hero-backdrop" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.38 }} />
-          : <div style={{ width: "100%", height: "100%", background: `linear-gradient(135deg,#0a1e34,#1a2d48)` }} />
-        }
-        <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to bottom, transparent 30%, ${C.bg} 100%)` }} />
-        <button onClick={() => setPage("home")} style={{ position: "absolute", top: 20, left: 28, display: "flex", alignItems: "center", gap: 6, padding: "7px 14px", borderRadius: 8, background: "rgba(9,21,35,0.7)", color: C.textMuted, border: `1px solid ${C.border}`, fontSize: 13, zIndex: 1 }}>
+        {m.backdrop ? (
+          <img
+            src={m.backdrop}
+            alt=""
+            className="hero-backdrop"
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              opacity: 0.38,
+            }}
+          />
+        ) : (
+          <div
+            style={{
+              width: "100%",
+              height: "100%",
+              background: `linear-gradient(135deg,#0a1e34,#1a2d48)`,
+            }}
+          />
+        )}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: `linear-gradient(to bottom, transparent 30%, ${C.bg} 100%)`,
+          }}
+        />
+        <button
+          onClick={() => setPage("home")}
+          style={{
+            position: "absolute",
+            top: 20,
+            left: 28,
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            padding: "7px 14px",
+            borderRadius: 8,
+            background: "rgba(9,21,35,0.7)",
+            color: C.textMuted,
+            border: `1px solid ${C.border}`,
+            fontSize: 13,
+            zIndex: 1,
+          }}
+        >
           <BackIcon /> Voltar
         </button>
       </div>
 
-      <div style={{ maxWidth: 1100, margin: "-200px auto 0", padding: "0 32px", position: "relative", zIndex: 1 }}>
-        <div style={{ display: "flex", gap: 32, marginBottom: 40, alignItems: "flex-end" }}>
-          <div style={{ width: 200, height: 300, borderRadius: 14, flexShrink: 0, overflow: "hidden", boxShadow: "0 20px 60px rgba(0,0,0,0.6)", border: `2px solid ${C.border}`, background: C.bgCard }}>
-            {m.poster && <img src={m.posterHD || m.poster} alt={m.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={e => e.target.style.display = "none"} />}
+      <div
+        style={{
+          maxWidth: 1100,
+          margin: "-200px auto 0",
+          padding: "0 32px",
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            gap: 32,
+            marginBottom: 40,
+            alignItems: "flex-end",
+          }}
+        >
+          <div
+            style={{
+              width: 200,
+              height: 300,
+              borderRadius: 14,
+              flexShrink: 0,
+              overflow: "hidden",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.6)",
+              border: `2px solid ${C.border}`,
+              background: C.bgCard,
+            }}
+          >
+            {m.poster && (
+              <img
+                src={m.posterHD || m.poster}
+                alt={m.title}
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                onError={(e) => (e.target.style.display = "none")}
+              />
+            )}
           </div>
           <div style={{ flex: 1, paddingBottom: 6 }}>
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
-              {(m.genres?.length ? m.genres : [m.genre]).slice(0, 4).map(g => <Badge key={g} color="rgba(201,168,76,0.10)" textColor={C.goldDim}>{g}</Badge>)}
-              {m.rated && <Badge color={C.bgCard} textColor={C.textDim}>{m.rated}</Badge>}
-              {m.year && <Badge color={C.bgCard} textColor={C.textDim}>{m.year}</Badge>}
-              {m.runtime && <Badge color={C.bgCard} textColor={C.textDim}>{m.runtime} min</Badge>}
+            <div
+              style={{
+                display: "flex",
+                gap: 6,
+                flexWrap: "wrap",
+                marginBottom: 10,
+              }}
+            >
+              {(m.genres?.length ? m.genres : [m.genre])
+                .slice(0, 4)
+                .map((g) => (
+                  <Badge
+                    key={g}
+                    color="rgba(201,168,76,0.10)"
+                    textColor={C.goldDim}
+                  >
+                    {g}
+                  </Badge>
+                ))}
+              {m.rated && (
+                <Badge color={C.bgCard} textColor={C.textDim}>
+                  {m.rated}
+                </Badge>
+              )}
+              {m.year && (
+                <Badge color={C.bgCard} textColor={C.textDim}>
+                  {m.year}
+                </Badge>
+              )}
+              {m.runtime && (
+                <Badge color={C.bgCard} textColor={C.textDim}>
+                  {m.runtime} min
+                </Badge>
+              )}
             </div>
-            <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 36, fontWeight: 900, color: C.text, marginBottom: 4, lineHeight: 1.15 }}>{m.title}</h1>
-            {m.tagline && <p style={{ color: C.gold, fontSize: 13, fontStyle: "italic", marginBottom: 14 }}>"{m.tagline}"</p>}
-            <div style={{ display: "flex", gap: 20, marginBottom: 14, flexWrap: "wrap" }}>
-              {m.director && <div><span style={{ fontSize: 10, color: C.textDim, display: "block" }}>Direção</span><span style={{ fontSize: 13, color: C.textMuted }}>{m.director}</span></div>}
-              {m.writer && <div><span style={{ fontSize: 10, color: C.textDim, display: "block" }}>Roteiro</span><span style={{ fontSize: 13, color: C.textMuted }}>{m.writer.split(",")[0]}</span></div>}
+            <h1
+              style={{
+                fontFamily: "'Outfit', sans-serif",
+                fontSize: 36,
+                fontWeight: 900,
+                color: C.text,
+                marginBottom: 4,
+                lineHeight: 1.15,
+              }}
+            >
+              {m.title}
+            </h1>
+            {m.tagline && (
+              <p
+                style={{
+                  color: C.gold,
+                  fontSize: 13,
+                  fontStyle: "italic",
+                  marginBottom: 14,
+                }}
+              >
+                "{m.tagline}"
+              </p>
+            )}
+            <div
+              style={{
+                display: "flex",
+                gap: 20,
+                marginBottom: 14,
+                flexWrap: "wrap",
+              }}
+            >
+              {m.director && (
+                <div>
+                  <span
+                    style={{ fontSize: 10, color: C.textDim, display: "block" }}
+                  >
+                    Direção
+                  </span>
+                  <span style={{ fontSize: 13, color: C.textMuted }}>
+                    {m.director}
+                  </span>
+                </div>
+              )}
+              {m.writer && (
+                <div>
+                  <span
+                    style={{ fontSize: 10, color: C.textDim, display: "block" }}
+                  >
+                    Roteiro
+                  </span>
+                  <span style={{ fontSize: 13, color: C.textMuted }}>
+                    {m.writer.split(",")[0]}
+                  </span>
+                </div>
+              )}
             </div>
             <div style={{ marginBottom: 16 }}>
-              {loading && !m.imdbRating
-                ? <div style={{ display: "flex", gap: 8 }}>{[1, 2, 3].map(i => <div key={i} className="skeleton" style={{ width: 72, height: 62, borderRadius: 10 }} />)}</div>
-                : <RatingsRow movie={m} />}
+              {loading && !m.imdbRating ? (
+                <div style={{ display: "flex", gap: 8 }}>
+                  {[1, 2, 3].map((i) => (
+                    <div
+                      key={i}
+                      className="skeleton"
+                      style={{ width: 72, height: 62, borderRadius: 10 }}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <RatingsRow movie={m} />
+              )}
             </div>
             <div style={{ marginBottom: 16 }}>
-              <p style={{ fontSize: 10, color: C.textDim, marginBottom: 7, textTransform: "uppercase", letterSpacing: "0.08em" }}>Onde Assistir no Brasil</p>
-              <StreamingBadges services={streamServices} loading={loading && !streamServices.length} />
+              <p
+                style={{
+                  fontSize: 10,
+                  color: C.textDim,
+                  marginBottom: 7,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                }}
+              >
+                Onde Assistir no Brasil
+              </p>
+              <StreamingBadges
+                services={streamServices}
+                loading={loading && !streamServices.length}
+              />
             </div>
             {(m.awards || m.boxOffice) && (
-              <div style={{ display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap" }}>
-                {m.awards && <div style={{ background: "rgba(201,168,76,0.06)", border: `1px solid rgba(201,168,76,0.2)`, borderRadius: 8, padding: "6px 12px" }}><p style={{ fontSize: 10, color: C.goldDim, marginBottom: 2 }}>Prêmios</p><p style={{ fontSize: 12, color: C.gold }}>{m.awards}</p></div>}
-                {m.boxOffice && <div style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 8, padding: "6px 12px" }}><p style={{ fontSize: 10, color: C.textDim, marginBottom: 2 }}>Bilheteria</p><p style={{ fontSize: 12, color: C.text }}>{m.boxOffice}</p></div>}
+              <div
+                style={{
+                  display: "flex",
+                  gap: 10,
+                  marginBottom: 16,
+                  flexWrap: "wrap",
+                }}
+              >
+                {m.awards && (
+                  <div
+                    style={{
+                      background: "rgba(201,168,76,0.06)",
+                      border: `1px solid rgba(201,168,76,0.2)`,
+                      borderRadius: 8,
+                      padding: "6px 12px",
+                    }}
+                  >
+                    <p
+                      style={{
+                        fontSize: 10,
+                        color: C.goldDim,
+                        marginBottom: 2,
+                      }}
+                    >
+                      Prêmios
+                    </p>
+                    <p style={{ fontSize: 12, color: C.gold }}>{m.awards}</p>
+                  </div>
+                )}
+                {m.boxOffice && (
+                  <div
+                    style={{
+                      background: C.bgCard,
+                      border: `1px solid ${C.border}`,
+                      borderRadius: 8,
+                      padding: "6px 12px",
+                    }}
+                  >
+                    <p
+                      style={{
+                        fontSize: 10,
+                        color: C.textDim,
+                        marginBottom: 2,
+                      }}
+                    >
+                      Bilheteria
+                    </p>
+                    <p style={{ fontSize: 12, color: C.text }}>{m.boxOffice}</p>
+                  </div>
+                )}
               </div>
             )}
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-              <Btn variant={inWatchlist ? "ghost" : "gold"} onClick={() => {
-                const tmdbId = m.tmdbId || m.id;
-                if (inWatchlist) removeFromWatchlist(tmdbId);
-                else addToWatchlist(tmdbId, m.title, m.poster);
-              }}>{inWatchlist ? <><CheckIcon /> Na Watchlist</> : <><PlusIcon /> Minha Lista</>}</Btn>
-              <Btn variant="ghost" onClick={() => setLiked(l => !l)}><HeartIcon f={liked} /> Curtir</Btn>
-              {m.trailer && <a href={`https://youtube.com/watch?v=${m.trailer}`} target="_blank" rel="noopener noreferrer"><Btn variant="ghost"><PlayIcon /> Trailer</Btn></a>}
+              <Btn
+                variant={inWatchlist ? "ghost" : "gold"}
+                onClick={() => {
+                  const tmdbId = m.tmdbId || m.id;
+                  if (inWatchlist) removeFromWatchlist(tmdbId);
+                  else addToWatchlist(tmdbId, m.title, m.poster);
+                }}
+              >
+                {inWatchlist ? (
+                  <>
+                    <CheckIcon /> Na Watchlist
+                  </>
+                ) : (
+                  <>
+                    <PlusIcon /> Minha Lista
+                  </>
+                )}
+              </Btn>
+              <Btn variant="ghost" onClick={() => setLiked((l) => !l)}>
+                <HeartIcon f={liked} /> Curtir
+              </Btn>
+              {m.trailer && (
+                <a
+                  href={`https://youtube.com/watch?v=${m.trailer}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Btn variant="ghost">
+                    <PlayIcon /> Trailer
+                  </Btn>
+                </a>
+              )}
             </div>
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 290px", gap: 28 }}>
+        <div
+          style={{ display: "grid", gridTemplateColumns: "1fr 290px", gap: 28 }}
+        >
           <div>
             <Section title="Sua Avaliação">
-              <div style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 14, padding: 20, marginBottom: 16 }}>
-                <p style={{ fontSize: 13, color: C.textMuted, marginBottom: 10 }}>
-                  {existingRating ? `Sua nota: ${Number(existingRating.rating).toFixed(1)} ★` : "Clique nas estrelas para avaliar"}
+              <div
+                style={{
+                  background: C.bgCard,
+                  border: `1px solid ${C.border}`,
+                  borderRadius: 14,
+                  padding: 20,
+                  marginBottom: 16,
+                }}
+              >
+                <p
+                  style={{ fontSize: 13, color: C.textMuted, marginBottom: 10 }}
+                >
+                  {existingRating
+                    ? `Sua nota: ${Number(existingRating.rating).toFixed(1)} ★`
+                    : "Clique nas estrelas para avaliar"}
                 </p>
-                <StarRating value={localRating} max={5} size={28} interactive onChange={async (val) => {
-                  setLocalRating(val);
-                  const tmdbId = m.tmdbId || m.id;
-                  try {
-                    await upsertRating(tmdbId, val, review, m.title, m.poster);
-                    toast.success(existingRating ? "Avaliação atualizada!" : "Avaliação publicada!");
-                  } catch (e) { toast.error("Erro ao salvar avaliação"); }
-                }} />
-                <textarea value={review} onChange={e => setReview(e.target.value)} placeholder="Escreva sua review (opcional)…" rows={3}
-                  style={{ width: "100%", marginTop: 12, padding: "10px 14px", borderRadius: 8, background: C.bgDeep, border: `1px solid ${C.border}`, color: C.text, fontSize: 13, resize: "vertical", outline: "none" }}
-                  onBlur={async () => {
-                    if (localRating > 0 && review !== (existingRating?.review || "")) {
-                      const tmdbId = m.tmdbId || m.id;
-                      await upsertRating(tmdbId, localRating, review, m.title, m.poster).catch(() => {});
+                <StarRating
+                  value={localRating}
+                  max={5}
+                  size={28}
+                  interactive
+                  onChange={async (val) => {
+                    setLocalRating(val);
+                    const tmdbId = m.tmdbId || m.id;
+                    try {
+                      await upsertRating(
+                        tmdbId,
+                        val,
+                        review,
+                        m.title,
+                        m.poster,
+                      );
+                      toast.success(
+                        existingRating
+                          ? "Avaliação atualizada!"
+                          : "Avaliação publicada!",
+                      );
+                    } catch (e) {
+                      toast.error("Erro ao salvar avaliação");
                     }
-                  }} />
+                  }}
+                />
+                <textarea
+                  value={review}
+                  onChange={(e) => setReview(e.target.value)}
+                  placeholder="Escreva sua review (opcional)…"
+                  rows={3}
+                  style={{
+                    width: "100%",
+                    marginTop: 12,
+                    padding: "10px 14px",
+                    borderRadius: 8,
+                    background: C.bgDeep,
+                    border: `1px solid ${C.border}`,
+                    color: C.text,
+                    fontSize: 13,
+                    resize: "vertical",
+                    outline: "none",
+                  }}
+                  onBlur={async () => {
+                    if (
+                      localRating > 0 &&
+                      review !== (existingRating?.review || "")
+                    ) {
+                      const tmdbId = m.tmdbId || m.id;
+                      await upsertRating(
+                        tmdbId,
+                        localRating,
+                        review,
+                        m.title,
+                        m.poster,
+                      ).catch(() => {});
+                    }
+                  }}
+                />
                 <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
-                  {existingRating && <Btn variant="ghost" size="sm" onClick={async () => {
-                    await (await import("@/integrations/supabase/client")).supabase.from("ratings").delete().eq("id", existingRating.id);
-                    setLocalRating(0); setReview(""); toast.success("Avaliação removida");
-                  }}>Remover avaliação</Btn>}
+                  {existingRating && (
+                    <Btn
+                      variant="ghost"
+                      size="sm"
+                      onClick={async () => {
+                        await (
+                          await import("@/integrations/supabase/client")
+                        ).supabase
+                          .from("ratings")
+                          .delete()
+                          .eq("id", existingRating.id);
+                        setLocalRating(0);
+                        setReview("");
+                        toast.success("Avaliação removida");
+                      }}
+                    >
+                      Remover avaliação
+                    </Btn>
+                  )}
                 </div>
               </div>
             </Section>
             <Section title="Sinopse">
-              <p style={{ color: C.textMuted, fontSize: 14, lineHeight: 1.8 }}>{m.plot || m.overview}</p>
+              <p style={{ color: C.textMuted, fontSize: 14, lineHeight: 1.8 }}>
+                {m.plot || m.overview}
+              </p>
             </Section>
             {m.cast?.length > 0 && (
               <Section title="Elenco Principal">
-                <div style={{ display: "flex", gap: 10, overflowX: "auto", paddingBottom: 8 }}>
-                  {m.cast.map(actor => (
-                    <div key={actor.id} style={{ textAlign: "center", flexShrink: 0, width: 78 }}>
-                      <div style={{ width: 66, height: 66, borderRadius: "50%", overflow: "hidden", margin: "0 auto 6px", background: C.bgCard, border: `2px solid ${C.border}` }}>
-                        {actor.photo ? <img src={actor.photo} alt={actor.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={e => e.target.style.display = "none"} /> : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, opacity: 0.4 }}><UserRound size={20} /></div>}
+                <div
+                  style={{
+                    display: "flex",
+                    gap: 10,
+                    overflowX: "auto",
+                    paddingBottom: 8,
+                  }}
+                >
+                  {m.cast.map((actor) => (
+                    <div
+                      key={actor.id}
+                      style={{ textAlign: "center", flexShrink: 0, width: 78 }}
+                    >
+                      <div
+                        style={{
+                          width: 66,
+                          height: 66,
+                          borderRadius: "50%",
+                          overflow: "hidden",
+                          margin: "0 auto 6px",
+                          background: C.bgCard,
+                          border: `2px solid ${C.border}`,
+                        }}
+                      >
+                        {actor.photo ? (
+                          <img
+                            src={actor.photo}
+                            alt={actor.name}
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
+                            }}
+                            onError={(e) => (e.target.style.display = "none")}
+                          />
+                        ) : (
+                          <div
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              fontSize: 20,
+                              opacity: 0.4,
+                            }}
+                          >
+                            <UserRound size={20} />
+                          </div>
+                        )}
                       </div>
-                      <p style={{ fontSize: 11, fontWeight: 500, color: C.text, lineHeight: 1.2 }}>{actor.name}</p>
-                      <p style={{ fontSize: 10, color: C.textDim, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 78 }}>{actor.character}</p>
+                      <p
+                        style={{
+                          fontSize: 11,
+                          fontWeight: 500,
+                          color: C.text,
+                          lineHeight: 1.2,
+                        }}
+                      >
+                        {actor.name}
+                      </p>
+                      <p
+                        style={{
+                          fontSize: 10,
+                          color: C.textDim,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                          maxWidth: 78,
+                        }}
+                      >
+                        {actor.character}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -1416,33 +3587,140 @@ function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx }) {
             )}
             <Section title="Reviews da Comunidade">
               {reviews.map((r, i) => (
-                <div key={i} style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 14, padding: 20, marginBottom: 12 }}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div
+                  key={i}
+                  style={{
+                    background: C.bgCard,
+                    border: `1px solid ${C.border}`,
+                    borderRadius: 14,
+                    padding: 20,
+                    marginBottom: 12,
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      marginBottom: 10,
+                    }}
+                  >
+                    <div
+                      style={{ display: "flex", alignItems: "center", gap: 10 }}
+                    >
                       <Avatar user={r.user} size={34} />
-                      <div><p style={{ fontSize: 13, fontWeight: 600, color: C.text }}>{r.user?.name}</p><p style={{ fontSize: 11, color: C.textDim }}>{r.date}</p></div>
+                      <div>
+                        <p
+                          style={{
+                            fontSize: 13,
+                            fontWeight: 600,
+                            color: C.text,
+                          }}
+                        >
+                          {r.user?.name}
+                        </p>
+                        <p style={{ fontSize: 11, color: C.textDim }}>
+                          {r.date}
+                        </p>
+                      </div>
                     </div>
                     <StarRating value={r.rating} size={13} />
                   </div>
-                  <p style={{ fontSize: 14, color: C.textMuted, lineHeight: 1.7, fontStyle: "italic" }}>"{r.text}"</p>
+                  <p
+                    style={{
+                      fontSize: 14,
+                      color: C.textMuted,
+                      lineHeight: 1.7,
+                      fontStyle: "italic",
+                    }}
+                  >
+                    "{r.text}"
+                  </p>
                 </div>
               ))}
-              {reviews.length === 0 && <p style={{ color: C.textDim, textAlign: "center", padding: 40 }}>Nenhuma review ainda.</p>}
+              {reviews.length === 0 && (
+                <p
+                  style={{ color: C.textDim, textAlign: "center", padding: 40 }}
+                >
+                  Nenhuma review ainda.
+                </p>
+              )}
             </Section>
           </div>
           <div>
             {m.similar?.length > 0 && (
               <Section title="Similares">
-                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  {m.similar.slice(0, 4).map(s => (
-                    <div key={s.id} onClick={() => { setSelectedMovie(s); setPage("movie"); }}
-                      style={{ display: "flex", gap: 10, cursor: "pointer", padding: 8, borderRadius: 8, background: C.bgCard, border: `1px solid ${C.border}`, transition: "all 0.2s" }}
-                      onMouseEnter={e => { e.currentTarget.style.borderColor = C.borderHover; e.currentTarget.style.background = C.bgCardHover; }}
-                      onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.background = C.bgCard; }}>
-                      <div style={{ width: 44, height: 66, borderRadius: 4, overflow: "hidden", flexShrink: 0, background: C.bgDeep }}>
-                        {s.poster && <img src={s.poster} alt={s.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
+                <div
+                  style={{ display: "flex", flexDirection: "column", gap: 10 }}
+                >
+                  {m.similar.slice(0, 4).map((s) => (
+                    <div
+                      key={s.id}
+                      onClick={() => {
+                        setSelectedMovie(s);
+                        setPage("movie");
+                      }}
+                      style={{
+                        display: "flex",
+                        gap: 10,
+                        cursor: "pointer",
+                        padding: 8,
+                        borderRadius: 8,
+                        background: C.bgCard,
+                        border: `1px solid ${C.border}`,
+                        transition: "all 0.2s",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = C.borderHover;
+                        e.currentTarget.style.background = C.bgCardHover;
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = C.border;
+                        e.currentTarget.style.background = C.bgCard;
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: 44,
+                          height: 66,
+                          borderRadius: 4,
+                          overflow: "hidden",
+                          flexShrink: 0,
+                          background: C.bgDeep,
+                        }}
+                      >
+                        {s.poster && (
+                          <img
+                            src={s.poster}
+                            alt={s.title}
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
+                            }}
+                          />
+                        )}
                       </div>
-                      <div><p style={{ fontSize: 12, fontWeight: 500, color: C.text, marginBottom: 2 }}>{s.title}</p><p style={{ fontSize: 11, color: C.textDim }}>{s.year}</p>{s.rating && <p style={{ fontSize: 11, color: C.gold }}>★ {s.rating}</p>}</div>
+                      <div>
+                        <p
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 500,
+                            color: C.text,
+                            marginBottom: 2,
+                          }}
+                        >
+                          {s.title}
+                        </p>
+                        <p style={{ fontSize: 11, color: C.textDim }}>
+                          {s.year}
+                        </p>
+                        {s.rating && (
+                          <p style={{ fontSize: 11, color: C.gold }}>
+                            ★ {s.rating}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -1450,16 +3728,77 @@ function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx }) {
             )}
             {m.recommendations?.length > 0 && (
               <Section title="Recomendados">
-                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  {m.recommendations.slice(0, 4).map(s => (
-                    <div key={s.id} onClick={() => { setSelectedMovie(s); setPage("movie"); }}
-                      style={{ display: "flex", gap: 10, cursor: "pointer", padding: 8, borderRadius: 8, background: C.bgCard, border: `1px solid ${C.border}`, transition: "all 0.2s" }}
-                      onMouseEnter={e => { e.currentTarget.style.borderColor = C.borderHover; e.currentTarget.style.background = C.bgCardHover; }}
-                      onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.background = C.bgCard; }}>
-                      <div style={{ width: 44, height: 66, borderRadius: 4, overflow: "hidden", flexShrink: 0, background: C.bgDeep }}>
-                        {s.poster && <img src={s.poster} alt={s.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
+                <div
+                  style={{ display: "flex", flexDirection: "column", gap: 10 }}
+                >
+                  {m.recommendations.slice(0, 4).map((s) => (
+                    <div
+                      key={s.id}
+                      onClick={() => {
+                        setSelectedMovie(s);
+                        setPage("movie");
+                      }}
+                      style={{
+                        display: "flex",
+                        gap: 10,
+                        cursor: "pointer",
+                        padding: 8,
+                        borderRadius: 8,
+                        background: C.bgCard,
+                        border: `1px solid ${C.border}`,
+                        transition: "all 0.2s",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = C.borderHover;
+                        e.currentTarget.style.background = C.bgCardHover;
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = C.border;
+                        e.currentTarget.style.background = C.bgCard;
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: 44,
+                          height: 66,
+                          borderRadius: 4,
+                          overflow: "hidden",
+                          flexShrink: 0,
+                          background: C.bgDeep,
+                        }}
+                      >
+                        {s.poster && (
+                          <img
+                            src={s.poster}
+                            alt={s.title}
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
+                            }}
+                          />
+                        )}
                       </div>
-                      <div><p style={{ fontSize: 12, fontWeight: 500, color: C.text, marginBottom: 2 }}>{s.title}</p><p style={{ fontSize: 11, color: C.textDim }}>{s.year}</p>{s.rating && <p style={{ fontSize: 11, color: C.gold }}>★ {s.rating}</p>}</div>
+                      <div>
+                        <p
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 500,
+                            color: C.text,
+                            marginBottom: 2,
+                          }}
+                        >
+                          {s.title}
+                        </p>
+                        <p style={{ fontSize: 11, color: C.textDim }}>
+                          {s.year}
+                        </p>
+                        {s.rating && (
+                          <p style={{ fontSize: 11, color: C.gold }}>
+                            ★ {s.rating}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -1482,10 +3821,17 @@ const SORT_OPTIONS = [
   { value: "revenue.desc", label: "Maior Bilheteria" },
 ];
 const LANG_OPTIONS = [
-  { value: "", label: "Todos" }, { value: "en", label: "Inglês" }, { value: "pt", label: "Português" },
-  { value: "es", label: "Espanhol" }, { value: "fr", label: "Francês" }, { value: "ja", label: "Japonês" },
-  { value: "ko", label: "Coreano" }, { value: "de", label: "Alemão" }, { value: "it", label: "Italiano" },
-  { value: "hi", label: "Hindi" }, { value: "zh", label: "Chinês" },
+  { value: "", label: "Todos" },
+  { value: "en", label: "Inglês" },
+  { value: "pt", label: "Português" },
+  { value: "es", label: "Espanhol" },
+  { value: "fr", label: "Francês" },
+  { value: "ja", label: "Japonês" },
+  { value: "ko", label: "Coreano" },
+  { value: "de", label: "Alemão" },
+  { value: "it", label: "Italiano" },
+  { value: "hi", label: "Hindi" },
+  { value: "zh", label: "Chinês" },
 ];
 
 function SearchPage({ setPage, setSelectedMovie }) {
@@ -1507,11 +3853,18 @@ function SearchPage({ setPage, setSelectedMovie }) {
   const [loading, setLoading] = useState(false);
   const debRef = useRef(null);
 
-  useEffect(() => { tmdb.genres().then(d => setGenres(d.genres || [])).catch(() => { }); }, []);
+  useEffect(() => {
+    tmdb
+      .genres()
+      .then((d) => setGenres(d.genres || []))
+      .catch(() => {});
+  }, []);
 
   const doSearch = useCallback(async (q, pg) => {
     setLoading(true);
-    const d = await tmdb.search(q, pg).catch(() => ({ results: [], total_results: 0, total_pages: 1 }));
+    const d = await tmdb
+      .search(q, pg)
+      .catch(() => ({ results: [], total_results: 0, total_pages: 1 }));
     setResults((d.results || []).map(normalizeTmdb).filter(Boolean));
     setTotalResults(d.total_results || 0);
     setTotalPages(Math.min(d.total_pages || 1, 500));
@@ -1519,29 +3872,40 @@ function SearchPage({ setPage, setSelectedMovie }) {
     setLoading(false);
   }, []);
 
-  const doDiscover = useCallback(async (pg) => {
-    setLoading(true);
-    const params = { sort_by: sortBy };
-    if (selectedGenres.length > 0) params.with_genres = selectedGenres.join(",");
-    if (yearFrom) params["primary_release_date.gte"] = `${yearFrom}-01-01`;
-    if (yearTo) params["primary_release_date.lte"] = `${yearTo}-12-31`;
-    if (ratingMin) params["vote_average.gte"] = ratingMin;
-    if (lang) params.with_original_language = lang;
-    if (ratingMin) params["vote_count.gte"] = "50";
-    params.page = String(pg);
-    const d = await tmdb.get("/discover/movie", params).catch(() => ({ results: [], total_results: 0, total_pages: 1 }));
-    setResults((d.results || []).map(normalizeTmdb).filter(Boolean));
-    setTotalResults(d.total_results || 0);
-    setTotalPages(Math.min(d.total_pages || 1, 500));
-    setCurrentPage(pg);
-    setLoading(false);
-  }, [sortBy, selectedGenres, yearFrom, yearTo, ratingMin, lang]);
+  const doDiscover = useCallback(
+    async (pg) => {
+      setLoading(true);
+      const params = { sort_by: sortBy };
+      if (selectedGenres.length > 0)
+        params.with_genres = selectedGenres.join(",");
+      if (yearFrom) params["primary_release_date.gte"] = `${yearFrom}-01-01`;
+      if (yearTo) params["primary_release_date.lte"] = `${yearTo}-12-31`;
+      if (ratingMin) params["vote_average.gte"] = ratingMin;
+      if (lang) params.with_original_language = lang;
+      if (ratingMin) params["vote_count.gte"] = "50";
+      params.page = String(pg);
+      const d = await tmdb
+        .get("/discover/movie", params)
+        .catch(() => ({ results: [], total_results: 0, total_pages: 1 }));
+      setResults((d.results || []).map(normalizeTmdb).filter(Boolean));
+      setTotalResults(d.total_results || 0);
+      setTotalPages(Math.min(d.total_pages || 1, 500));
+      setCurrentPage(pg);
+      setLoading(false);
+    },
+    [sortBy, selectedGenres, yearFrom, yearTo, ratingMin, lang],
+  );
 
   useEffect(() => {
     clearTimeout(debRef.current);
     if (!query.trim()) {
-      if (selectedGenres.length > 0 || yearFrom || yearTo || ratingMin || lang) doDiscover(1);
-      else { setResults([]); setTotalResults(0); setTotalPages(1); }
+      if (selectedGenres.length > 0 || yearFrom || yearTo || ratingMin || lang)
+        doDiscover(1);
+      else {
+        setResults([]);
+        setTotalResults(0);
+        setTotalPages(1);
+      }
       return;
     }
     debRef.current = setTimeout(() => doSearch(query, 1), 360);
@@ -1550,141 +3914,548 @@ function SearchPage({ setPage, setSelectedMovie }) {
 
   useEffect(() => {
     if (query.trim()) return;
-    if (selectedGenres.length > 0 || yearFrom || yearTo || ratingMin || lang || sortBy !== "popularity.desc") doDiscover(1);
-    else { setResults([]); setTotalResults(0); setTotalPages(1); }
+    if (
+      selectedGenres.length > 0 ||
+      yearFrom ||
+      yearTo ||
+      ratingMin ||
+      lang ||
+      sortBy !== "popularity.desc"
+    )
+      doDiscover(1);
+    else {
+      setResults([]);
+      setTotalResults(0);
+      setTotalPages(1);
+    }
   }, [selectedGenres, sortBy, yearFrom, yearTo, ratingMin, lang, doDiscover]);
 
-  const toggleGenre = (gid) => setSelectedGenres(prev => prev.includes(gid) ? prev.filter(id => id !== gid) : [...prev, gid]);
-  const handlePageChange = (pg) => { if (query.trim()) doSearch(query, pg); else doDiscover(pg); window.scrollTo({ top: 0, behavior: "smooth" }); };
-  const clearFilters = () => { setSelectedGenres([]); setSortBy("popularity.desc"); setYearFrom(""); setYearTo(""); setRatingMin(""); setLang(""); };
-  const hasFilters = selectedGenres.length > 0 || sortBy !== "popularity.desc" || yearFrom || yearTo || ratingMin || lang;
+  const toggleGenre = (gid) =>
+    setSelectedGenres((prev) =>
+      prev.includes(gid) ? prev.filter((id) => id !== gid) : [...prev, gid],
+    );
+  const handlePageChange = (pg) => {
+    if (query.trim()) doSearch(query, pg);
+    else doDiscover(pg);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+  const clearFilters = () => {
+    setSelectedGenres([]);
+    setSortBy("popularity.desc");
+    setYearFrom("");
+    setYearTo("");
+    setRatingMin("");
+    setLang("");
+  };
+  const hasFilters =
+    selectedGenres.length > 0 ||
+    sortBy !== "popularity.desc" ||
+    yearFrom ||
+    yearTo ||
+    ratingMin ||
+    lang;
   const currentYear = new Date().getFullYear();
-  const selectStyle = { padding: "8px 12px", borderRadius: 8, background: C.bgCard, border: `1px solid ${C.border}`, color: C.text, fontSize: 13, outline: "none", minWidth: 140, cursor: "pointer" };
-  const inputSmStyle = { padding: "8px 12px", borderRadius: 8, background: C.bgCard, border: `1px solid ${C.border}`, color: C.text, fontSize: 13, outline: "none", width: 80, textAlign: "center" };
+  const selectStyle = {
+    padding: "8px 12px",
+    borderRadius: 8,
+    background: C.bgCard,
+    border: `1px solid ${C.border}`,
+    color: C.text,
+    fontSize: 13,
+    outline: "none",
+    minWidth: 140,
+    cursor: "pointer",
+  };
+  const inputSmStyle = {
+    padding: "8px 12px",
+    borderRadius: 8,
+    background: C.bgCard,
+    border: `1px solid ${C.border}`,
+    color: C.text,
+    fontSize: 13,
+    outline: "none",
+    width: 80,
+    textAlign: "center",
+  };
 
   return (
     <div style={{ paddingTop: 80, paddingBottom: 60 }}>
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 32px" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
-          <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 26, fontWeight: 700, color: C.text }}>Buscar <span style={{ color: C.gold }}>Filmes</span></h1>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 24,
+            flexWrap: "wrap",
+            gap: 12,
+          }}
+        >
+          <h1
+            style={{
+              fontFamily: "'Outfit', sans-serif",
+              fontSize: 26,
+              fontWeight: 700,
+              color: C.text,
+            }}
+          >
+            Buscar <span style={{ color: C.gold }}>Filmes</span>
+          </h1>
           <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-            <ViewToolbar viewMode={viewMode} setViewMode={setViewMode} perPage={perPage} setPerPage={setPerPage} />
-            <button onClick={() => setShowFilters(!showFilters)}
-              style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 8, background: showFilters ? C.gold : C.bgCard, color: showFilters ? C.bgDeep : C.textMuted, border: `1px solid ${showFilters ? C.gold : C.border}`, fontSize: 13, fontWeight: 500, cursor: "pointer", transition: "all 0.2s" }}>
-              Filtros {hasFilters && <span style={{ background: showFilters ? C.bgDeep : C.gold, color: showFilters ? C.gold : C.bgDeep, borderRadius: 10, padding: "1px 6px", fontSize: 10, fontWeight: 700 }}>●</span>}
+            <ViewToolbar
+              viewMode={viewMode}
+              setViewMode={setViewMode}
+              perPage={perPage}
+              setPerPage={setPerPage}
+            />
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "8px 16px",
+                borderRadius: 8,
+                background: showFilters ? C.gold : C.bgCard,
+                color: showFilters ? C.bgDeep : C.textMuted,
+                border: `1px solid ${showFilters ? C.gold : C.border}`,
+                fontSize: 13,
+                fontWeight: 500,
+                cursor: "pointer",
+                transition: "all 0.2s",
+              }}
+            >
+              Filtros{" "}
+              {hasFilters && (
+                <span
+                  style={{
+                    background: showFilters ? C.bgDeep : C.gold,
+                    color: showFilters ? C.gold : C.bgDeep,
+                    borderRadius: 10,
+                    padding: "1px 6px",
+                    fontSize: 10,
+                    fontWeight: 700,
+                  }}
+                >
+                  ●
+                </span>
+              )}
             </button>
           </div>
         </div>
 
         <div style={{ position: "relative", marginBottom: 16 }}>
-          <div style={{ position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}><SearchSVG size={18} /></div>
-          <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Buscar por título…"
-            style={{ width: "100%", paddingLeft: 48, paddingRight: 20, paddingTop: 14, paddingBottom: 14, borderRadius: 12, background: C.bgCard, border: `1px solid ${C.border}`, color: C.text, fontSize: 15, outline: "none", transition: "border-color 0.2s" }}
-            onFocus={e => e.target.style.borderColor = C.gold} onBlur={e => e.target.style.borderColor = C.border} />
-          {loading && <div style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)" }}><Spinner size={18} /></div>}
+          <div
+            style={{
+              position: "absolute",
+              left: 16,
+              top: "50%",
+              transform: "translateY(-50%)",
+              pointerEvents: "none",
+            }}
+          >
+            <SearchSVG size={18} />
+          </div>
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Buscar por título…"
+            style={{
+              width: "100%",
+              paddingLeft: 48,
+              paddingRight: 20,
+              paddingTop: 14,
+              paddingBottom: 14,
+              borderRadius: 12,
+              background: C.bgCard,
+              border: `1px solid ${C.border}`,
+              color: C.text,
+              fontSize: 15,
+              outline: "none",
+              transition: "border-color 0.2s",
+            }}
+            onFocus={(e) => (e.target.style.borderColor = C.gold)}
+            onBlur={(e) => (e.target.style.borderColor = C.border)}
+          />
+          {loading && (
+            <div
+              style={{
+                position: "absolute",
+                right: 16,
+                top: "50%",
+                transform: "translateY(-50%)",
+              }}
+            >
+              <Spinner size={18} />
+            </div>
+          )}
         </div>
 
         {showFilters && (
-          <div style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 12, padding: 20, marginBottom: 20 }}>
+          <div
+            style={{
+              background: C.bgCard,
+              border: `1px solid ${C.border}`,
+              borderRadius: 12,
+              padding: 20,
+              marginBottom: 20,
+            }}
+          >
             <div style={{ marginBottom: 16 }}>
-              <label style={{ fontSize: 12, fontWeight: 600, color: C.textMuted, marginBottom: 8, display: "block", textTransform: "uppercase", letterSpacing: 0.5 }}>Gêneros</label>
+              <label
+                style={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: C.textMuted,
+                  marginBottom: 8,
+                  display: "block",
+                  textTransform: "uppercase",
+                  letterSpacing: 0.5,
+                }}
+              >
+                Gêneros
+              </label>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                {genres.map(g => (
-                  <button key={g.id} onClick={() => toggleGenre(g.id)}
-                    style={{ padding: "5px 14px", borderRadius: 16, fontSize: 11, fontWeight: 500, whiteSpace: "nowrap", transition: "all 0.2s", background: selectedGenres.includes(g.id) ? C.gold : "transparent", color: selectedGenres.includes(g.id) ? C.bgDeep : C.textMuted, border: `1px solid ${selectedGenres.includes(g.id) ? C.gold : C.border}`, cursor: "pointer" }}>
+                {genres.map((g) => (
+                  <button
+                    key={g.id}
+                    onClick={() => toggleGenre(g.id)}
+                    style={{
+                      padding: "5px 14px",
+                      borderRadius: 16,
+                      fontSize: 11,
+                      fontWeight: 500,
+                      whiteSpace: "nowrap",
+                      transition: "all 0.2s",
+                      background: selectedGenres.includes(g.id)
+                        ? C.gold
+                        : "transparent",
+                      color: selectedGenres.includes(g.id)
+                        ? C.bgDeep
+                        : C.textMuted,
+                      border: `1px solid ${selectedGenres.includes(g.id) ? C.gold : C.border}`,
+                      cursor: "pointer",
+                    }}
+                  >
                     {g.name}
                   </button>
                 ))}
               </div>
             </div>
-            <div style={{ display: "flex", gap: 16, flexWrap: "wrap", alignItems: "flex-end" }}>
+            <div
+              style={{
+                display: "flex",
+                gap: 16,
+                flexWrap: "wrap",
+                alignItems: "flex-end",
+              }}
+            >
               <div>
-                <label style={{ fontSize: 11, fontWeight: 600, color: C.textDim, marginBottom: 4, display: "block", textTransform: "uppercase" }}>Ordenar</label>
-                <select value={sortBy} onChange={e => setSortBy(e.target.value)} style={selectStyle}>
-                  {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                <label
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 600,
+                    color: C.textDim,
+                    marginBottom: 4,
+                    display: "block",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Ordenar
+                </label>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  style={selectStyle}
+                >
+                  {SORT_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div>
-                <label style={{ fontSize: 11, fontWeight: 600, color: C.textDim, marginBottom: 4, display: "block", textTransform: "uppercase" }}>Ano</label>
+                <label
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 600,
+                    color: C.textDim,
+                    marginBottom: 4,
+                    display: "block",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Ano
+                </label>
                 <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                  <input type="number" min="1888" max={currentYear} placeholder="De" value={yearFrom} onChange={e => setYearFrom(e.target.value)} style={inputSmStyle} />
+                  <input
+                    type="number"
+                    min="1888"
+                    max={currentYear}
+                    placeholder="De"
+                    value={yearFrom}
+                    onChange={(e) => setYearFrom(e.target.value)}
+                    style={inputSmStyle}
+                  />
                   <span style={{ color: C.textDim, fontSize: 12 }}>—</span>
-                  <input type="number" min="1888" max={currentYear} placeholder="Até" value={yearTo} onChange={e => setYearTo(e.target.value)} style={inputSmStyle} />
+                  <input
+                    type="number"
+                    min="1888"
+                    max={currentYear}
+                    placeholder="Até"
+                    value={yearTo}
+                    onChange={(e) => setYearTo(e.target.value)}
+                    style={inputSmStyle}
+                  />
                 </div>
               </div>
               <div>
-                <label style={{ fontSize: 11, fontWeight: 600, color: C.textDim, marginBottom: 4, display: "block", textTransform: "uppercase" }}>Nota mínima</label>
-                <select value={ratingMin} onChange={e => setRatingMin(e.target.value)} style={selectStyle}>
+                <label
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 600,
+                    color: C.textDim,
+                    marginBottom: 4,
+                    display: "block",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Nota mínima
+                </label>
+                <select
+                  value={ratingMin}
+                  onChange={(e) => setRatingMin(e.target.value)}
+                  style={selectStyle}
+                >
                   <option value="">Qualquer</option>
-                  {[9, 8, 7, 6, 5, 4, 3].map(n => <option key={n} value={String(n)}>≥ {n}/10</option>)}
+                  {[9, 8, 7, 6, 5, 4, 3].map((n) => (
+                    <option key={n} value={String(n)}>
+                      ≥ {n}/10
+                    </option>
+                  ))}
                 </select>
               </div>
               <div>
-                <label style={{ fontSize: 11, fontWeight: 600, color: C.textDim, marginBottom: 4, display: "block", textTransform: "uppercase" }}>Idioma</label>
-                <select value={lang} onChange={e => setLang(e.target.value)} style={selectStyle}>
-                  {LANG_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                <label
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 600,
+                    color: C.textDim,
+                    marginBottom: 4,
+                    display: "block",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Idioma
+                </label>
+                <select
+                  value={lang}
+                  onChange={(e) => setLang(e.target.value)}
+                  style={selectStyle}
+                >
+                  {LANG_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
                 </select>
               </div>
-              {hasFilters && <button onClick={clearFilters} style={{ padding: "8px 16px", borderRadius: 8, background: "transparent", color: C.gold, border: `1px solid ${C.gold}`, fontSize: 12, fontWeight: 500, cursor: "pointer", whiteSpace: "nowrap" }}>✕ Limpar</button>}
+              {hasFilters && (
+                <button
+                  onClick={clearFilters}
+                  style={{
+                    padding: "8px 16px",
+                    borderRadius: 8,
+                    background: "transparent",
+                    color: C.gold,
+                    border: `1px solid ${C.gold}`,
+                    fontSize: 12,
+                    fontWeight: 500,
+                    cursor: "pointer",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  ✕ Limpar
+                </button>
+              )}
             </div>
           </div>
         )}
 
         {totalResults > 0 && (
           <p style={{ color: C.textDim, fontSize: 13, marginBottom: 16 }}>
-            {totalResults.toLocaleString("pt-BR")} resultado{totalResults !== 1 ? "s" : ""}
+            {totalResults.toLocaleString("pt-BR")} resultado
+            {totalResults !== 1 ? "s" : ""}
             {query && <span style={{ color: C.gold }}> · "{query}"</span>}
-            {hasFilters && !query && <span style={{ color: C.gold }}> · filtros aplicados</span>}
+            {hasFilters && !query && (
+              <span style={{ color: C.gold }}> · filtros aplicados</span>
+            )}
           </p>
         )}
 
         {results.length > 0 ? (
           <>
             {viewMode === "grid" ? (
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 16 }}>
-                {results.slice(0, perPage).map(m => <MovieCard key={m.id} movie={m} onClick={() => { setSelectedMovie(m); setPage("movie"); }} />)}
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
+                  gap: 16,
+                }}
+              >
+                {results.slice(0, perPage).map((m) => (
+                  <MovieCard
+                    key={m.id}
+                    movie={m}
+                    onClick={() => {
+                      setSelectedMovie(m);
+                      setPage("movie");
+                    }}
+                  />
+                ))}
               </div>
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                {results.slice(0, perPage).map(m => (
-                  <div key={m.id} style={{
-                    background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 14,
-                    padding: 16, display: "flex", gap: 16, alignItems: "center",
-                    cursor: "pointer", transition: "all 0.2s"
-                  }}
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: 12 }}
+              >
+                {results.slice(0, perPage).map((m) => (
+                  <div
+                    key={m.id}
+                    style={{
+                      background: C.bgCard,
+                      border: `1px solid ${C.border}`,
+                      borderRadius: 14,
+                      padding: 16,
+                      display: "flex",
+                      gap: 16,
+                      alignItems: "center",
+                      cursor: "pointer",
+                      transition: "all 0.2s",
+                    }}
                     className="card-hover"
-                    onClick={() => { setSelectedMovie(m); setPage("movie"); }}>
-                    <div style={{ width: 50, height: 75, borderRadius: 8, overflow: "hidden", flexShrink: 0, background: C.bgDeep }}>
-                      {m.poster && <img src={m.poster} alt={m.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
+                    onClick={() => {
+                      setSelectedMovie(m);
+                      setPage("movie");
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: 50,
+                        height: 75,
+                        borderRadius: 8,
+                        overflow: "hidden",
+                        flexShrink: 0,
+                        background: C.bgDeep,
+                      }}
+                    >
+                      {m.poster && (
+                        <img
+                          src={m.poster}
+                          alt={m.title}
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                          }}
+                        />
+                      )}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ fontSize: 15, fontWeight: 600, color: C.text, marginBottom: 2 }}>{m.title}</p>
-                      <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                        {m.year && <span style={{ fontSize: 12, color: C.textDim }}>{m.year}</span>}
-                        {m.genre && <Badge color="rgba(201,168,76,0.1)" textColor={C.goldDim} small>{m.genre}</Badge>}
-                        {m.rating && <span style={{ fontSize: 12, color: C.gold, fontWeight: 600 }}>★ {m.rating}</span>}
+                      <p
+                        style={{
+                          fontSize: 15,
+                          fontWeight: 600,
+                          color: C.text,
+                          marginBottom: 2,
+                        }}
+                      >
+                        {m.title}
+                      </p>
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: 8,
+                          alignItems: "center",
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        {m.year && (
+                          <span style={{ fontSize: 12, color: C.textDim }}>
+                            {m.year}
+                          </span>
+                        )}
+                        {m.genre && (
+                          <Badge
+                            color="rgba(201,168,76,0.1)"
+                            textColor={C.goldDim}
+                            small
+                          >
+                            {m.genre}
+                          </Badge>
+                        )}
+                        {m.rating && (
+                          <span
+                            style={{
+                              fontSize: 12,
+                              color: C.gold,
+                              fontWeight: 600,
+                            }}
+                          >
+                            ★ {m.rating}
+                          </span>
+                        )}
                       </div>
-                      {m.overview && <p style={{ fontSize: 12, color: C.textMuted, marginTop: 4, lineHeight: 1.5, overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>{m.overview}</p>}
+                      {m.overview && (
+                        <p
+                          style={{
+                            fontSize: 12,
+                            color: C.textMuted,
+                            marginTop: 4,
+                            lineHeight: 1.5,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            display: "-webkit-box",
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: "vertical",
+                          }}
+                        >
+                          {m.overview}
+                        </p>
+                      )}
                     </div>
                   </div>
                 ))}
               </div>
             )}
-            <PaginationBar page={currentPage} totalPages={totalPages} totalResults={totalResults} onPageChange={handlePageChange} />
+            <PaginationBar
+              page={currentPage}
+              totalPages={totalPages}
+              totalResults={totalResults}
+              onPageChange={handlePageChange}
+            />
           </>
-        ) : (
-          !loading && (query || hasFilters) ? (
-            <div style={{ textAlign: "center", padding: "60px 0", color: C.textDim }}>
-              <div style={{ marginBottom: 12 }}><Search size={32} style={{ color: "#4A5E72" }} /></div>
-              <p style={{ fontSize: 15 }}>Nenhum resultado encontrado</p>
+        ) : !loading && (query || hasFilters) ? (
+          <div
+            style={{ textAlign: "center", padding: "60px 0", color: C.textDim }}
+          >
+            <div style={{ marginBottom: 12 }}>
+              <Search size={32} style={{ color: "#4A5E72" }} />
             </div>
-          ) : null
-        )}
+            <p style={{ fontSize: 15 }}>Nenhum resultado encontrado</p>
+          </div>
+        ) : null}
 
         {!query && !hasFilters && !loading && (
-          <div style={{ textAlign: "center", padding: "60px 0", color: C.textDim }}>
-            <div style={{ marginBottom: 12 }}><Film size={40} style={{ color: "#4A5E72" }} /></div>
-            <p style={{ fontSize: 15 }}>Digite um título ou use os filtros para explorar</p>
+          <div
+            style={{ textAlign: "center", padding: "60px 0", color: C.textDim }}
+          >
+            <div style={{ marginBottom: 12 }}>
+              <Film size={40} style={{ color: "#4A5E72" }} />
+            </div>
+            <p style={{ fontSize: 15 }}>
+              Digite um título ou use os filtros para explorar
+            </p>
           </div>
         )}
       </div>
@@ -1697,8 +4468,19 @@ function SearchPage({ setPage, setSelectedMovie }) {
 // ─────────────────────────────────────────────
 function ImportDataModal({ userId, onClose }) {
   const [step, setStep] = useState("upload"); // upload | processing | done
-  const [progress, setProgress] = useState({ total: 0, matched: 0, imported: 0, failed: 0, current: "" });
-  const [summary, setSummary] = useState({ ratings: 0, watchlist: 0, reviews: 0, skipped: [] });
+  const [progress, setProgress] = useState({
+    total: 0,
+    matched: 0,
+    imported: 0,
+    failed: 0,
+    current: "",
+  });
+  const [summary, setSummary] = useState({
+    ratings: 0,
+    watchlist: 0,
+    reviews: 0,
+    skipped: [],
+  });
   const fileRef = useRef(null);
 
   async function processZip(file) {
@@ -1706,22 +4488,32 @@ function ImportDataModal({ userId, onClose }) {
     try {
       const zip = await JSZip.loadAsync(file);
       const csvFiles = {};
-      const targetNames = ["ratings.csv", "reviews.csv", "watchlist.csv", "diary.csv"];
+      const targetNames = [
+        "ratings.csv",
+        "reviews.csv",
+        "watchlist.csv",
+        "diary.csv",
+      ];
       // Search all files in zip (including subdirectories)
       const allFiles = [];
-      zip.forEach((path, entry) => { if (!entry.dir) allFiles.push({ path, entry }); });
+      zip.forEach((path, entry) => {
+        if (!entry.dir) allFiles.push({ path, entry });
+      });
       for (const name of targetNames) {
-        const found = allFiles.find(f => f.path.toLowerCase().endsWith(name));
+        const found = allFiles.find((f) => f.path.toLowerCase().endsWith(name));
         if (found) {
           const text = await found.entry.async("text");
-          csvFiles[name] = Papa.parse(text, { header: true, skipEmptyLines: true }).data;
+          csvFiles[name] = Papa.parse(text, {
+            header: true,
+            skipEmptyLines: true,
+          }).data;
         }
       }
 
       // Merge ratings + reviews + diary into unified list (dedup by Name+Year, prefer review)
       const movieMap = new Map();
       const addToMap = (rows, hasReview = false) => {
-        (rows || []).forEach(r => {
+        (rows || []).forEach((r) => {
           const name = r.Name?.trim();
           const year = r.Year?.trim();
           if (!name) return;
@@ -1729,8 +4521,18 @@ function ImportDataModal({ userId, onClose }) {
           const existing = movieMap.get(key);
           const rating = parseFloat(r.Rating) || 0;
           const review = r.Review?.trim() || "";
-          if (!existing || (hasReview && review) || (!existing.review && rating > 0)) {
-            movieMap.set(key, { name, year, rating, review, date: r.Date || "" });
+          if (
+            !existing ||
+            (hasReview && review) ||
+            (!existing.review && rating > 0)
+          ) {
+            movieMap.set(key, {
+              name,
+              year,
+              rating,
+              review,
+              date: r.Date || "",
+            });
           }
         });
       };
@@ -1739,64 +4541,123 @@ function ImportDataModal({ userId, onClose }) {
       addToMap(csvFiles["reviews.csv"], true);
 
       // Watchlist
-      const watchlistEntries = (csvFiles["watchlist.csv"] || []).filter(r => r.Name?.trim()).map(r => ({
-        name: r.Name.trim(), year: r.Year?.trim()
-      }));
+      const watchlistEntries = (csvFiles["watchlist.csv"] || [])
+        .filter((r) => r.Name?.trim())
+        .map((r) => ({
+          name: r.Name.trim(),
+          year: r.Year?.trim(),
+        }));
 
       const allMovies = [...movieMap.values()];
       const totalCount = allMovies.length + watchlistEntries.length;
-      setProgress(p => ({ ...p, total: totalCount }));
+      setProgress((p) => ({ ...p, total: totalCount }));
 
-      let importedRatings = 0, importedWl = 0, importedReviews = 0;
+      let importedRatings = 0,
+        importedWl = 0,
+        importedReviews = 0;
       const skipped = [];
 
       for (let i = 0; i < allMovies.length; i += 5) {
         const batch = allMovies.slice(i, i + 5);
-        await Promise.all(batch.map(async (movie) => {
-          setProgress(p => ({ ...p, current: movie.name }));
-          try {
-            const searchParams = { query: movie.name };
-            if (movie.year) searchParams.year = movie.year;
-            const result = await tmdbProxy({ data: { path: "/search/movie", params: searchParams } });
-            const match = result?.results?.[0];
-            if (!match) { skipped.push(movie.name); setProgress(p => ({ ...p, failed: p.failed + 1 })); return; }
-            const posterUrl = match.poster_path ? `${TMDB_IMG}/w300${match.poster_path}` : null;
-            if (movie.rating > 0) {
-              await supabase.from("ratings").upsert({
-                user_id: userId, tmdb_id: match.id, rating: movie.rating,
-                review: movie.review || null, title: match.title, poster_url: posterUrl
-              }, { onConflict: "user_id,tmdb_id" });
-              importedRatings++;
-              if (movie.review) importedReviews++;
+        await Promise.all(
+          batch.map(async (movie) => {
+            setProgress((p) => ({ ...p, current: movie.name }));
+            try {
+              const searchParams = { query: movie.name };
+              if (movie.year) searchParams.year = movie.year;
+              const result = await tmdbProxy({
+                data: { path: "/search/movie", params: searchParams },
+              });
+              const match = result?.results?.[0];
+              if (!match) {
+                skipped.push(movie.name);
+                setProgress((p) => ({ ...p, failed: p.failed + 1 }));
+                return;
+              }
+              const posterUrl = match.poster_path
+                ? `${TMDB_IMG}/w300${match.poster_path}`
+                : null;
+              if (movie.rating > 0) {
+                await supabase.from("ratings").upsert(
+                  {
+                    user_id: userId,
+                    tmdb_id: match.id,
+                    rating: movie.rating,
+                    review: movie.review || null,
+                    title: match.title,
+                    poster_url: posterUrl,
+                  },
+                  { onConflict: "user_id,tmdb_id" },
+                );
+                importedRatings++;
+                if (movie.review) importedReviews++;
+              }
+              setProgress((p) => ({
+                ...p,
+                matched: p.matched + 1,
+                imported: p.imported + 1,
+              }));
+            } catch {
+              skipped.push(movie.name);
+              setProgress((p) => ({ ...p, failed: p.failed + 1 }));
             }
-            setProgress(p => ({ ...p, matched: p.matched + 1, imported: p.imported + 1 }));
-          } catch { skipped.push(movie.name); setProgress(p => ({ ...p, failed: p.failed + 1 })); }
-        }));
-        if (i + 5 < allMovies.length) await new Promise(r => setTimeout(r, 300));
+          }),
+        );
+        if (i + 5 < allMovies.length)
+          await new Promise((r) => setTimeout(r, 300));
       }
 
       for (let i = 0; i < watchlistEntries.length; i += 5) {
         const batch = watchlistEntries.slice(i, i + 5);
-        await Promise.all(batch.map(async (movie) => {
-          setProgress(p => ({ ...p, current: movie.name }));
-          try {
-            const searchParams = { query: movie.name };
-            if (movie.year) searchParams.year = movie.year;
-            const result = await tmdbProxy({ data: { path: "/search/movie", params: searchParams } });
-            const match = result?.results?.[0];
-            if (!match) { skipped.push(movie.name); setProgress(p => ({ ...p, failed: p.failed + 1 })); return; }
-            const posterUrl = match.poster_path ? `${TMDB_IMG}/w300${match.poster_path}` : null;
-            await supabase.from("watchlist").upsert({
-              user_id: userId, tmdb_id: match.id, title: match.title, poster_url: posterUrl
-            }, { onConflict: "user_id,tmdb_id" });
-            importedWl++;
-            setProgress(p => ({ ...p, matched: p.matched + 1, imported: p.imported + 1 }));
-          } catch { skipped.push(movie.name); setProgress(p => ({ ...p, failed: p.failed + 1 })); }
-        }));
-        if (i + 5 < watchlistEntries.length) await new Promise(r => setTimeout(r, 300));
+        await Promise.all(
+          batch.map(async (movie) => {
+            setProgress((p) => ({ ...p, current: movie.name }));
+            try {
+              const searchParams = { query: movie.name };
+              if (movie.year) searchParams.year = movie.year;
+              const result = await tmdbProxy({
+                data: { path: "/search/movie", params: searchParams },
+              });
+              const match = result?.results?.[0];
+              if (!match) {
+                skipped.push(movie.name);
+                setProgress((p) => ({ ...p, failed: p.failed + 1 }));
+                return;
+              }
+              const posterUrl = match.poster_path
+                ? `${TMDB_IMG}/w300${match.poster_path}`
+                : null;
+              await supabase.from("watchlist").upsert(
+                {
+                  user_id: userId,
+                  tmdb_id: match.id,
+                  title: match.title,
+                  poster_url: posterUrl,
+                },
+                { onConflict: "user_id,tmdb_id" },
+              );
+              importedWl++;
+              setProgress((p) => ({
+                ...p,
+                matched: p.matched + 1,
+                imported: p.imported + 1,
+              }));
+            } catch {
+              skipped.push(movie.name);
+              setProgress((p) => ({ ...p, failed: p.failed + 1 }));
+            }
+          }),
+        );
+        if (i + 5 < watchlistEntries.length)
+          await new Promise((r) => setTimeout(r, 300));
       }
 
-      setSummary({ ratings: importedRatings, watchlist: importedWl, reviews: importedReviews, skipped });
+      setSummary({
+        ratings: importedRatings,
+        watchlist: importedWl,
+        reviews: importedReviews,
+        skipped,
+      });
       setStep("done");
     } catch (err) {
       console.error("Import error:", err);
@@ -1806,39 +4667,173 @@ function ImportDataModal({ userId, onClose }) {
   }
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }} onClick={onClose}>
-      <div style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 20, padding: 32, maxWidth: 500, width: "100%", maxHeight: "80vh", overflow: "auto" }} onClick={e => e.stopPropagation()}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-          <h2 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 22, fontWeight: 700, color: C.text }}>Importar Dados</h2>
-          <button onClick={onClose} style={{ background: "none", border: "none", color: C.textMuted, cursor: "pointer" }}><X size={20} /></button>
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 9999,
+        background: "rgba(0,0,0,0.75)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 20,
+      }}
+      onClick={onClose}
+    >
+      <div
+        style={{
+          background: C.bgCard,
+          border: `1px solid ${C.border}`,
+          borderRadius: 20,
+          padding: 32,
+          maxWidth: 500,
+          width: "100%",
+          maxHeight: "80vh",
+          overflow: "auto",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: 24,
+          }}
+        >
+          <h2
+            style={{
+              fontFamily: "'Outfit', sans-serif",
+              fontSize: 22,
+              fontWeight: 700,
+              color: C.text,
+            }}
+          >
+            Importar Dados
+          </h2>
+          <button
+            onClick={onClose}
+            style={{
+              background: "none",
+              border: "none",
+              color: C.textMuted,
+              cursor: "pointer",
+            }}
+          >
+            <X size={20} />
+          </button>
         </div>
 
         {step === "upload" && (
           <div>
-            <p style={{ color: C.textMuted, fontSize: 14, lineHeight: 1.6, marginBottom: 16 }}>
-              Importe suas avaliações, reviews e watchlist de outros apps como <span style={{ color: C.gold, fontWeight: 600 }}>Letterboxd</span>.
+            <p
+              style={{
+                color: C.textMuted,
+                fontSize: 14,
+                lineHeight: 1.6,
+                marginBottom: 16,
+              }}
+            >
+              Importe suas avaliações, reviews e watchlist de outros apps como{" "}
+              <span style={{ color: C.gold, fontWeight: 600 }}>Letterboxd</span>
+              .
             </p>
             <p style={{ color: C.textMuted, fontSize: 13, marginBottom: 20 }}>
-              Exporte seus dados no app original (geralmente em Configurações → Exportar) e faça upload do arquivo <code style={{ background: C.bgDeep, padding: "2px 6px", borderRadius: 4, color: C.gold }}>.zip</code> aqui.
+              Exporte seus dados no app original (geralmente em Configurações →
+              Exportar) e faça upload do arquivo{" "}
+              <code
+                style={{
+                  background: C.bgDeep,
+                  padding: "2px 6px",
+                  borderRadius: 4,
+                  color: C.gold,
+                }}
+              >
+                .zip
+              </code>{" "}
+              aqui.
             </p>
-            <div style={{
-              border: `2px dashed ${C.border}`, borderRadius: 16, padding: "40px 20px",
-              textAlign: "center", cursor: "pointer", transition: "border-color 0.2s"
-            }}
-            onClick={() => fileRef.current?.click()}
-            onDragOver={e => { e.preventDefault(); e.currentTarget.style.borderColor = C.gold; }}
-            onDragLeave={e => { e.currentTarget.style.borderColor = C.border; }}
-            onDrop={e => { e.preventDefault(); e.currentTarget.style.borderColor = C.border; const f = e.dataTransfer.files[0]; if (f) processZip(f); }}>
+            <div
+              style={{
+                border: `2px dashed ${C.border}`,
+                borderRadius: 16,
+                padding: "40px 20px",
+                textAlign: "center",
+                cursor: "pointer",
+                transition: "border-color 0.2s",
+              }}
+              onClick={() => fileRef.current?.click()}
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.currentTarget.style.borderColor = C.gold;
+              }}
+              onDragLeave={(e) => {
+                e.currentTarget.style.borderColor = C.border;
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                e.currentTarget.style.borderColor = C.border;
+                const f = e.dataTransfer.files[0];
+                if (f) processZip(f);
+              }}
+            >
               <Upload size={40} style={{ color: C.gold, marginBottom: 12 }} />
-              <p style={{ color: C.text, fontWeight: 600, fontSize: 15, marginBottom: 4 }}>Arraste o arquivo ZIP aqui</p>
-              <p style={{ color: C.textMuted, fontSize: 13 }}>ou clique para selecionar</p>
-              <input ref={fileRef} type="file" accept=".zip" hidden onChange={e => { const f = e.target.files?.[0]; if (f) processZip(f); }} />
+              <p
+                style={{
+                  color: C.text,
+                  fontWeight: 600,
+                  fontSize: 15,
+                  marginBottom: 4,
+                }}
+              >
+                Arraste o arquivo ZIP aqui
+              </p>
+              <p style={{ color: C.textMuted, fontSize: 13 }}>
+                ou clique para selecionar
+              </p>
+              <input
+                ref={fileRef}
+                type="file"
+                accept=".zip"
+                hidden
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) processZip(f);
+                }}
+              />
             </div>
 
-            <div style={{ marginTop: 20, padding: 16, background: C.bgDeep, borderRadius: 12, border: `1px solid ${C.border}` }}>
-              <p style={{ fontSize: 12, fontWeight: 600, color: C.gold, marginBottom: 8 }}>Arquivos suportados no ZIP:</p>
-              {["ratings.csv — Avaliações com notas", "reviews.csv — Reviews com texto", "watchlist.csv — Lista para assistir", "diary.csv — Diário de filmes"].map(t => (
-                <p key={t} style={{ fontSize: 12, color: C.textMuted, marginBottom: 3 }}>• {t}</p>
+            <div
+              style={{
+                marginTop: 20,
+                padding: 16,
+                background: C.bgDeep,
+                borderRadius: 12,
+                border: `1px solid ${C.border}`,
+              }}
+            >
+              <p
+                style={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: C.gold,
+                  marginBottom: 8,
+                }}
+              >
+                Arquivos suportados no ZIP:
+              </p>
+              {[
+                "ratings.csv — Avaliações com notas",
+                "reviews.csv — Reviews com texto",
+                "watchlist.csv — Lista para assistir",
+                "diary.csv — Diário de filmes",
+              ].map((t) => (
+                <p
+                  key={t}
+                  style={{ fontSize: 12, color: C.textMuted, marginBottom: 3 }}
+                >
+                  • {t}
+                </p>
               ))}
             </div>
           </div>
@@ -1846,21 +4841,66 @@ function ImportDataModal({ userId, onClose }) {
 
         {step === "processing" && (
           <div style={{ textAlign: "center" }}>
-            <Loader2 size={40} style={{ color: C.gold, marginBottom: 16, animation: "spin 1s linear infinite" }} />
-            <p style={{ color: C.text, fontWeight: 600, fontSize: 16, marginBottom: 8 }}>Importando dados...</p>
-            <p style={{ color: C.textMuted, fontSize: 13, marginBottom: 20 }}>{progress.current}</p>
-            <div style={{ background: C.bgDeep, borderRadius: 8, height: 8, overflow: "hidden", marginBottom: 16 }}>
-              <div style={{
-                height: "100%", borderRadius: 8,
-                background: `linear-gradient(90deg, ${C.goldDim}, ${C.gold})`,
-                width: progress.total > 0 ? `${Math.round((progress.imported + progress.failed) / progress.total * 100)}%` : "0%",
-                transition: "width 0.3s ease"
-              }} />
+            <Loader2
+              size={40}
+              style={{
+                color: C.gold,
+                marginBottom: 16,
+                animation: "spin 1s linear infinite",
+              }}
+            />
+            <p
+              style={{
+                color: C.text,
+                fontWeight: 600,
+                fontSize: 16,
+                marginBottom: 8,
+              }}
+            >
+              Importando dados...
+            </p>
+            <p style={{ color: C.textMuted, fontSize: 13, marginBottom: 20 }}>
+              {progress.current}
+            </p>
+            <div
+              style={{
+                background: C.bgDeep,
+                borderRadius: 8,
+                height: 8,
+                overflow: "hidden",
+                marginBottom: 16,
+              }}
+            >
+              <div
+                style={{
+                  height: "100%",
+                  borderRadius: 8,
+                  background: `linear-gradient(90deg, ${C.goldDim}, ${C.gold})`,
+                  width:
+                    progress.total > 0
+                      ? `${Math.round(((progress.imported + progress.failed) / progress.total) * 100)}%`
+                      : "0%",
+                  transition: "width 0.3s ease",
+                }}
+              />
             </div>
             <div style={{ display: "flex", justifyContent: "center", gap: 24 }}>
-              {[["Encontrados", progress.total, C.text], ["Importados", progress.imported, C.success], ["Falhas", progress.failed, C.red]].map(([l, v, c]) => (
+              {[
+                ["Encontrados", progress.total, C.text],
+                ["Importados", progress.imported, C.success],
+                ["Falhas", progress.failed, C.red],
+              ].map(([l, v, c]) => (
                 <div key={l}>
-                  <p style={{ fontSize: 20, fontWeight: 700, color: c, fontFamily: "'Outfit', sans-serif" }}>{v}</p>
+                  <p
+                    style={{
+                      fontSize: 20,
+                      fontWeight: 700,
+                      color: c,
+                      fontFamily: "'Outfit', sans-serif",
+                    }}
+                  >
+                    {v}
+                  </p>
                   <p style={{ fontSize: 11, color: C.textMuted }}>{l}</p>
                 </div>
               ))}
@@ -1870,29 +4910,107 @@ function ImportDataModal({ userId, onClose }) {
 
         {step === "done" && (
           <div style={{ textAlign: "center" }}>
-            <CheckCircle size={48} style={{ color: C.success, marginBottom: 16 }} />
-            <p style={{ color: C.text, fontWeight: 700, fontSize: 20, marginBottom: 20, fontFamily: "'Outfit', sans-serif" }}>Importação Concluída!</p>
-            <div style={{ display: "flex", justifyContent: "center", gap: 20, marginBottom: 24 }}>
-              {[["Avaliações", summary.ratings, Star], ["Reviews", summary.reviews, Pencil], ["Watchlist", summary.watchlist, Bookmark]].map(([l, v, Icon]) => (
-                <div key={l} style={{ background: C.bgDeep, borderRadius: 12, padding: "14px 20px", border: `1px solid ${C.border}` }}>
+            <CheckCircle
+              size={48}
+              style={{ color: C.success, marginBottom: 16 }}
+            />
+            <p
+              style={{
+                color: C.text,
+                fontWeight: 700,
+                fontSize: 20,
+                marginBottom: 20,
+                fontFamily: "'Outfit', sans-serif",
+              }}
+            >
+              Importação Concluída!
+            </p>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                gap: 20,
+                marginBottom: 24,
+              }}
+            >
+              {[
+                ["Avaliações", summary.ratings, Star],
+                ["Reviews", summary.reviews, Pencil],
+                ["Watchlist", summary.watchlist, Bookmark],
+              ].map(([l, v, Icon]) => (
+                <div
+                  key={l}
+                  style={{
+                    background: C.bgDeep,
+                    borderRadius: 12,
+                    padding: "14px 20px",
+                    border: `1px solid ${C.border}`,
+                  }}
+                >
                   <Icon size={18} style={{ color: C.gold, marginBottom: 6 }} />
-                  <p style={{ fontSize: 22, fontWeight: 700, color: C.gold, fontFamily: "'Outfit', sans-serif" }}>{v}</p>
+                  <p
+                    style={{
+                      fontSize: 22,
+                      fontWeight: 700,
+                      color: C.gold,
+                      fontFamily: "'Outfit', sans-serif",
+                    }}
+                  >
+                    {v}
+                  </p>
                   <p style={{ fontSize: 11, color: C.textMuted }}>{l}</p>
                 </div>
               ))}
             </div>
             {summary.skipped.length > 0 && (
-              <div style={{ textAlign: "left", background: C.bgDeep, borderRadius: 12, padding: 16, border: `1px solid ${C.border}`, marginBottom: 20 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+              <div
+                style={{
+                  textAlign: "left",
+                  background: C.bgDeep,
+                  borderRadius: 12,
+                  padding: 16,
+                  border: `1px solid ${C.border}`,
+                  marginBottom: 20,
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    marginBottom: 8,
+                  }}
+                >
                   <AlertCircle size={14} style={{ color: C.orange }} />
-                  <p style={{ fontSize: 12, fontWeight: 600, color: C.orange }}>{summary.skipped.length} filme(s) não encontrado(s)</p>
+                  <p style={{ fontSize: 12, fontWeight: 600, color: C.orange }}>
+                    {summary.skipped.length} filme(s) não encontrado(s)
+                  </p>
                 </div>
                 <div style={{ maxHeight: 120, overflow: "auto" }}>
-                  {summary.skipped.map((s, i) => <p key={i} style={{ fontSize: 12, color: C.textMuted, marginBottom: 2 }}>• {s}</p>)}
+                  {summary.skipped.map((s, i) => (
+                    <p
+                      key={i}
+                      style={{
+                        fontSize: 12,
+                        color: C.textMuted,
+                        marginBottom: 2,
+                      }}
+                    >
+                      • {s}
+                    </p>
+                  ))}
                 </div>
               </div>
             )}
-            <Btn variant="gold" onClick={() => { onClose(); window.location.reload(); }}>Fechar</Btn>
+            <Btn
+              variant="gold"
+              onClick={() => {
+                onClose();
+                window.location.reload();
+              }}
+            >
+              Fechar
+            </Btn>
           </div>
         )}
       </div>
@@ -1920,9 +5038,13 @@ function ProfileEditModal({ profile, user, onClose, onSave }) {
     try {
       const ext = file.name.split(".").pop();
       const path = `${user.id}/avatar.${ext}`;
-      const { error: uploadErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
+      const { error: uploadErr } = await supabase.storage
+        .from("avatars")
+        .upload(path, file, { upsert: true });
       if (uploadErr) throw uploadErr;
-      const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(path);
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("avatars").getPublicUrl(path);
       setAvatarUrl(publicUrl + "?t=" + Date.now());
       toast.success("Foto enviada!");
     } catch (err) {
@@ -1935,7 +5057,12 @@ function ProfileEditModal({ profile, user, onClose, onSave }) {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await onSave({ display_name: displayName.trim(), username: username.trim(), bio: bio.trim(), avatar_url: avatarUrl });
+      await onSave({
+        display_name: displayName.trim(),
+        username: username.trim(),
+        bio: bio.trim(),
+        avatar_url: avatarUrl,
+      });
       toast.success("Perfil atualizado!");
       onClose();
     } catch (err) {
@@ -1946,90 +5073,314 @@ function ProfileEditModal({ profile, user, onClose, onSave }) {
   };
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}
-      onClick={onClose}>
-      <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)" }} />
-      <div style={{ position: "relative", background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 20, padding: 28, maxWidth: 520, width: "100%", maxHeight: "90vh", overflowY: "auto" }}
-        onClick={e => e.stopPropagation()}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
-          <h2 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 20, fontWeight: 700, color: C.text }}>Editar Perfil</h2>
-          <button onClick={onClose} style={{ width: 32, height: 32, borderRadius: "50%", background: C.bgDeep, border: `1px solid ${C.border}`, color: C.textMuted, fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>✕</button>
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 1000,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 16,
+      }}
+      onClick={onClose}
+    >
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: "rgba(0,0,0,0.7)",
+          backdropFilter: "blur(8px)",
+        }}
+      />
+      <div
+        style={{
+          position: "relative",
+          background: C.bgCard,
+          border: `1px solid ${C.border}`,
+          borderRadius: 20,
+          padding: 28,
+          maxWidth: 520,
+          width: "100%",
+          maxHeight: "90vh",
+          overflowY: "auto",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 24,
+          }}
+        >
+          <h2
+            style={{
+              fontFamily: "'Outfit', sans-serif",
+              fontSize: 20,
+              fontWeight: 700,
+              color: C.text,
+            }}
+          >
+            Editar Perfil
+          </h2>
+          <button
+            onClick={onClose}
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: "50%",
+              background: C.bgDeep,
+              border: `1px solid ${C.border}`,
+              color: C.textMuted,
+              fontSize: 16,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+            }}
+          >
+            ✕
+          </button>
         </div>
 
         {/* Avatar Section */}
         <div style={{ textAlign: "center", marginBottom: 24 }}>
-          <div style={{
-            width: 100, height: 100, borderRadius: "50%", margin: "0 auto 16px",
-            background: avatarUrl ? "transparent" : `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`,
-            border: `3px solid ${C.gold}`, boxShadow: `0 4px 20px rgba(201,168,76,0.3)`,
-            display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden",
-            fontSize: 28, fontWeight: 800, color: C.bgDeep, fontFamily: "'Outfit', sans-serif",
-          }}>
-            {avatarUrl ? <img src={avatarUrl} alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : (displayName || "?").slice(0, 2).toUpperCase()}
+          <div
+            style={{
+              width: 100,
+              height: 100,
+              borderRadius: "50%",
+              margin: "0 auto 16px",
+              background: avatarUrl
+                ? "transparent"
+                : `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`,
+              border: `3px solid ${C.gold}`,
+              boxShadow: `0 4px 20px rgba(201,168,76,0.3)`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              overflow: "hidden",
+              fontSize: 28,
+              fontWeight: 800,
+              color: C.bgDeep,
+              fontFamily: "'Outfit', sans-serif",
+            }}
+          >
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt="Avatar"
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              />
+            ) : (
+              (displayName || "?").slice(0, 2).toUpperCase()
+            )}
           </div>
 
           {/* Avatar Tab Switcher */}
-          <div style={{ display: "inline-flex", gap: 4, background: C.bgDeep, borderRadius: 10, padding: 3, marginBottom: 16 }}>
-            {[["monkeys", "🐒 Macacos"], ["upload", "📷 Upload"]].map(([id, label]) => (
-              <button key={id} onClick={() => setAvatarTab(id)} style={{
-                padding: "7px 16px", fontSize: 12, fontWeight: 600,
-                color: avatarTab === id ? C.bgDeep : C.textMuted,
-                background: avatarTab === id ? C.gold : "transparent",
-                borderRadius: 8, transition: "all 0.2s"
-              }}>{label}</button>
+          <div
+            style={{
+              display: "inline-flex",
+              gap: 4,
+              background: C.bgDeep,
+              borderRadius: 10,
+              padding: 3,
+              marginBottom: 16,
+            }}
+          >
+            {[
+              ["monkeys", "🐒 Macacos"],
+              ["upload", "📷 Upload"],
+            ].map(([id, label]) => (
+              <button
+                key={id}
+                onClick={() => setAvatarTab(id)}
+                style={{
+                  padding: "7px 16px",
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: avatarTab === id ? C.bgDeep : C.textMuted,
+                  background: avatarTab === id ? C.gold : "transparent",
+                  borderRadius: 8,
+                  transition: "all 0.2s",
+                }}
+              >
+                {label}
+              </button>
             ))}
           </div>
 
           {avatarTab === "monkeys" && (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10, maxWidth: 320, margin: "0 auto" }}>
-              {MONKEY_AVATARS.map(m => (
-                <button key={m.id} onClick={() => setAvatarUrl(m.src)} style={{
-                  padding: 8, borderRadius: 14, border: avatarUrl === m.src ? `2px solid ${C.gold}` : `1px solid ${C.border}`,
-                  background: avatarUrl === m.src ? `${C.gold}15` : C.bgDeep,
-                  cursor: "pointer", transition: "all 0.2s", display: "flex", alignItems: "center", justifyContent: "center"
-                }}>
-                  <img src={m.src} alt={m.label} loading="lazy" width={64} height={64} style={{ borderRadius: 10 }} />
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(3, 1fr)",
+                gap: 10,
+                maxWidth: 320,
+                margin: "0 auto",
+              }}
+            >
+              {MONKEY_AVATARS.map((m) => (
+                <button
+                  key={m.id}
+                  onClick={() => setAvatarUrl(m.src)}
+                  style={{
+                    padding: 8,
+                    borderRadius: 14,
+                    border:
+                      avatarUrl === m.src
+                        ? `2px solid ${C.gold}`
+                        : `1px solid ${C.border}`,
+                    background: avatarUrl === m.src ? `${C.gold}15` : C.bgDeep,
+                    cursor: "pointer",
+                    transition: "all 0.2s",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <img
+                    src={m.src}
+                    alt={m.label}
+                    loading="lazy"
+                    width={64}
+                    height={64}
+                    style={{ borderRadius: 10 }}
+                  />
                 </button>
               ))}
             </div>
           )}
 
           {avatarTab === "upload" && (
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
-              <input ref={fileRef} type="file" accept="image/*" onChange={handleUpload} style={{ display: "none" }} />
-              <Btn variant="outline" size="sm" onClick={() => fileRef.current?.click()} disabled={uploading}>
-                {uploading ? <><Spinner size={14} /> Enviando...</> : "Escolher foto"}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 10,
+              }}
+            >
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                onChange={handleUpload}
+                style={{ display: "none" }}
+              />
+              <Btn
+                variant="outline"
+                size="sm"
+                onClick={() => fileRef.current?.click()}
+                disabled={uploading}
+              >
+                {uploading ? (
+                  <>
+                    <Spinner size={14} /> Enviando...
+                  </>
+                ) : (
+                  "Escolher foto"
+                )}
               </Btn>
-              <p style={{ fontSize: 11, color: C.textDim }}>JPG, PNG ou WebP · máx. 2MB</p>
+              <p style={{ fontSize: 11, color: C.textDim }}>
+                JPG, PNG ou WebP · máx. 2MB
+              </p>
             </div>
           )}
 
           {avatarUrl && (
-            <button onClick={() => setAvatarUrl("")} style={{ marginTop: 8, fontSize: 11, color: C.red, cursor: "pointer", background: "none", border: "none" }}>
+            <button
+              onClick={() => setAvatarUrl("")}
+              style={{
+                marginTop: 8,
+                fontSize: 11,
+                color: C.red,
+                cursor: "pointer",
+                background: "none",
+                border: "none",
+              }}
+            >
               Remover avatar
             </button>
           )}
         </div>
 
         {/* Fields */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 24 }}>
-          <TextInput label="Nome de exibição" value={displayName} onChange={setDisplayName} placeholder="Seu nome" />
-          <TextInput label="Username" value={username} onChange={setUsername} placeholder="@username" note="Sem espaços, letras e números" />
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 16,
+            marginBottom: 24,
+          }}
+        >
+          <TextInput
+            label="Nome de exibição"
+            value={displayName}
+            onChange={setDisplayName}
+            placeholder="Seu nome"
+          />
+          <TextInput
+            label="Username"
+            value={username}
+            onChange={setUsername}
+            placeholder="@username"
+            note="Sem espaços, letras e números"
+          />
           <div>
-            <label style={{ display: "block", fontSize: 12, color: C.textMuted, marginBottom: 6, fontWeight: 500 }}>Bio</label>
-            <textarea value={bio} onChange={e => setBio(e.target.value)} placeholder="Conte sobre você..." rows={3}
-              style={{ width: "100%", padding: "12px 16px", borderRadius: 10, background: "rgba(9,21,35,0.6)", border: `1px solid ${C.border}`, color: C.text, fontSize: 14, outline: "none", resize: "vertical", fontFamily: "inherit", transition: "border-color 0.2s" }}
-              onFocus={e => e.target.style.borderColor = C.gold}
-              onBlur={e => e.target.style.borderColor = C.border} />
-            <p style={{ fontSize: 11, color: C.textDim, marginTop: 4 }}>{bio.length}/200</p>
+            <label
+              style={{
+                display: "block",
+                fontSize: 12,
+                color: C.textMuted,
+                marginBottom: 6,
+                fontWeight: 500,
+              }}
+            >
+              Bio
+            </label>
+            <textarea
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
+              placeholder="Conte sobre você..."
+              rows={3}
+              style={{
+                width: "100%",
+                padding: "12px 16px",
+                borderRadius: 10,
+                background: "rgba(9,21,35,0.6)",
+                border: `1px solid ${C.border}`,
+                color: C.text,
+                fontSize: 14,
+                outline: "none",
+                resize: "vertical",
+                fontFamily: "inherit",
+                transition: "border-color 0.2s",
+              }}
+              onFocus={(e) => (e.target.style.borderColor = C.gold)}
+              onBlur={(e) => (e.target.style.borderColor = C.border)}
+            />
+            <p style={{ fontSize: 11, color: C.textDim, marginTop: 4 }}>
+              {bio.length}/200
+            </p>
           </div>
         </div>
 
         {/* Actions */}
         <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-          <Btn variant="ghost" size="sm" onClick={onClose}>Cancelar</Btn>
+          <Btn variant="ghost" size="sm" onClick={onClose}>
+            Cancelar
+          </Btn>
           <Btn variant="gold" size="sm" onClick={handleSave} disabled={saving}>
-            {saving ? <><Spinner size={14} /> Salvando...</> : "Salvar"}
+            {saving ? (
+              <>
+                <Spinner size={14} /> Salvando...
+              </>
+            ) : (
+              "Salvar"
+            )}
           </Btn>
         </div>
       </div>
@@ -2040,7 +5391,14 @@ function ProfileEditModal({ profile, user, onClose, onSave }) {
 // ─────────────────────────────────────────────
 //  PROFILE PAGE
 // ─────────────────────────────────────────────
-function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSelectedMovie, viewUserId }) {
+function ProfilePage({
+  user,
+  setPage,
+  isOwnProfile = true,
+  auth: authCtx,
+  setSelectedMovie,
+  viewUserId,
+}) {
   const currentUserId = authCtx?.user?.id;
   const isViewingOther = viewUserId && viewUserId !== currentUserId;
   const targetUserId = isViewingOther ? viewUserId : currentUserId;
@@ -2048,115 +5406,295 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
   // For viewing other profiles, load their profile data
   const [otherProfile, setOtherProfile] = useState(null);
   useEffect(() => {
-    if (!isViewingOther) { setOtherProfile(null); return; }
-    supabase.from("profiles").select("*").eq("user_id", viewUserId).single().then(({ data }) => setOtherProfile(data));
+    if (!isViewingOther) {
+      setOtherProfile(null);
+      return;
+    }
+    supabase
+      .from("profiles")
+      .select("*")
+      .eq("user_id", viewUserId)
+      .single()
+      .then(({ data }) => setOtherProfile(data));
   }, [viewUserId, isViewingOther]);
 
   const profile = isViewingOther ? otherProfile : authCtx?.profile;
   const { ratings, loading: ratingsLoading } = useRatings(targetUserId);
-  const { items: watchlistItems, loading: wlLoading, remove: removeFromWl } = useWatchlist(targetUserId);
+  const {
+    items: watchlistItems,
+    loading: wlLoading,
+    remove: removeFromWl,
+  } = useWatchlist(targetUserId);
   const [tab, setTab] = useState("ratings");
   const [viewMode, setViewMode] = useState("list");
   const [showImportModal, setShowImportModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
 
   // Follow hooks - currentUser for actions, targetUser for display counts
-  const { following: myFollowing, follow, unfollow, isFollowing } = useFollows(currentUserId);
-  const { followers: targetFollowers, following: targetFollowing } = useFollows(targetUserId);
+  const {
+    following: myFollowing,
+    follow,
+    unfollow,
+    isFollowing,
+  } = useFollows(currentUserId);
+  const { followers: targetFollowers, following: targetFollowing } =
+    useFollows(targetUserId);
   const { isFriend } = useFriendships(currentUserId);
 
-  const displayName = profile?.display_name || (isViewingOther ? "Usuário" : authCtx?.user?.email || "Usuário");
+  const displayName =
+    profile?.display_name ||
+    (isViewingOther ? "Usuário" : authCtx?.user?.email || "Usuário");
   const initials = displayName.slice(0, 2).toUpperCase();
-  const uname = profile?.username || (!isViewingOther ? authCtx?.user?.email?.split("@")[0] : null) || "user";
+  const uname =
+    profile?.username ||
+    (!isViewingOther ? authCtx?.user?.email?.split("@")[0] : null) ||
+    "user";
   const bio = profile?.bio || "";
-  const avgRating = ratings.length > 0 ? (ratings.reduce((s, r) => s + Number(r.rating), 0) / ratings.length).toFixed(1) : "—";
+  const avgRating =
+    ratings.length > 0
+      ? (
+          ratings.reduce((s, r) => s + Number(r.rating), 0) / ratings.length
+        ).toFixed(1)
+      : "—";
 
-  // Favorite genres based on ratings
+// Gêneros favoritos baseados em TODAS as avaliações do usuário
   const [favGenres, setFavGenres] = useState([]);
   useEffect(() => {
     if (!ratings.length) { setFavGenres([]); return; }
     let alive = true;
-    // Fetch details for top-rated movies to extract genres
-    const toFetch = ratings.slice(0, 20);
+
+    // Alteração: Agora utilizamos o array 'ratings' completo em vez de apenas .slice(0, 20)
+    const toFetch = ratings; 
+
     Promise.all(toFetch.map(r =>
-      cachedFetch(`mini_${r.tmdb_id}`, () => tmdbProxy({ data: { path: `/movie/${r.tmdb_id}`, params: {} } })).catch(() => null)
+      cachedFetch(`mini_${r.tmdb_id}`, () => 
+        tmdbProxy({ data: { path: `/movie/${r.tmdb_id}`, params: {} } })
+      ).catch(() => null)
     )).then(results => {
       if (!alive) return;
       const genreCount = {};
+      
       results.filter(Boolean).forEach(m => {
         (m.genres || []).forEach(g => {
-          genreCount[g.name] = (genreCount[g.name] || 0) + 1;
+          // O TMDB retorna objetos de gênero com 'name'. Verificamos para evitar erros.
+          const genreName = g.name || g;
+          if (genreName) {
+            genreCount[genreName] = (genreCount[genreName] || 0) + 1;
+          }
         });
       });
-      const sorted = Object.entries(genreCount).sort((a, b) => b[1] - a[1]).slice(0, 6);
+
+      // Ordenamos pela contagem decrescente e mantemos o Top 6 conforme solicitado
+      const sorted = Object.entries(genreCount)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 6);
+        
       const maxCount = sorted[0]?.[1] || 1;
-      setFavGenres(sorted.map(([name, count]) => ({ name, count, pct: Math.round((count / maxCount) * 100) })));
+      setFavGenres(sorted.map(([name, count]) => ({ 
+        name, 
+        count, 
+        pct: Math.round((count / maxCount) * 100) 
+      })));
     });
     return () => { alive = false; };
   }, [ratings]);
 
   // Top 3 recent posters for banner collage
-  const bannerPosters = ratings.filter(r => r.poster_url).slice(0, 4).map(r => r.poster_url);
+  const bannerPosters = ratings
+    .filter((r) => r.poster_url)
+    .slice(0, 4)
+    .map((r) => r.poster_url);
 
   return (
     <div style={{ paddingTop: 64, paddingBottom: 80, minHeight: "100vh" }}>
       {/* Cover / Banner */}
       <div style={{ position: "relative", height: 220, overflow: "hidden" }}>
         {bannerPosters.length > 0 ? (
-          <div style={{ display: "flex", width: "100%", height: "100%", position: "absolute", inset: 0 }}>
+          <div
+            style={{
+              display: "flex",
+              width: "100%",
+              height: "100%",
+              position: "absolute",
+              inset: 0,
+            }}
+          >
             {bannerPosters.map((p, i) => (
               <div key={i} style={{ flex: 1, overflow: "hidden" }}>
-                <img src={p} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", filter: "brightness(0.4) saturate(1.2)" }} />
+                <img
+                  src={p}
+                  alt=""
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    filter: "brightness(0.4) saturate(1.2)",
+                  }}
+                />
               </div>
             ))}
           </div>
         ) : (
-          <div style={{ position: "absolute", inset: 0, background: `linear-gradient(135deg, ${C.bgDeep} 0%, ${C.bgCardHover} 50%, ${C.gold}22 100%)` }} />
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              background: `linear-gradient(135deg, ${C.bgDeep} 0%, ${C.bgCardHover} 50%, ${C.gold}22 100%)`,
+            }}
+          />
         )}
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 30%, #0F1923 100%)" }} />
-        <div style={{ position: "absolute", inset: 0, backgroundImage: `repeating-linear-gradient(45deg,transparent,transparent 40px,rgba(201,168,76,0.04) 40px,rgba(201,168,76,0.04) 41px)` }} />
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background:
+              "linear-gradient(to bottom, transparent 30%, #0F1923 100%)",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            backgroundImage: `repeating-linear-gradient(45deg,transparent,transparent 40px,rgba(201,168,76,0.04) 40px,rgba(201,168,76,0.04) 41px)`,
+          }}
+        />
       </div>
 
       <div style={{ maxWidth: 900, margin: "0 auto", padding: "0 24px" }}>
         {/* Profile Header Card */}
         <div style={{ marginTop: -72, position: "relative", zIndex: 10 }}>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              textAlign: "center",
+            }}
+          >
             {/* Avatar */}
-            <div style={{
-              width: 110, height: 110, borderRadius: "50%",
-              background: profile?.avatar_url ? "transparent" : `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`,
-              border: `4px solid ${C.bgDeep}`, boxShadow: `0 4px 24px rgba(201,168,76,0.3)`,
-              display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden",
-              fontSize: 32, fontWeight: 800, color: C.bgDeep, fontFamily: "'Outfit', sans-serif",
-              marginBottom: 14
-            }}>
-              {profile?.avatar_url ? <img src={profile.avatar_url} alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : initials}
+            <div
+              style={{
+                width: 110,
+                height: 110,
+                borderRadius: "50%",
+                background: profile?.avatar_url
+                  ? "transparent"
+                  : `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`,
+                border: `4px solid ${C.bgDeep}`,
+                boxShadow: `0 4px 24px rgba(201,168,76,0.3)`,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                overflow: "hidden",
+                fontSize: 32,
+                fontWeight: 800,
+                color: C.bgDeep,
+                fontFamily: "'Outfit', sans-serif",
+                marginBottom: 14,
+              }}
+            >
+              {profile?.avatar_url ? (
+                <img
+                  src={profile.avatar_url}
+                  alt="Avatar"
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                />
+              ) : (
+                initials
+              )}
             </div>
 
-            <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 26, fontWeight: 700, color: C.text, marginBottom: 2 }}>{displayName}</h1>
-            <p style={{ color: C.gold, fontSize: 14, fontWeight: 500, marginBottom: 8 }}>@{uname}</p>
-            {bio && <p style={{ color: C.textMuted, fontSize: 13, maxWidth: 380, lineHeight: 1.5, marginBottom: 20 }}>{bio}</p>}
+            <h1
+              style={{
+                fontFamily: "'Outfit', sans-serif",
+                fontSize: 26,
+                fontWeight: 700,
+                color: C.text,
+                marginBottom: 2,
+              }}
+            >
+              {displayName}
+            </h1>
+            <p
+              style={{
+                color: C.gold,
+                fontSize: 14,
+                fontWeight: 500,
+                marginBottom: 8,
+              }}
+            >
+              @{uname}
+            </p>
+            {bio && (
+              <p
+                style={{
+                  color: C.textMuted,
+                  fontSize: 13,
+                  maxWidth: 380,
+                  lineHeight: 1.5,
+                  marginBottom: 20,
+                }}
+              >
+                {bio}
+              </p>
+            )}
 
             {/* Stats Row */}
-            <div style={{
-              display: "flex", gap: 0, background: C.bgCard, border: `1px solid ${C.border}`,
-              borderRadius: 16, overflow: "hidden", marginBottom: 20
-            }}>
+            <div
+              style={{
+                display: "flex",
+                gap: 0,
+                background: C.bgCard,
+                border: `1px solid ${C.border}`,
+                borderRadius: 16,
+                overflow: "hidden",
+                marginBottom: 20,
+              }}
+            >
               {[
                 ["Avaliações", ratings.length, <Film size={16} />],
-                ["Watchlist", watchlistItems.length, <ClipboardList size={16} />],
+                [
+                  "Watchlist",
+                  watchlistItems.length,
+                  <ClipboardList size={16} />,
+                ],
                 ["Nota Média", avgRating, <Star size={16} />],
                 ["Seguindo", targetFollowing.length, <UserRound size={16} />],
                 ["Seguidores", targetFollowers.length, <Users size={16} />],
               ].map(([label, val, icon], i, arr) => (
-                <div key={label} style={{
-                  padding: "14px 20px", textAlign: "center",
-                  borderRight: i < arr.length - 1 ? `1px solid ${C.border}` : "none",
-                  minWidth: 120
-                }}>
-                  <div style={{ marginBottom: 4, display: "flex", justifyContent: "center", color: C.gold }}>{icon}</div>
-                  <p style={{ fontSize: 22, fontWeight: 700, color: C.gold, fontFamily: "'Outfit', sans-serif" }}>{val}</p>
-                  <p style={{ fontSize: 11, color: C.textMuted, marginTop: 2 }}>{label}</p>
+                <div
+                  key={label}
+                  style={{
+                    padding: "14px 20px",
+                    textAlign: "center",
+                    borderRight:
+                      i < arr.length - 1 ? `1px solid ${C.border}` : "none",
+                    minWidth: 120,
+                  }}
+                >
+                  <div
+                    style={{
+                      marginBottom: 4,
+                      display: "flex",
+                      justifyContent: "center",
+                      color: C.gold,
+                    }}
+                  >
+                    {icon}
+                  </div>
+                  <p
+                    style={{
+                      fontSize: 22,
+                      fontWeight: 700,
+                      color: C.gold,
+                      fontFamily: "'Outfit', sans-serif",
+                    }}
+                  >
+                    {val}
+                  </p>
+                  <p style={{ fontSize: 11, color: C.textMuted, marginTop: 2 }}>
+                    {label}
+                  </p>
                 </div>
               ))}
             </div>
@@ -2164,15 +5702,67 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
             {/* Favorite Genres */}
             {favGenres.length > 0 && (
               <div style={{ width: "100%", maxWidth: 400, marginBottom: 20 }}>
-                <p style={{ fontSize: 12, fontWeight: 600, color: C.textMuted, marginBottom: 10, textTransform: "uppercase", letterSpacing: 0.5 }}>Gêneros Favoritos</p>
-                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                  {favGenres.map(g => (
-                    <div key={g.name} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <span style={{ fontSize: 12, color: C.text, fontWeight: 500, width: 90, textAlign: "right", flexShrink: 0 }}>{g.name}</span>
-                      <div style={{ flex: 1, height: 6, background: C.bgDeep, borderRadius: 3, overflow: "hidden" }}>
-                        <div style={{ width: `${g.pct}%`, height: "100%", background: `linear-gradient(90deg, ${C.goldDim}, ${C.gold})`, borderRadius: 3, transition: "width 0.5s ease" }} />
+                <p
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: C.textMuted,
+                    marginBottom: 10,
+                    textTransform: "uppercase",
+                    letterSpacing: 0.5,
+                  }}
+                >
+                  Gêneros Favoritos
+                </p>
+                <div
+                  style={{ display: "flex", flexDirection: "column", gap: 6 }}
+                >
+                  {favGenres.map((g) => (
+                    <div
+                      key={g.name}
+                      style={{ display: "flex", alignItems: "center", gap: 10 }}
+                    >
+                      <span
+                        style={{
+                          fontSize: 12,
+                          color: C.text,
+                          fontWeight: 500,
+                          width: 90,
+                          textAlign: "right",
+                          flexShrink: 0,
+                        }}
+                      >
+                        {g.name}
+                      </span>
+                      <div
+                        style={{
+                          flex: 1,
+                          height: 6,
+                          background: C.bgDeep,
+                          borderRadius: 3,
+                          overflow: "hidden",
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: `${g.pct}%`,
+                            height: "100%",
+                            background: `linear-gradient(90deg, ${C.goldDim}, ${C.gold})`,
+                            borderRadius: 3,
+                            transition: "width 0.5s ease",
+                          }}
+                        />
                       </div>
-                      <span style={{ fontSize: 11, color: C.textDim, width: 20, flexShrink: 0 }}>{g.count}</span>
+                      <span
+                        style={{
+                          fontSize: 11,
+                          color: C.textDim,
+                          width: 20,
+                          flexShrink: 0,
+                        }}
+                      >
+                        {g.count}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -2180,27 +5770,85 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
             )}
 
             {/* Actions */}
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center" }}>
+            <div
+              style={{
+                display: "flex",
+                gap: 10,
+                flexWrap: "wrap",
+                justifyContent: "center",
+              }}
+            >
               {isViewingOther ? (
                 <>
-                  <Btn variant="ghost" size="sm" onClick={() => { setPage("profile"); }}>← Voltar</Btn>
-                  {isFriend(viewUserId) && <Badge color="rgba(34,197,94,0.15)" textColor={C.success}>Amigo</Badge>}
-                  <Btn variant={isFollowing(viewUserId) ? "ghost" : "gold"} size="sm" onClick={() => {
-                    if (isFollowing(viewUserId)) unfollow(viewUserId);
-                    else follow(viewUserId);
-                  }}>
-                    {isFollowing(viewUserId) ? <><UserCheckIcon /> Seguindo</> : <><UserPlusIcon /> Seguir</>}
+                  <Btn
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setPage("profile");
+                    }}
+                  >
+                    ← Voltar
+                  </Btn>
+                  {isFriend(viewUserId) && (
+                    <Badge color="rgba(34,197,94,0.15)" textColor={C.success}>
+                      Amigo
+                    </Badge>
+                  )}
+                  <Btn
+                    variant={isFollowing(viewUserId) ? "ghost" : "gold"}
+                    size="sm"
+                    onClick={() => {
+                      if (isFollowing(viewUserId)) unfollow(viewUserId);
+                      else follow(viewUserId);
+                    }}
+                  >
+                    {isFollowing(viewUserId) ? (
+                      <>
+                        <UserCheckIcon /> Seguindo
+                      </>
+                    ) : (
+                      <>
+                        <UserPlusIcon /> Seguir
+                      </>
+                    )}
                   </Btn>
                 </>
               ) : (
                 <>
-                  <Btn variant="gold" size="sm" onClick={() => setShowEditModal(true)}><Pencil size={13} /> Editar Perfil</Btn>
-                  <Btn variant="ghost" size="sm" onClick={() => {
-                    const url = `${window.location.origin}?profile=${currentUserId}`;
-                    navigator.clipboard.writeText(url).then(() => toast.success("Link do perfil copiado!")).catch(() => toast.error("Erro ao copiar"));
-                  }}><Link2 size={13} /> Compartilhar Perfil</Btn>
-                  <Btn variant="ghost" size="sm" onClick={() => setShowImportModal(true)}><Upload size={13} /> Importar Dados</Btn>
-                  <Btn variant="ghost" size="sm" onClick={() => authCtx?.signOut?.()}>Sair da conta</Btn>
+                  <Btn
+                    variant="gold"
+                    size="sm"
+                    onClick={() => setShowEditModal(true)}
+                  >
+                    <Pencil size={13} /> Editar Perfil
+                  </Btn>
+                  <Btn
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      const url = `${window.location.origin}?profile=${currentUserId}`;
+                      navigator.clipboard
+                        .writeText(url)
+                        .then(() => toast.success("Link do perfil copiado!"))
+                        .catch(() => toast.error("Erro ao copiar"));
+                    }}
+                  >
+                    <Link2 size={13} /> Compartilhar Perfil
+                  </Btn>
+                  <Btn
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowImportModal(true)}
+                  >
+                    <Upload size={13} /> Importar Dados
+                  </Btn>
+                  <Btn
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => authCtx?.signOut?.()}
+                  >
+                    Sair da conta
+                  </Btn>
                 </>
               )}
             </div>
@@ -2217,133 +5865,528 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
         )}
 
         {showImportModal && !isViewingOther && (
-          <ImportDataModal userId={currentUserId} onClose={() => setShowImportModal(false)} />
+          <ImportDataModal
+            userId={currentUserId}
+            onClose={() => setShowImportModal(false)}
+          />
         )}
 
         {/* Tabs + View Controls */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 32, marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
-          <div style={{
-            display: "flex", gap: 4,
-            background: C.bgCard, borderRadius: 12, padding: 4,
-            border: `1px solid ${C.border}`,
-          }}>
-            {[["ratings", "Avaliações"], ["watchlist", "Watchlist"]].map(([id, label]) => (
-              <button key={id} onClick={() => setTab(id)} style={{
-                padding: "10px 20px", fontSize: 13, fontWeight: 600,
-                color: tab === id ? C.bgDeep : C.textMuted,
-                background: tab === id ? C.gold : "transparent",
-                borderRadius: 9, transition: "all 0.25s ease",
-                fontFamily: "'DM Sans', sans-serif"
-              }}>{label}</button>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginTop: 32,
+            marginBottom: 24,
+            flexWrap: "wrap",
+            gap: 12,
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              gap: 4,
+              background: C.bgCard,
+              borderRadius: 12,
+              padding: 4,
+              border: `1px solid ${C.border}`,
+            }}
+          >
+            {[
+              ["ratings", "Avaliações"],
+              ["watchlist", "Watchlist"],
+            ].map(([id, label]) => (
+              <button
+                key={id}
+                onClick={() => setTab(id)}
+                style={{
+                  padding: "10px 20px",
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: tab === id ? C.bgDeep : C.textMuted,
+                  background: tab === id ? C.gold : "transparent",
+                  borderRadius: 9,
+                  transition: "all 0.25s ease",
+                  fontFamily: "'DM Sans', sans-serif",
+                }}
+              >
+                {label}
+              </button>
             ))}
           </div>
-          <ViewToolbar viewMode={viewMode} setViewMode={setViewMode} showPerPage={false} />
+          <ViewToolbar
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+            showPerPage={false}
+          />
         </div>
 
         {/* Ratings Tab */}
-        {tab === "ratings" && (
-          viewMode === "list" ? (
+        {tab === "ratings" &&
+          (viewMode === "list" ? (
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-{ratingsLoading ? <Spinner /> : ratings.length > 0 ? ratings.map((r) => (
-                <div key={r.id} style={{
-                  background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 16,
-                  padding: 18, display: "flex", gap: 16, alignItems: "center",
-                  cursor: "pointer", transition: "all 0.2s ease"
-                }}
-                  className="card-hover"
-                  onClick={() => { setSelectedMovie?.({ tmdbId: r.tmdb_id, title: r.title, poster: r.poster_url }); setPage("movie"); }}>
-                  <div style={{ width: 56, height: 84, borderRadius: 10, overflow: "hidden", flexShrink: 0, background: C.bgDeep, border: `1px solid ${C.border}` }}>
-                    {r.poster_url && <img src={r.poster_url} alt={r.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
+              {ratingsLoading ? (
+                <Spinner />
+              ) : ratings.length > 0 ? (
+                ratings.map((r) => (
+                  <div
+                    key={r.id}
+                    style={{
+                      background: C.bgCard,
+                      border: `1px solid ${C.border}`,
+                      borderRadius: 16,
+                      padding: 18,
+                      display: "flex",
+                      gap: 16,
+                      alignItems: "center",
+                      cursor: "pointer",
+                      transition: "all 0.2s ease",
+                    }}
+                    className="card-hover"
+                    onClick={() => {
+                      setSelectedMovie?.({
+                        tmdbId: r.tmdb_id,
+                        title: r.title,
+                        poster: r.poster_url,
+                      });
+                      setPage("movie");
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: 56,
+                        height: 84,
+                        borderRadius: 10,
+                        overflow: "hidden",
+                        flexShrink: 0,
+                        background: C.bgDeep,
+                        border: `1px solid ${C.border}`,
+                      }}
+                    >
+                      {r.poster_url && (
+                        <img
+                          src={r.poster_url}
+                          alt={r.title}
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                          }}
+                        />
+                      )}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p
+                        style={{
+                          fontSize: 15,
+                          fontWeight: 600,
+                          color: C.text,
+                          marginBottom: 4,
+                        }}
+                      >
+                        {r.title || `TMDb #${r.tmdb_id}`}
+                      </p>
+                      <StarRating value={Number(r.rating)} size={14} />
+                      {r.review && (
+                        <p
+                          style={{
+                            fontSize: 12,
+                            color: C.textMuted,
+                            lineHeight: 1.5,
+                            fontStyle: "italic",
+                            marginTop: 6,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            display: "-webkit-box",
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: "vertical",
+                          }}
+                        >
+                          "{r.review}"
+                        </p>
+                      )}
+                    </div>
+                    <p
+                      style={{
+                        fontSize: 11,
+                        color: C.textDim,
+                        whiteSpace: "nowrap",
+                        flexShrink: 0,
+                      }}
+                    >
+                      {new Date(r.updated_at).toLocaleDateString("pt-BR")}
+                    </p>
                   </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontSize: 15, fontWeight: 600, color: C.text, marginBottom: 4 }}>{r.title || `TMDb #${r.tmdb_id}`}</p>
-                    <StarRating value={Number(r.rating)} size={14} />
-                    {r.review && <p style={{ fontSize: 12, color: C.textMuted, lineHeight: 1.5, fontStyle: "italic", marginTop: 6, overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>"{r.review}"</p>}
-                  </div>
-                  <p style={{ fontSize: 11, color: C.textDim, whiteSpace: "nowrap", flexShrink: 0 }}>{new Date(r.updated_at).toLocaleDateString("pt-BR")}</p>
-                </div>
-              )) : (
+                ))
+              ) : (
                 <div style={{ textAlign: "center", padding: "60px 20px" }}>
-                  <div style={{ marginBottom: 12 }}><Film size={40} style={{ color: "#4A5E72" }} /></div>
-                  <p style={{ color: C.textMuted, fontSize: 15, fontWeight: 500 }}>Nenhuma avaliação ainda</p>
-                  <p style={{ color: C.textDim, fontSize: 13, marginTop: 4 }}>Avalie filmes para construir seu histórico!</p>
+                  <div style={{ marginBottom: 12 }}>
+                    <Film size={40} style={{ color: "#4A5E72" }} />
+                  </div>
+                  <p
+                    style={{
+                      color: C.textMuted,
+                      fontSize: 15,
+                      fontWeight: 500,
+                    }}
+                  >
+                    Nenhuma avaliação ainda
+                  </p>
+                  <p style={{ color: C.textDim, fontSize: 13, marginTop: 4 }}>
+                    Avalie filmes para construir seu histórico!
+                  </p>
                 </div>
               )}
             </div>
           ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: 18 }}>
-{ratingsLoading ? <Spinner /> : ratings.length > 0 ? ratings.map((r) => (
-                <div key={r.id} className="movie-card-netflix" style={{ position: "relative" }}>
-                  <div style={{ cursor: "pointer" }} onClick={() => { setSelectedMovie?.({ tmdbId: r.tmdb_id, title: r.title, poster: r.poster_url }); setPage("movie"); }}>
-                    <div style={{ width: "100%", aspectRatio: "2/3", borderRadius: 12, overflow: "hidden", background: C.bgCard, border: `1px solid ${C.border}` }}>
-                      {r.poster_url ? <img src={r.poster_url} alt={r.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", opacity: 0.3 }}><Film size={32} /></div>}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))",
+                gap: 18,
+              }}
+            >
+              {ratingsLoading ? (
+                <Spinner />
+              ) : ratings.length > 0 ? (
+                ratings.map((r) => (
+                  <div
+                    key={r.id}
+                    className="movie-card-netflix"
+                    style={{ position: "relative" }}
+                  >
+                    <div
+                      style={{ cursor: "pointer" }}
+                      onClick={() => {
+                        setSelectedMovie?.({
+                          tmdbId: r.tmdb_id,
+                          title: r.title,
+                          poster: r.poster_url,
+                        });
+                        setPage("movie");
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: "100%",
+                          aspectRatio: "2/3",
+                          borderRadius: 12,
+                          overflow: "hidden",
+                          background: C.bgCard,
+                          border: `1px solid ${C.border}`,
+                        }}
+                      >
+                        {r.poster_url ? (
+                          <img
+                            src={r.poster_url}
+                            alt={r.title}
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
+                            }}
+                          />
+                        ) : (
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              height: "100%",
+                              opacity: 0.3,
+                            }}
+                          >
+                            <Film size={32} />
+                          </div>
+                        )}
+                      </div>
+                      <p
+                        style={{
+                          fontSize: 12,
+                          fontWeight: 500,
+                          color: C.text,
+                          marginTop: 8,
+                          lineHeight: 1.3,
+                        }}
+                      >
+                        {r.title}
+                      </p>
+                      <div style={{ marginTop: 4 }}>
+                        <StarRating value={Number(r.rating)} size={12} />
+                      </div>
                     </div>
-                    <p style={{ fontSize: 12, fontWeight: 500, color: C.text, marginTop: 8, lineHeight: 1.3 }}>{r.title}</p>
-                    <div style={{ marginTop: 4 }}><StarRating value={Number(r.rating)} size={12} /></div>
                   </div>
-                </div>
-              )) : (
-                <div style={{ textAlign: "center", padding: "60px 20px", gridColumn: "1/-1" }}>
-                  <div style={{ marginBottom: 12 }}><Film size={40} style={{ color: "#4A5E72" }} /></div>
-                  <p style={{ color: C.textMuted, fontSize: 15, fontWeight: 500 }}>Nenhuma avaliação ainda</p>
+                ))
+              ) : (
+                <div
+                  style={{
+                    textAlign: "center",
+                    padding: "60px 20px",
+                    gridColumn: "1/-1",
+                  }}
+                >
+                  <div style={{ marginBottom: 12 }}>
+                    <Film size={40} style={{ color: "#4A5E72" }} />
+                  </div>
+                  <p
+                    style={{
+                      color: C.textMuted,
+                      fontSize: 15,
+                      fontWeight: 500,
+                    }}
+                  >
+                    Nenhuma avaliação ainda
+                  </p>
                 </div>
               )}
             </div>
-          )
-        )}
+          ))}
 
         {/* Watchlist Tab */}
-        {tab === "watchlist" && (
-          viewMode === "grid" ? (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: 18 }}>
-{wlLoading ? <Spinner /> : watchlistItems.length > 0 ? watchlistItems.map((item) => (
-                <div key={item.id} style={{ position: "relative" }} className="movie-card-netflix">
-                  <div style={{ cursor: "pointer" }} onClick={() => { setSelectedMovie?.({ tmdbId: item.tmdb_id, title: item.title, poster: item.poster_url }); setPage("movie"); }}>
-                    <div style={{ width: "100%", aspectRatio: "2/3", borderRadius: 12, overflow: "hidden", background: C.bgCard, border: `1px solid ${C.border}` }}>
-                      {item.poster_url ? <img src={item.poster_url} alt={item.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", opacity: 0.3 }}><Film size={32} /></div>}
+        {tab === "watchlist" &&
+          (viewMode === "grid" ? (
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))",
+                gap: 18,
+              }}
+            >
+              {wlLoading ? (
+                <Spinner />
+              ) : watchlistItems.length > 0 ? (
+                watchlistItems.map((item) => (
+                  <div
+                    key={item.id}
+                    style={{ position: "relative" }}
+                    className="movie-card-netflix"
+                  >
+                    <div
+                      style={{ cursor: "pointer" }}
+                      onClick={() => {
+                        setSelectedMovie?.({
+                          tmdbId: item.tmdb_id,
+                          title: item.title,
+                          poster: item.poster_url,
+                        });
+                        setPage("movie");
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: "100%",
+                          aspectRatio: "2/3",
+                          borderRadius: 12,
+                          overflow: "hidden",
+                          background: C.bgCard,
+                          border: `1px solid ${C.border}`,
+                        }}
+                      >
+                        {item.poster_url ? (
+                          <img
+                            src={item.poster_url}
+                            alt={item.title}
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
+                            }}
+                          />
+                        ) : (
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              height: "100%",
+                              opacity: 0.3,
+                            }}
+                          >
+                            <Film size={32} />
+                          </div>
+                        )}
+                      </div>
+                      <p
+                        style={{
+                          fontSize: 12,
+                          fontWeight: 500,
+                          color: C.text,
+                          marginTop: 8,
+                          lineHeight: 1.3,
+                        }}
+                      >
+                        {item.title}
+                      </p>
                     </div>
-                    <p style={{ fontSize: 12, fontWeight: 500, color: C.text, marginTop: 8, lineHeight: 1.3 }}>{item.title}</p>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeFromWl(item.tmdb_id);
+                      }}
+                      style={{
+                        position: "absolute",
+                        top: 8,
+                        right: 8,
+                        width: 26,
+                        height: 26,
+                        borderRadius: "50%",
+                        background: "rgba(0,0,0,0.7)",
+                        backdropFilter: "blur(4px)",
+                        color: "#ef4444",
+                        fontSize: 12,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        border: "1px solid rgba(239,68,68,0.3)",
+                        cursor: "pointer",
+                        transition: "all 0.2s",
+                      }}
+                    >
+                      ✕
+                    </button>
                   </div>
-                  <button onClick={(e) => { e.stopPropagation(); removeFromWl(item.tmdb_id); }}
-                    style={{ position: "absolute", top: 8, right: 8, width: 26, height: 26, borderRadius: "50%", background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)", color: "#ef4444", fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid rgba(239,68,68,0.3)", cursor: "pointer", transition: "all 0.2s" }}>✕</button>
-                </div>
-              )) : (
-                <div style={{ textAlign: "center", padding: "60px 20px", gridColumn: "1/-1" }}>
-                  <div style={{ marginBottom: 12 }}><ClipboardList size={40} style={{ color: "#4A5E72" }} /></div>
-                  <p style={{ color: C.textMuted, fontSize: 15, fontWeight: 500 }}>Sua lista está vazia</p>
-                  <p style={{ color: C.textDim, fontSize: 13, marginTop: 4 }}>Adicione filmes para assistir depois!</p>
+                ))
+              ) : (
+                <div
+                  style={{
+                    textAlign: "center",
+                    padding: "60px 20px",
+                    gridColumn: "1/-1",
+                  }}
+                >
+                  <div style={{ marginBottom: 12 }}>
+                    <ClipboardList size={40} style={{ color: "#4A5E72" }} />
+                  </div>
+                  <p
+                    style={{
+                      color: C.textMuted,
+                      fontSize: 15,
+                      fontWeight: 500,
+                    }}
+                  >
+                    Sua lista está vazia
+                  </p>
+                  <p style={{ color: C.textDim, fontSize: 13, marginTop: 4 }}>
+                    Adicione filmes para assistir depois!
+                  </p>
                 </div>
               )}
             </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-{wlLoading ? <Spinner /> : watchlistItems.length > 0 ? watchlistItems.map((item) => (
-                <div key={item.id} style={{
-                  background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 16,
-                  padding: 18, display: "flex", gap: 16, alignItems: "center",
-                  cursor: "pointer", transition: "all 0.2s ease"
-                }}
-                  className="card-hover"
-                  onClick={() => { setSelectedMovie?.({ tmdbId: item.tmdb_id, title: item.title, poster: item.poster_url }); setPage("movie"); }}>
-                  <div style={{ width: 56, height: 84, borderRadius: 10, overflow: "hidden", flexShrink: 0, background: C.bgDeep, border: `1px solid ${C.border}` }}>
-                    {item.poster_url ? <img src={item.poster_url} alt={item.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", opacity: 0.3 }}><Film size={24} /></div>}
+              {wlLoading ? (
+                <Spinner />
+              ) : watchlistItems.length > 0 ? (
+                watchlistItems.map((item) => (
+                  <div
+                    key={item.id}
+                    style={{
+                      background: C.bgCard,
+                      border: `1px solid ${C.border}`,
+                      borderRadius: 16,
+                      padding: 18,
+                      display: "flex",
+                      gap: 16,
+                      alignItems: "center",
+                      cursor: "pointer",
+                      transition: "all 0.2s ease",
+                    }}
+                    className="card-hover"
+                    onClick={() => {
+                      setSelectedMovie?.({
+                        tmdbId: item.tmdb_id,
+                        title: item.title,
+                        poster: item.poster_url,
+                      });
+                      setPage("movie");
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: 56,
+                        height: 84,
+                        borderRadius: 10,
+                        overflow: "hidden",
+                        flexShrink: 0,
+                        background: C.bgDeep,
+                        border: `1px solid ${C.border}`,
+                      }}
+                    >
+                      {item.poster_url ? (
+                        <img
+                          src={item.poster_url}
+                          alt={item.title}
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                          }}
+                        />
+                      ) : (
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            height: "100%",
+                            opacity: 0.3,
+                          }}
+                        >
+                          <Film size={24} />
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p
+                        style={{ fontSize: 15, fontWeight: 600, color: C.text }}
+                      >
+                        {item.title}
+                      </p>
+                      <p
+                        style={{ fontSize: 11, color: C.textDim, marginTop: 4 }}
+                      >
+                        Adicionado em{" "}
+                        {new Date(item.created_at).toLocaleDateString("pt-BR")}
+                      </p>
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeFromWl(item.tmdb_id);
+                      }}
+                      style={{
+                        padding: "6px 12px",
+                        borderRadius: 8,
+                        background: "transparent",
+                        border: `1px solid ${C.border}`,
+                        color: C.red,
+                        fontSize: 11,
+                        cursor: "pointer",
+                      }}
+                    >
+                      Remover
+                    </button>
                   </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontSize: 15, fontWeight: 600, color: C.text }}>{item.title}</p>
-                    <p style={{ fontSize: 11, color: C.textDim, marginTop: 4 }}>Adicionado em {new Date(item.created_at).toLocaleDateString("pt-BR")}</p>
-                  </div>
-                  <button onClick={(e) => { e.stopPropagation(); removeFromWl(item.tmdb_id); }}
-                    style={{ padding: "6px 12px", borderRadius: 8, background: "transparent", border: `1px solid ${C.border}`, color: C.red, fontSize: 11, cursor: "pointer" }}>Remover</button>
-                </div>
-              )) : (
+                ))
+              ) : (
                 <div style={{ textAlign: "center", padding: "60px 20px" }}>
-                  <div style={{ marginBottom: 12 }}><ClipboardList size={40} style={{ color: "#4A5E72" }} /></div>
-                  <p style={{ color: C.textMuted, fontSize: 15, fontWeight: 500 }}>Sua lista está vazia</p>
+                  <div style={{ marginBottom: 12 }}>
+                    <ClipboardList size={40} style={{ color: "#4A5E72" }} />
+                  </div>
+                  <p
+                    style={{
+                      color: C.textMuted,
+                      fontSize: 15,
+                      fontWeight: 500,
+                    }}
+                  >
+                    Sua lista está vazia
+                  </p>
                 </div>
               )}
             </div>
-          )
-        )}
+          ))}
       </div>
     </div>
   );
@@ -2369,33 +6412,63 @@ function useFollows(userId) {
     setLoading(false);
   }, [userId]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const follow = async (targetId) => {
     if (!userId) return;
-    await supabase.from("follows").insert({ follower_id: userId, following_id: targetId });
+    await supabase
+      .from("follows")
+      .insert({ follower_id: userId, following_id: targetId });
     await load();
     // Check mutual follow → auto-create friendship
-    const { data: mutual } = await supabase.from("follows")
-      .select("id").eq("follower_id", targetId).eq("following_id", userId).limit(1);
+    const { data: mutual } = await supabase
+      .from("follows")
+      .select("id")
+      .eq("follower_id", targetId)
+      .eq("following_id", userId)
+      .limit(1);
     if (mutual && mutual.length > 0) {
       const [a, b] = [userId, targetId].sort();
-      await supabase.from("friendships").upsert({ user_a_id: a, user_b_id: b }, { onConflict: "user_a_id,user_b_id" });
+      await supabase
+        .from("friendships")
+        .upsert(
+          { user_a_id: a, user_b_id: b },
+          { onConflict: "user_a_id,user_b_id" },
+        );
     }
   };
 
   const unfollow = async (targetId) => {
     if (!userId) return;
-    await supabase.from("follows").delete().eq("follower_id", userId).eq("following_id", targetId);
+    await supabase
+      .from("follows")
+      .delete()
+      .eq("follower_id", userId)
+      .eq("following_id", targetId);
     await load();
     // Remove friendship if no longer mutual
     const [a, b] = [userId, targetId].sort();
-    await supabase.from("friendships").delete().eq("user_a_id", a).eq("user_b_id", b);
+    await supabase
+      .from("friendships")
+      .delete()
+      .eq("user_a_id", a)
+      .eq("user_b_id", b);
   };
 
-  const isFollowing = (targetId) => following.some(f => f.following_id === targetId);
+  const isFollowing = (targetId) =>
+    following.some((f) => f.following_id === targetId);
 
-  return { following, followers, loading, follow, unfollow, isFollowing, reload: load };
+  return {
+    following,
+    followers,
+    loading,
+    follow,
+    unfollow,
+    isFollowing,
+    reload: load,
+  };
 }
 
 function useFriendLinks(userId) {
@@ -2403,15 +6476,25 @@ function useFriendLinks(userId) {
 
   const load = useCallback(async () => {
     if (!userId) return;
-    const { data } = await supabase.from("friend_links").select("*").eq("user_id", userId).order("created_at", { ascending: false });
+    const { data } = await supabase
+      .from("friend_links")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
     setLinks(data || []);
   }, [userId]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const createLink = async () => {
     if (!userId) return null;
-    const { data, error } = await supabase.from("friend_links").insert({ user_id: userId }).select().single();
+    const { data, error } = await supabase
+      .from("friend_links")
+      .insert({ user_id: userId })
+      .select()
+      .single();
     if (error) throw error;
     await load();
     return data;
@@ -2430,21 +6513,33 @@ function useFriendships(userId) {
 
   const load = useCallback(async () => {
     if (!userId) return;
-    const { data } = await supabase.from("friendships").select("*").or(`user_a_id.eq.${userId},user_b_id.eq.${userId}`);
+    const { data } = await supabase
+      .from("friendships")
+      .select("*")
+      .or(`user_a_id.eq.${userId},user_b_id.eq.${userId}`);
     setFriends(data || []);
   }, [userId]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
-  const isFriend = (targetId) => friends.some(f => (f.user_a_id === targetId || f.user_b_id === targetId));
+  const isFriend = (targetId) =>
+    friends.some((f) => f.user_a_id === targetId || f.user_b_id === targetId);
 
   const acceptLink = async (code) => {
     if (!userId) return;
     // Find the link
-    const { data: linkData } = await supabase.from("friend_links").select("*").eq("code", code).single();
+    const { data: linkData } = await supabase
+      .from("friend_links")
+      .select("*")
+      .eq("code", code)
+      .single();
     if (!linkData) throw new Error("Link inválido");
-    if (linkData.user_id === userId) throw new Error("Você não pode adicionar a si mesmo");
-    if (linkData.expires_at && new Date(linkData.expires_at) < new Date()) throw new Error("Link expirado");
+    if (linkData.user_id === userId)
+      throw new Error("Você não pode adicionar a si mesmo");
+    if (linkData.expires_at && new Date(linkData.expires_at) < new Date())
+      throw new Error("Link expirado");
     // Check if already friends
     if (isFriend(linkData.user_id)) throw new Error("Vocês já são amigos");
     // Create friendship (order by smallest first to avoid duplicates)
@@ -2459,7 +6554,12 @@ function useFriendships(userId) {
 // ─────────────────────────────────────────────
 //  FRIENDS PAGE
 // ─────────────────────────────────────────────
-function FriendsPage({ setPage, setSelectedMovie, auth: authCtx, onViewProfile }) {
+function FriendsPage({
+  setPage,
+  setSelectedMovie,
+  auth: authCtx,
+  onViewProfile,
+}) {
   const userId = authCtx?.user?.id;
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
@@ -2470,50 +6570,90 @@ function FriendsPage({ setPage, setSelectedMovie, auth: authCtx, onViewProfile }
   const [friendProfiles, setFriendProfiles] = useState([]);
   const debRef = useRef(null);
 
-  const { following, followers, follow, unfollow, isFollowing, loading: followsLoading } = useFollows(userId);
+  const {
+    following,
+    followers,
+    follow,
+    unfollow,
+    isFollowing,
+    loading: followsLoading,
+  } = useFollows(userId);
   const { friends, isFriend } = useFriendships(userId);
 
   // Search users
   useEffect(() => {
     if (debRef.current) clearTimeout(debRef.current);
-    if (!searchQuery.trim()) { setSearchResults([]); return; }
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      return;
+    }
     debRef.current = setTimeout(async () => {
       setSearchLoading(true);
       const q = searchQuery.trim().toLowerCase();
-      const { data } = await supabase.from("profiles").select("*")
+      const { data } = await supabase
+        .from("profiles")
+        .select("*")
         .or(`display_name.ilike.%${q}%,username.ilike.%${q}%`)
         .neq("user_id", userId)
         .limit(20);
       setSearchResults(data || []);
       setSearchLoading(false);
     }, 400);
-    return () => { if (debRef.current) clearTimeout(debRef.current); };
+    return () => {
+      if (debRef.current) clearTimeout(debRef.current);
+    };
   }, [searchQuery, userId]);
 
   // Load following profiles
   useEffect(() => {
-    if (!following.length) { setFollowingProfiles([]); return; }
-    const ids = following.map(f => f.following_id);
-    supabase.from("profiles").select("*").in("user_id", ids).then(({ data }) => setFollowingProfiles(data || []));
+    if (!following.length) {
+      setFollowingProfiles([]);
+      return;
+    }
+    const ids = following.map((f) => f.following_id);
+    supabase
+      .from("profiles")
+      .select("*")
+      .in("user_id", ids)
+      .then(({ data }) => setFollowingProfiles(data || []));
   }, [following]);
 
   // Load follower profiles
   useEffect(() => {
-    if (!followers.length) { setFollowerProfiles([]); return; }
-    const ids = followers.map(f => f.follower_id);
-    supabase.from("profiles").select("*").in("user_id", ids).then(({ data }) => setFollowerProfiles(data || []));
+    if (!followers.length) {
+      setFollowerProfiles([]);
+      return;
+    }
+    const ids = followers.map((f) => f.follower_id);
+    supabase
+      .from("profiles")
+      .select("*")
+      .in("user_id", ids)
+      .then(({ data }) => setFollowerProfiles(data || []));
   }, [followers]);
 
   // Load friend profiles
   useEffect(() => {
-    if (!friends.length) { setFriendProfiles([]); return; }
-    const ids = friends.map(f => f.user_a_id === userId ? f.user_b_id : f.user_a_id);
-    supabase.from("profiles").select("*").in("user_id", ids).then(({ data }) => setFriendProfiles(data || []));
+    if (!friends.length) {
+      setFriendProfiles([]);
+      return;
+    }
+    const ids = friends.map((f) =>
+      f.user_a_id === userId ? f.user_b_id : f.user_a_id,
+    );
+    supabase
+      .from("profiles")
+      .select("*")
+      .in("user_id", ids)
+      .then(({ data }) => setFriendProfiles(data || []));
   }, [friends, userId]);
 
   const handleShareProfile = () => {
     const url = `${window.location.origin}?profile=${userId}`;
-    navigator.clipboard.writeText(url).then(() => toast.success("Link do perfil copiado!")).catch(() => toast.error("Erro ao copiar"));
+    navigator.clipboard
+      .writeText(url)
+      .then(() => toast.success("Link do perfil copiado!"))
+      .catch(() => toast.error("Erro ao copiar"));
   };
 
   const getAvatarForProfile = (profile) => {
@@ -2528,40 +6668,110 @@ function FriendsPage({ setPage, setSelectedMovie, auth: authCtx, onViewProfile }
     const isFriendUser = isFriend(profile.user_id);
 
     return (
-      <div style={{
-        background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 16,
-        padding: 20, display: "flex", alignItems: "center", gap: 16, transition: "all 0.2s",
-        cursor: "pointer"
-      }} className="card-hover" onClick={() => onViewProfile?.(profile.user_id)}>
+      <div
+        style={{
+          background: C.bgCard,
+          border: `1px solid ${C.border}`,
+          borderRadius: 16,
+          padding: 20,
+          display: "flex",
+          alignItems: "center",
+          gap: 16,
+          transition: "all 0.2s",
+          cursor: "pointer",
+        }}
+        className="card-hover"
+        onClick={() => onViewProfile?.(profile.user_id)}
+      >
         {/* Avatar */}
-        <div style={{
-          width: 52, height: 52, borderRadius: "50%", flexShrink: 0, overflow: "hidden",
-          background: avatarUrl ? "transparent" : `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`,
-          border: `2px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "center",
-          fontSize: 16, fontWeight: 700, color: C.bgDeep, fontFamily: "'Outfit', sans-serif"
-        }}>
-          {avatarUrl ? <img src={avatarUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : initials}
+        <div
+          style={{
+            width: 52,
+            height: 52,
+            borderRadius: "50%",
+            flexShrink: 0,
+            overflow: "hidden",
+            background: avatarUrl
+              ? "transparent"
+              : `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`,
+            border: `2px solid ${C.border}`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 16,
+            fontWeight: 700,
+            color: C.bgDeep,
+            fontFamily: "'Outfit', sans-serif",
+          }}
+        >
+          {avatarUrl ? (
+            <img
+              src={avatarUrl}
+              alt=""
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
+          ) : (
+            initials
+          )}
         </div>
 
         {/* Info */}
         <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{ fontSize: 15, fontWeight: 600, color: C.text, marginBottom: 2 }}>{profile.display_name || "Sem nome"}</p>
-          {profile.username && <p style={{ fontSize: 12, color: C.gold }}>@{profile.username}</p>}
-          {profile.bio && <p style={{ fontSize: 12, color: C.textMuted, marginTop: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{profile.bio}</p>}
+          <p
+            style={{
+              fontSize: 15,
+              fontWeight: 600,
+              color: C.text,
+              marginBottom: 2,
+            }}
+          >
+            {profile.display_name || "Sem nome"}
+          </p>
+          {profile.username && (
+            <p style={{ fontSize: 12, color: C.gold }}>@{profile.username}</p>
+          )}
+          {profile.bio && (
+            <p
+              style={{
+                fontSize: 12,
+                color: C.textMuted,
+                marginTop: 4,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {profile.bio}
+            </p>
+          )}
         </div>
 
         {/* Actions */}
         {showActions && profile.user_id !== userId && (
           <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
             {isFriendUser && (
-              <Badge color="rgba(34,197,94,0.15)" textColor={C.success}>Amigo</Badge>
+              <Badge color="rgba(34,197,94,0.15)" textColor={C.success}>
+                Amigo
+              </Badge>
             )}
-            <Btn variant={isFollowingUser ? "ghost" : "gold"} size="sm" onClick={(e) => {
-              e.stopPropagation();
-              if (isFollowingUser) unfollow(profile.user_id);
-              else follow(profile.user_id);
-            }}>
-              {isFollowingUser ? <><UserCheckIcon /> Seguindo</> : <><UserPlusIcon /> Seguir</>}
+            <Btn
+              variant={isFollowingUser ? "ghost" : "gold"}
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (isFollowingUser) unfollow(profile.user_id);
+                else follow(profile.user_id);
+              }}
+            >
+              {isFollowingUser ? (
+                <>
+                  <UserCheckIcon /> Seguindo
+                </>
+              ) : (
+                <>
+                  <UserPlusIcon /> Seguir
+                </>
+              )}
             </Btn>
           </div>
         )}
@@ -2574,36 +6784,89 @@ function FriendsPage({ setPage, setSelectedMovie, auth: authCtx, onViewProfile }
       <div style={{ maxWidth: 800, margin: "0 auto", padding: "0 28px" }}>
         {/* Header */}
         <div style={{ marginBottom: 28 }}>
-          <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 26, fontWeight: 700, color: C.text, marginBottom: 6 }}>
+          <h1
+            style={{
+              fontFamily: "'Outfit', sans-serif",
+              fontSize: 26,
+              fontWeight: 700,
+              color: C.text,
+              marginBottom: 6,
+            }}
+          >
             <span style={{ color: C.gold }}>Amigos</span> & Social
           </h1>
-          <p style={{ color: C.textMuted, fontSize: 13 }}>Encontre pessoas, siga e adicione amigos</p>
+          <p style={{ color: C.textMuted, fontSize: 13 }}>
+            Encontre pessoas, siga e adicione amigos
+          </p>
         </div>
 
         {/* Share Profile Section */}
-        <div style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 16, padding: 22, marginBottom: 24 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+        <div
+          style={{
+            background: C.bgCard,
+            border: `1px solid ${C.border}`,
+            borderRadius: 16,
+            padding: 22,
+            marginBottom: 24,
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              marginBottom: 10,
+            }}
+          >
             <LinkIcon />
-            <h3 style={{ fontSize: 14, fontWeight: 600, color: C.text }}>Compartilhar Perfil</h3>
+            <h3 style={{ fontSize: 14, fontWeight: 600, color: C.text }}>
+              Compartilhar Perfil
+            </h3>
           </div>
-          <p style={{ fontSize: 12, color: C.textMuted, marginBottom: 14 }}>Envie o link do seu perfil para que amigos possam te encontrar e seguir.</p>
-          <Btn variant="gold" size="sm" onClick={handleShareProfile}><Link2 size={13} /> Copiar Link do Perfil</Btn>
+          <p style={{ fontSize: 12, color: C.textMuted, marginBottom: 14 }}>
+            Envie o link do seu perfil para que amigos possam te encontrar e
+            seguir.
+          </p>
+          <Btn variant="gold" size="sm" onClick={handleShareProfile}>
+            <Link2 size={13} /> Copiar Link do Perfil
+          </Btn>
         </div>
 
         {/* Tabs */}
-        <div style={{ display: "flex", gap: 4, marginBottom: 20, background: C.bgCard, borderRadius: 12, padding: 3, border: `1px solid ${C.border}` }}>
+        <div
+          style={{
+            display: "flex",
+            gap: 4,
+            marginBottom: 20,
+            background: C.bgCard,
+            borderRadius: 12,
+            padding: 3,
+            border: `1px solid ${C.border}`,
+          }}
+        >
           {[
             ["search", "Buscar"],
             ["following", `Seguindo (${following.length})`],
             ["followers", `Seguidores (${followers.length})`],
             ["friends", `Amigos (${friends.length})`],
           ].map(([id, label]) => (
-            <button key={id} onClick={() => setTab(id)} style={{
-              flex: 1, padding: "9px 14px", borderRadius: 10, fontSize: 12, fontWeight: 600,
-              color: tab === id ? C.bgDeep : C.textMuted,
-              background: tab === id ? C.gold : "transparent",
-              transition: "all 0.2s", whiteSpace: "nowrap"
-            }}>{label}</button>
+            <button
+              key={id}
+              onClick={() => setTab(id)}
+              style={{
+                flex: 1,
+                padding: "9px 14px",
+                borderRadius: 10,
+                fontSize: 12,
+                fontWeight: 600,
+                color: tab === id ? C.bgDeep : C.textMuted,
+                background: tab === id ? C.gold : "transparent",
+                transition: "all 0.2s",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {label}
+            </button>
           ))}
         </div>
 
@@ -2611,34 +6874,85 @@ function FriendsPage({ setPage, setSelectedMovie, auth: authCtx, onViewProfile }
         {tab === "search" && (
           <div>
             <div style={{ position: "relative", marginBottom: 20 }}>
-              <div style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}><SearchSVG size={15} /></div>
-              <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+              <div
+                style={{
+                  position: "absolute",
+                  left: 14,
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  pointerEvents: "none",
+                }}
+              >
+                <SearchSVG size={15} />
+              </div>
+              <input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Buscar por nome ou username..."
                 style={{
-                  width: "100%", padding: "14px 14px 14px 40px", borderRadius: 12,
-                  background: C.bgCard, border: `1px solid ${C.border}`, color: C.text,
-                  fontSize: 14, outline: "none", transition: "border-color 0.2s"
+                  width: "100%",
+                  padding: "14px 14px 14px 40px",
+                  borderRadius: 12,
+                  background: C.bgCard,
+                  border: `1px solid ${C.border}`,
+                  color: C.text,
+                  fontSize: 14,
+                  outline: "none",
+                  transition: "border-color 0.2s",
                 }}
-                onFocus={e => e.target.style.borderColor = C.gold}
-                onBlur={e => e.target.style.borderColor = C.border} />
+                onFocus={(e) => (e.target.style.borderColor = C.gold)}
+                onBlur={(e) => (e.target.style.borderColor = C.border)}
+              />
             </div>
 
             {searchLoading ? (
-              <div style={{ display: "flex", justifyContent: "center", padding: "40px 0" }}><Spinner size={28} /></div>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  padding: "40px 0",
+                }}
+              >
+                <Spinner size={28} />
+              </div>
             ) : searchResults.length > 0 ? (
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                {searchResults.map(p => <UserCard key={p.id} profile={p} />)}
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: 12 }}
+              >
+                {searchResults.map((p) => (
+                  <UserCard key={p.id} profile={p} />
+                ))}
               </div>
             ) : searchQuery ? (
-              <div style={{ textAlign: "center", padding: "60px 0", color: C.textDim }}>
-                <div style={{ marginBottom: 12 }}><Search size={32} style={{ color: "#4A5E72" }} /></div>
+              <div
+                style={{
+                  textAlign: "center",
+                  padding: "60px 0",
+                  color: C.textDim,
+                }}
+              >
+                <div style={{ marginBottom: 12 }}>
+                  <Search size={32} style={{ color: "#4A5E72" }} />
+                </div>
                 <p style={{ fontSize: 14 }}>Nenhum usuário encontrado</p>
               </div>
             ) : (
-              <div style={{ textAlign: "center", padding: "60px 0", color: C.textDim }}>
-                <div style={{ marginBottom: 12 }}><Users size={40} style={{ color: "#4A5E72" }} /></div>
-                <p style={{ fontSize: 14, marginBottom: 4 }}>Busque por nome ou username</p>
-                <p style={{ fontSize: 12 }}>para encontrar e seguir outros cinéfilos</p>
+              <div
+                style={{
+                  textAlign: "center",
+                  padding: "60px 0",
+                  color: C.textDim,
+                }}
+              >
+                <div style={{ marginBottom: 12 }}>
+                  <Users size={40} style={{ color: "#4A5E72" }} />
+                </div>
+                <p style={{ fontSize: 14, marginBottom: 4 }}>
+                  Busque por nome ou username
+                </p>
+                <p style={{ fontSize: 12 }}>
+                  para encontrar e seguir outros cinéfilos
+                </p>
               </div>
             )}
           </div>
@@ -2648,16 +6962,38 @@ function FriendsPage({ setPage, setSelectedMovie, auth: authCtx, onViewProfile }
         {tab === "following" && (
           <div>
             {followsLoading ? (
-              <div style={{ display: "flex", justifyContent: "center", padding: "40px 0" }}><Spinner size={28} /></div>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  padding: "40px 0",
+                }}
+              >
+                <Spinner size={28} />
+              </div>
             ) : followingProfiles.length > 0 ? (
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                {followingProfiles.map(p => <UserCard key={p.id} profile={p} />)}
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: 12 }}
+              >
+                {followingProfiles.map((p) => (
+                  <UserCard key={p.id} profile={p} />
+                ))}
               </div>
             ) : (
-              <div style={{ textAlign: "center", padding: "60px 0", color: C.textDim }}>
-                <div style={{ marginBottom: 12 }}><UserRound size={40} style={{ color: "#4A5E72" }} /></div>
+              <div
+                style={{
+                  textAlign: "center",
+                  padding: "60px 0",
+                  color: C.textDim,
+                }}
+              >
+                <div style={{ marginBottom: 12 }}>
+                  <UserRound size={40} style={{ color: "#4A5E72" }} />
+                </div>
                 <p style={{ fontSize: 14 }}>Você ainda não segue ninguém</p>
-                <p style={{ fontSize: 12, marginTop: 4 }}>Busque usuários e comece a seguir!</p>
+                <p style={{ fontSize: 12, marginTop: 4 }}>
+                  Busque usuários e comece a seguir!
+                </p>
               </div>
             )}
           </div>
@@ -2667,16 +7003,38 @@ function FriendsPage({ setPage, setSelectedMovie, auth: authCtx, onViewProfile }
         {tab === "followers" && (
           <div>
             {followsLoading ? (
-              <div style={{ display: "flex", justifyContent: "center", padding: "40px 0" }}><Spinner size={28} /></div>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  padding: "40px 0",
+                }}
+              >
+                <Spinner size={28} />
+              </div>
             ) : followerProfiles.length > 0 ? (
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                {followerProfiles.map(p => <UserCard key={p.id} profile={p} />)}
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: 12 }}
+              >
+                {followerProfiles.map((p) => (
+                  <UserCard key={p.id} profile={p} />
+                ))}
               </div>
             ) : (
-              <div style={{ textAlign: "center", padding: "60px 0", color: C.textDim }}>
-                <div style={{ marginBottom: 12 }}><UserRound size={40} style={{ color: "#4A5E72" }} /></div>
+              <div
+                style={{
+                  textAlign: "center",
+                  padding: "60px 0",
+                  color: C.textDim,
+                }}
+              >
+                <div style={{ marginBottom: 12 }}>
+                  <UserRound size={40} style={{ color: "#4A5E72" }} />
+                </div>
                 <p style={{ fontSize: 14 }}>Nenhum seguidor ainda</p>
-                <p style={{ fontSize: 12, marginTop: 4 }}>Compartilhe seu perfil para ganhar seguidores!</p>
+                <p style={{ fontSize: 12, marginTop: 4 }}>
+                  Compartilhe seu perfil para ganhar seguidores!
+                </p>
               </div>
             )}
           </div>
@@ -2686,14 +7044,28 @@ function FriendsPage({ setPage, setSelectedMovie, auth: authCtx, onViewProfile }
         {tab === "friends" && (
           <div>
             {friendProfiles.length > 0 ? (
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                {friendProfiles.map(p => <UserCard key={p.id} profile={p} />)}
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: 12 }}
+              >
+                {friendProfiles.map((p) => (
+                  <UserCard key={p.id} profile={p} />
+                ))}
               </div>
             ) : (
-              <div style={{ textAlign: "center", padding: "60px 0", color: C.textDim }}>
-                <div style={{ marginBottom: 12 }}><Handshake size={40} style={{ color: "#4A5E72" }} /></div>
+              <div
+                style={{
+                  textAlign: "center",
+                  padding: "60px 0",
+                  color: C.textDim,
+                }}
+              >
+                <div style={{ marginBottom: 12 }}>
+                  <Handshake size={40} style={{ color: "#4A5E72" }} />
+                </div>
                 <p style={{ fontSize: 14 }}>Nenhum amigo ainda</p>
-                <p style={{ fontSize: 12, marginTop: 4 }}>Gere um link de amizade e envie para seus amigos!</p>
+                <p style={{ fontSize: 12, marginTop: 4 }}>
+                  Gere um link de amizade e envie para seus amigos!
+                </p>
               </div>
             )}
           </div>
@@ -2713,54 +7085,134 @@ function useClubs(userId) {
   const load = useCallback(async () => {
     if (!userId) return;
     setLoading(true);
-    const { data: memberships } = await supabase.from("club_members").select("club_id").eq("user_id", userId);
+    const { data: memberships } = await supabase
+      .from("club_members")
+      .select("club_id")
+      .eq("user_id", userId);
     if (memberships?.length) {
-      const clubIds = memberships.map(m => m.club_id);
-      const { data: clubsData } = await supabase.from("clubs").select("*").in("id", clubIds).order("created_at", { ascending: false });
-      const enriched = await Promise.all((clubsData || []).map(async (club) => {
-        const [{ data: members }, { data: movies }] = await Promise.all([
-          supabase.from("club_members").select("user_id, role").eq("club_id", club.id),
-          supabase.from("club_movies").select("id, tmdb_id").eq("club_id", club.id),
-        ]);
-        const memberIds = (members || []).map(m => m.user_id);
-        const { data: profiles } = await supabase.from("profiles").select("*").in("user_id", memberIds);
-        return { ...club, members: (members || []).map(m => ({ ...m, profile: (profiles || []).find(p => p.user_id === m.user_id) })), movieCount: (movies || []).length, movieIds: [...new Set((movies || []).map(m => m.tmdb_id))].slice(0, 5) };
-      }));
+      const clubIds = memberships.map((m) => m.club_id);
+      const { data: clubsData } = await supabase
+        .from("clubs")
+        .select("*")
+        .in("id", clubIds)
+        .order("created_at", { ascending: false });
+      const enriched = await Promise.all(
+        (clubsData || []).map(async (club) => {
+          const [{ data: members }, { data: movies }] = await Promise.all([
+            supabase
+              .from("club_members")
+              .select("user_id, role")
+              .eq("club_id", club.id),
+            supabase
+              .from("club_movies")
+              .select("id, tmdb_id")
+              .eq("club_id", club.id),
+          ]);
+          const memberIds = (members || []).map((m) => m.user_id);
+          const { data: profiles } = await supabase
+            .from("profiles")
+            .select("*")
+            .in("user_id", memberIds);
+          return {
+            ...club,
+            members: (members || []).map((m) => ({
+              ...m,
+              profile: (profiles || []).find((p) => p.user_id === m.user_id),
+            })),
+            movieCount: (movies || []).length,
+            movieIds: [...new Set((movies || []).map((m) => m.tmdb_id))].slice(
+              0,
+              5,
+            ),
+          };
+        }),
+      );
       setClubs(enriched);
-    } else { setClubs([]); }
-    const { data: invData } = await supabase.from("club_invites").select("*, clubs(name)").eq("invited_user_id", userId).eq("status", "pending");
+    } else {
+      setClubs([]);
+    }
+    const { data: invData } = await supabase
+      .from("club_invites")
+      .select("*, clubs(name)")
+      .eq("invited_user_id", userId)
+      .eq("status", "pending");
     setInvites(invData || []);
     setLoading(false);
   }, [userId]);
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
   const createClub = async (name, description) => {
-    const { data: club, error } = await supabase.from("clubs").insert({ name, description, created_by: userId }).select().single();
+    const { data: club, error } = await supabase
+      .from("clubs")
+      .insert({ name, description, created_by: userId })
+      .select()
+      .single();
     if (error) throw error;
-    await supabase.from("club_members").insert({ club_id: club.id, user_id: userId, role: "owner" });
-    await load(); return club;
+    await supabase
+      .from("club_members")
+      .insert({ club_id: club.id, user_id: userId, role: "owner" });
+    await load();
+    return club;
   };
   const inviteFriend = async (clubId, friendUserId) => {
-    const { error } = await supabase.from("club_invites").insert({ club_id: clubId, invited_by: userId, invited_user_id: friendUserId });
+    const { error } = await supabase
+      .from("club_invites")
+      .insert({
+        club_id: clubId,
+        invited_by: userId,
+        invited_user_id: friendUserId,
+      });
     if (error) throw error;
   };
   const acceptInvite = async (inviteId, clubId) => {
-    await supabase.from("club_invites").update({ status: "accepted" }).eq("id", inviteId);
-    await supabase.from("club_members").insert({ club_id: clubId, user_id: userId });
+    await supabase
+      .from("club_invites")
+      .update({ status: "accepted" })
+      .eq("id", inviteId);
+    await supabase
+      .from("club_members")
+      .insert({ club_id: clubId, user_id: userId });
     await load();
   };
   const declineInvite = async (inviteId) => {
-    await supabase.from("club_invites").update({ status: "declined" }).eq("id", inviteId);
+    await supabase
+      .from("club_invites")
+      .update({ status: "declined" })
+      .eq("id", inviteId);
     await load();
   };
   const joinByCode = async (code) => {
-    const { data: club } = await supabase.from("clubs").select("id").eq("invite_code", code).single();
+    const { data: club } = await supabase
+      .from("clubs")
+      .select("id")
+      .eq("invite_code", code)
+      .single();
     if (!club) throw new Error("Código inválido");
-    const { data: existing } = await supabase.from("club_members").select("id").eq("club_id", club.id).eq("user_id", userId).maybeSingle();
+    const { data: existing } = await supabase
+      .from("club_members")
+      .select("id")
+      .eq("club_id", club.id)
+      .eq("user_id", userId)
+      .maybeSingle();
     if (existing) throw new Error("Você já é membro deste club");
-    await supabase.from("club_members").insert({ club_id: club.id, user_id: userId });
-    await load(); return club;
+    await supabase
+      .from("club_members")
+      .insert({ club_id: club.id, user_id: userId });
+    await load();
+    return club;
   };
-  return { clubs, loading, invites, createClub, inviteFriend, acceptInvite, declineInvite, joinByCode, reload: load };
+  return {
+    clubs,
+    loading,
+    invites,
+    createClub,
+    inviteFriend,
+    acceptInvite,
+    declineInvite,
+    joinByCode,
+    reload: load,
+  };
 }
 
 function useClubDetail(clubId, userId) {
@@ -2771,26 +7223,63 @@ function useClubDetail(clubId, userId) {
   const load = useCallback(async () => {
     if (!clubId) return;
     setLoading(true);
-    const [{ data: clubData }, { data: membersData }, { data: moviesData }] = await Promise.all([
-      supabase.from("clubs").select("*").eq("id", clubId).single(),
-      supabase.from("club_members").select("*").eq("club_id", clubId),
-      supabase.from("club_movies").select("*").eq("club_id", clubId).order("added_at", { ascending: false }),
-    ]);
+    const [{ data: clubData }, { data: membersData }, { data: moviesData }] =
+      await Promise.all([
+        supabase.from("clubs").select("*").eq("id", clubId).single(),
+        supabase.from("club_members").select("*").eq("club_id", clubId),
+        supabase
+          .from("club_movies")
+          .select("*")
+          .eq("club_id", clubId)
+          .order("added_at", { ascending: false }),
+      ]);
     setClub(clubData);
-    const memberIds = (membersData || []).map(m => m.user_id);
-    const { data: profiles } = await supabase.from("profiles").select("*").in("user_id", memberIds);
-    setMembers((membersData || []).map(m => ({ ...m, profile: (profiles || []).find(p => p.user_id === m.user_id) })));
+    const memberIds = (membersData || []).map((m) => m.user_id);
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("*")
+      .in("user_id", memberIds);
+    setMembers(
+      (membersData || []).map((m) => ({
+        ...m,
+        profile: (profiles || []).find((p) => p.user_id === m.user_id),
+      })),
+    );
     setMovies(moviesData || []);
     setLoading(false);
   }, [clubId]);
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
   const addMovie = async (tmdbId, title, posterUrl) => {
-    const { error } = await supabase.from("club_movies").insert({ club_id: clubId, user_id: userId, tmdb_id: tmdbId, title, poster_url: posterUrl });
-    if (error) { if (error.code === "23505") throw new Error("Filme já adicionado"); throw error; }
+    const { error } = await supabase
+      .from("club_movies")
+      .insert({
+        club_id: clubId,
+        user_id: userId,
+        tmdb_id: tmdbId,
+        title,
+        poster_url: posterUrl,
+      });
+    if (error) {
+      if (error.code === "23505") throw new Error("Filme já adicionado");
+      throw error;
+    }
     await load();
   };
-  const removeMovie = async (movieId) => { await supabase.from("club_movies").delete().eq("id", movieId); await load(); };
-  return { club, members, movies, loading, addMovie, removeMovie, reload: load };
+  const removeMovie = async (movieId) => {
+    await supabase.from("club_movies").delete().eq("id", movieId);
+    await load();
+  };
+  return {
+    club,
+    members,
+    movies,
+    loading,
+    addMovie,
+    removeMovie,
+    reload: load,
+  };
 }
 
 // ─────────────────────────────────────────────
@@ -2798,77 +7287,393 @@ function useClubDetail(clubId, userId) {
 // ─────────────────────────────────────────────
 function GroupsPage({ setPage, setSelectedGroup, auth: authCtx }) {
   const userId = authCtx?.user?.id;
-  const { clubs, loading, invites, createClub, joinByCode, acceptInvite, declineInvite } = useClubs(userId);
+  const {
+    clubs,
+    loading,
+    invites,
+    createClub,
+    joinByCode,
+    acceptInvite,
+    declineInvite,
+  } = useClubs(userId);
   const [showCreate, setShowCreate] = useState(false);
   const [name, setName] = useState("");
   const [desc, setDesc] = useState("");
   const [joinCode, setJoinCode] = useState("");
   const [creating, setCreating] = useState(false);
   const handleCreate = async () => {
-    if (!name.trim()) { toast.error("Dê um nome ao seu club"); return; }
+    if (!name.trim()) {
+      toast.error("Dê um nome ao seu club");
+      return;
+    }
     setCreating(true);
-    try { await createClub(name.trim(), desc.trim() || null); toast.success("Club criado!"); setName(""); setDesc(""); setShowCreate(false); } catch (e) { toast.error("Erro ao criar club"); }
+    try {
+      await createClub(name.trim(), desc.trim() || null);
+      toast.success("Club criado!");
+      setName("");
+      setDesc("");
+      setShowCreate(false);
+    } catch (e) {
+      toast.error("Erro ao criar club");
+    }
     setCreating(false);
   };
   const handleJoin = async () => {
     if (!joinCode.trim()) return;
-    try { let code = joinCode.trim(); if (code.includes("club=")) code = new URL(code).searchParams.get("club") || code; await joinByCode(code); toast.success("Você entrou no club!"); setJoinCode(""); } catch (e) { toast.error(e.message || "Erro ao entrar no club"); }
+    try {
+      let code = joinCode.trim();
+      if (code.includes("club="))
+        code = new URL(code).searchParams.get("club") || code;
+      await joinByCode(code);
+      toast.success("Você entrou no club!");
+      setJoinCode("");
+    } catch (e) {
+      toast.error(e.message || "Erro ao entrar no club");
+    }
   };
   return (
     <div style={{ paddingTop: 80, paddingBottom: 60 }}>
       <div style={{ maxWidth: 960, margin: "0 auto", padding: "0 32px" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 30 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 30,
+          }}
+        >
           <div>
-            <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 26, fontWeight: 700, color: C.text, marginBottom: 6 }}>Meus <span style={{ color: C.gold }}>Clubs</span></h1>
-            <p style={{ color: C.textMuted, fontSize: 13 }}>Listas colaborativas com seus amigos</p>
+            <h1
+              style={{
+                fontFamily: "'Outfit', sans-serif",
+                fontSize: 26,
+                fontWeight: 700,
+                color: C.text,
+                marginBottom: 6,
+              }}
+            >
+              Meus <span style={{ color: C.gold }}>Clubs</span>
+            </h1>
+            <p style={{ color: C.textMuted, fontSize: 13 }}>
+              Listas colaborativas com seus amigos
+            </p>
           </div>
-          <Btn variant="gold" onClick={() => setShowCreate(true)}><PlusIcon /> Criar Club</Btn>
+          <Btn variant="gold" onClick={() => setShowCreate(true)}>
+            <PlusIcon /> Criar Club
+          </Btn>
         </div>
         {invites.length > 0 && (
           <div style={{ marginBottom: 24 }}>
-            <p style={{ fontSize: 13, fontWeight: 600, color: C.gold, marginBottom: 12 }}>Convites Pendentes</p>
+            <p
+              style={{
+                fontSize: 13,
+                fontWeight: 600,
+                color: C.gold,
+                marginBottom: 12,
+              }}
+            >
+              Convites Pendentes
+            </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {invites.map(inv => (
-                <div key={inv.id} style={{ background: C.bgCard, border: `1px solid ${C.gold}40`, borderRadius: 14, padding: 18, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <div><p style={{ fontSize: 14, fontWeight: 600, color: C.text }}>{inv.clubs?.name || "Club"}</p><p style={{ fontSize: 11, color: C.textMuted }}>Você foi convidado para este club</p></div>
-                  <div style={{ display: "flex", gap: 8 }}><Btn variant="gold" size="sm" onClick={() => acceptInvite(inv.id, inv.club_id)}>Aceitar</Btn><Btn variant="ghost" size="sm" onClick={() => declineInvite(inv.id)}>Recusar</Btn></div>
+              {invites.map((inv) => (
+                <div
+                  key={inv.id}
+                  style={{
+                    background: C.bgCard,
+                    border: `1px solid ${C.gold}40`,
+                    borderRadius: 14,
+                    padding: 18,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <div>
+                    <p style={{ fontSize: 14, fontWeight: 600, color: C.text }}>
+                      {inv.clubs?.name || "Club"}
+                    </p>
+                    <p style={{ fontSize: 11, color: C.textMuted }}>
+                      Você foi convidado para este club
+                    </p>
+                  </div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <Btn
+                      variant="gold"
+                      size="sm"
+                      onClick={() => acceptInvite(inv.id, inv.club_id)}
+                    >
+                      Aceitar
+                    </Btn>
+                    <Btn
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => declineInvite(inv.id)}
+                    >
+                      Recusar
+                    </Btn>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
         )}
-        <div style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 16, padding: 20, marginBottom: 24 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}><Link2 size={14} /><h3 style={{ fontSize: 14, fontWeight: 600, color: C.text }}>Entrar em um Club</h3></div>
+        <div
+          style={{
+            background: C.bgCard,
+            border: `1px solid ${C.border}`,
+            borderRadius: 16,
+            padding: 20,
+            marginBottom: 24,
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              marginBottom: 10,
+            }}
+          >
+            <Link2 size={14} />
+            <h3 style={{ fontSize: 14, fontWeight: 600, color: C.text }}>
+              Entrar em um Club
+            </h3>
+          </div>
           <div style={{ display: "flex", gap: 8 }}>
-            <input value={joinCode} onChange={e => setJoinCode(e.target.value)} placeholder="Cole o link ou código do club..." style={{ flex: 1, padding: "10px 14px", borderRadius: 8, background: C.bgDeep, border: `1px solid ${C.border}`, color: C.text, fontSize: 13, outline: "none" }} onFocus={e => e.target.style.borderColor = C.gold} onBlur={e => e.target.style.borderColor = C.border} onKeyDown={e => { if (e.key === "Enter") handleJoin(); }} />
-            <Btn variant="gold" size="sm" onClick={handleJoin} disabled={!joinCode.trim()}>Entrar</Btn>
+            <input
+              value={joinCode}
+              onChange={(e) => setJoinCode(e.target.value)}
+              placeholder="Cole o link ou código do club..."
+              style={{
+                flex: 1,
+                padding: "10px 14px",
+                borderRadius: 8,
+                background: C.bgDeep,
+                border: `1px solid ${C.border}`,
+                color: C.text,
+                fontSize: 13,
+                outline: "none",
+              }}
+              onFocus={(e) => (e.target.style.borderColor = C.gold)}
+              onBlur={(e) => (e.target.style.borderColor = C.border)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleJoin();
+              }}
+            />
+            <Btn
+              variant="gold"
+              size="sm"
+              onClick={handleJoin}
+              disabled={!joinCode.trim()}
+            >
+              Entrar
+            </Btn>
           </div>
         </div>
         {showCreate && (
-          <div style={{ background: C.bgCard, border: `1px solid ${C.gold}`, borderRadius: 16, padding: 24, marginBottom: 22, animation: "fadeIn 0.2s ease" }}>
-            <h3 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 15, color: C.text, marginBottom: 16 }}>Novo Club</h3>
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}><TextInput label="Nome do Club" value={name} onChange={setName} placeholder="Ex: Cinéphiles de Sexta" /><TextInput label="Descrição (opcional)" value={desc} onChange={setDesc} placeholder="Do que se trata esse club?" /></div>
-            <div style={{ display: "flex", gap: 10, marginTop: 14 }}><Btn variant="gold" size="sm" onClick={handleCreate} disabled={creating}>{creating ? <Spinner size={14} /> : "Criar"}</Btn><Btn variant="ghost" size="sm" onClick={() => setShowCreate(false)}>Cancelar</Btn></div>
+          <div
+            style={{
+              background: C.bgCard,
+              border: `1px solid ${C.gold}`,
+              borderRadius: 16,
+              padding: 24,
+              marginBottom: 22,
+              animation: "fadeIn 0.2s ease",
+            }}
+          >
+            <h3
+              style={{
+                fontFamily: "'Outfit', sans-serif",
+                fontSize: 15,
+                color: C.text,
+                marginBottom: 16,
+              }}
+            >
+              Novo Club
+            </h3>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <TextInput
+                label="Nome do Club"
+                value={name}
+                onChange={setName}
+                placeholder="Ex: Cinéphiles de Sexta"
+              />
+              <TextInput
+                label="Descrição (opcional)"
+                value={desc}
+                onChange={setDesc}
+                placeholder="Do que se trata esse club?"
+              />
+            </div>
+            <div style={{ display: "flex", gap: 10, marginTop: 14 }}>
+              <Btn
+                variant="gold"
+                size="sm"
+                onClick={handleCreate}
+                disabled={creating}
+              >
+                {creating ? <Spinner size={14} /> : "Criar"}
+              </Btn>
+              <Btn
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowCreate(false)}
+              >
+                Cancelar
+              </Btn>
+            </div>
           </div>
         )}
         {loading ? (
-          <div style={{ display: "flex", justifyContent: "center", padding: "60px 0" }}><Spinner size={32} /></div>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              padding: "60px 0",
+            }}
+          >
+            <Spinner size={32} />
+          </div>
         ) : clubs.length > 0 ? (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 16 }}>
-            {clubs.map(club => (
-              <div key={club.id} className="card-hover" onClick={() => { setSelectedGroup(club); setPage("group"); }} style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 16, padding: 22, cursor: "pointer" }}>
-                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 14 }}>
-                  <div><h3 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 15, fontWeight: 600, color: C.text, marginBottom: 4 }}>{club.name}</h3><p style={{ fontSize: 12, color: C.textDim }}>{club.members.length} membros · {club.movieCount} filmes</p></div>
-                  <div style={{ display: "flex" }}>{club.members.slice(0, 3).map((m, i) => { const ini = (m.profile?.display_name || "?").slice(0, 2).toUpperCase(); return (<div key={m.user_id} style={{ marginLeft: i > 0 ? -8 : 0, zIndex: 3 - i, width: 28, height: 28, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, color: C.bgDeep, background: m.profile?.avatar_url ? "transparent" : `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`, border: `2px solid ${C.bgCard}`, overflow: "hidden" }}>{m.profile?.avatar_url ? <img src={m.profile.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : ini}</div>); })}</div>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+              gap: 16,
+            }}
+          >
+            {clubs.map((club) => (
+              <div
+                key={club.id}
+                className="card-hover"
+                onClick={() => {
+                  setSelectedGroup(club);
+                  setPage("group");
+                }}
+                style={{
+                  background: C.bgCard,
+                  border: `1px solid ${C.border}`,
+                  borderRadius: 16,
+                  padding: 22,
+                  cursor: "pointer",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "flex-start",
+                    justifyContent: "space-between",
+                    marginBottom: 14,
+                  }}
+                >
+                  <div>
+                    <h3
+                      style={{
+                        fontFamily: "'Outfit', sans-serif",
+                        fontSize: 15,
+                        fontWeight: 600,
+                        color: C.text,
+                        marginBottom: 4,
+                      }}
+                    >
+                      {club.name}
+                    </h3>
+                    <p style={{ fontSize: 12, color: C.textDim }}>
+                      {club.members.length} membros · {club.movieCount} filmes
+                    </p>
+                  </div>
+                  <div style={{ display: "flex" }}>
+                    {club.members.slice(0, 3).map((m, i) => {
+                      const ini = (m.profile?.display_name || "?")
+                        .slice(0, 2)
+                        .toUpperCase();
+                      return (
+                        <div
+                          key={m.user_id}
+                          style={{
+                            marginLeft: i > 0 ? -8 : 0,
+                            zIndex: 3 - i,
+                            width: 28,
+                            height: 28,
+                            borderRadius: "50%",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontSize: 10,
+                            fontWeight: 700,
+                            color: C.bgDeep,
+                            background: m.profile?.avatar_url
+                              ? "transparent"
+                              : `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`,
+                            border: `2px solid ${C.bgCard}`,
+                            overflow: "hidden",
+                          }}
+                        >
+                          {m.profile?.avatar_url ? (
+                            <img
+                              src={m.profile.avatar_url}
+                              alt=""
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                              }}
+                            />
+                          ) : (
+                            ini
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
-                {club.movieIds.length > 0 && (<div style={{ display: "flex", gap: 6, marginBottom: 14 }}>{club.movieIds.map(id => (<div key={id} style={{ width: 46, height: 68, borderRadius: 5, background: C.bgDeep, border: `1px solid ${C.border}`, overflow: "hidden", flexShrink: 0 }}><MiniPoster tmdbId={id} /></div>))}</div>)}
-                {club.description && <p style={{ fontSize: 12, color: C.textMuted, marginBottom: 10 }}>{club.description}</p>}
+                {club.movieIds.length > 0 && (
+                  <div style={{ display: "flex", gap: 6, marginBottom: 14 }}>
+                    {club.movieIds.map((id) => (
+                      <div
+                        key={id}
+                        style={{
+                          width: 46,
+                          height: 68,
+                          borderRadius: 5,
+                          background: C.bgDeep,
+                          border: `1px solid ${C.border}`,
+                          overflow: "hidden",
+                          flexShrink: 0,
+                        }}
+                      >
+                        <MiniPoster tmdbId={id} />
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {club.description && (
+                  <p
+                    style={{
+                      fontSize: 12,
+                      color: C.textMuted,
+                      marginBottom: 10,
+                    }}
+                  >
+                    {club.description}
+                  </p>
+                )}
                 <span style={{ fontSize: 12, color: C.gold }}>Ver club →</span>
               </div>
             ))}
           </div>
         ) : (
-          <div style={{ textAlign: "center", padding: "60px 20px" }}><div style={{ marginBottom: 12 }}><Film size={40} style={{ color: "#4A5E72" }} /></div><p style={{ color: C.textMuted, fontSize: 15, fontWeight: 500 }}>Nenhum club ainda</p><p style={{ color: C.textDim, fontSize: 13, marginTop: 4 }}>Crie um club e convide seus amigos!</p></div>
+          <div style={{ textAlign: "center", padding: "60px 20px" }}>
+            <div style={{ marginBottom: 12 }}>
+              <Film size={40} style={{ color: "#4A5E72" }} />
+            </div>
+            <p style={{ color: C.textMuted, fontSize: 15, fontWeight: 500 }}>
+              Nenhum club ainda
+            </p>
+            <p style={{ color: C.textDim, fontSize: 13, marginTop: 4 }}>
+              Crie um club e convide seus amigos!
+            </p>
+          </div>
         )}
       </div>
     </div>
@@ -2881,7 +7686,8 @@ function GroupsPage({ setPage, setSelectedGroup, auth: authCtx }) {
 function GroupPage({ group, setPage, setSelectedMovie, auth: authCtx }) {
   const userId = authCtx?.user?.id;
   const clubId = group?.id;
-  const { club, members, movies, loading, addMovie, removeMovie } = useClubDetail(clubId, userId);
+  const { club, members, movies, loading, addMovie, removeMovie } =
+    useClubDetail(clubId, userId);
   const { friends } = useFriendships(userId);
   const { inviteFriend } = useClubs(userId);
   const [showAddMovie, setShowAddMovie] = useState(false);
@@ -2893,55 +7699,797 @@ function GroupPage({ group, setPage, setSelectedMovie, auth: authCtx }) {
   const debRef = useRef(null);
   useEffect(() => {
     if (!showInvite || !friends.length || !userId) return;
-    const friendIds = friends.map(f => f.user_a_id === userId ? f.user_b_id : f.user_a_id);
-    const existingMemberIds = members.map(m => m.user_id);
-    const invitableIds = friendIds.filter(id => !existingMemberIds.includes(id));
-    if (!invitableIds.length) { setFriendProfiles([]); return; }
-    supabase.from("profiles").select("*").in("user_id", invitableIds).then(({ data }) => setFriendProfiles(data || []));
+    const friendIds = friends.map((f) =>
+      f.user_a_id === userId ? f.user_b_id : f.user_a_id,
+    );
+    const existingMemberIds = members.map((m) => m.user_id);
+    const invitableIds = friendIds.filter(
+      (id) => !existingMemberIds.includes(id),
+    );
+    if (!invitableIds.length) {
+      setFriendProfiles([]);
+      return;
+    }
+    supabase
+      .from("profiles")
+      .select("*")
+      .in("user_id", invitableIds)
+      .then(({ data }) => setFriendProfiles(data || []));
   }, [showInvite, friends, members, userId]);
   useEffect(() => {
     if (debRef.current) clearTimeout(debRef.current);
-    if (!movieSearch.trim()) { setMovieResults([]); return; }
-    debRef.current = setTimeout(async () => { setMovieSearchLoading(true); const res = await tmdb.search(movieSearch.trim()); setMovieResults((res?.results || []).slice(0, 10)); setMovieSearchLoading(false); }, 400);
-    return () => { if (debRef.current) clearTimeout(debRef.current); };
+    if (!movieSearch.trim()) {
+      setMovieResults([]);
+      return;
+    }
+    debRef.current = setTimeout(async () => {
+      setMovieSearchLoading(true);
+      const res = await tmdb.search(movieSearch.trim());
+      setMovieResults((res?.results || []).slice(0, 10));
+      setMovieSearchLoading(false);
+    }, 400);
+    return () => {
+      if (debRef.current) clearTimeout(debRef.current);
+    };
   }, [movieSearch]);
-  const handleAddMovie = async (movie) => { try { await addMovie(movie.id, movie.title, tmdb.poster(movie.poster_path)); toast.success(`"${movie.title}" adicionado ao club!`); } catch (e) { toast.error(e.message || "Erro ao adicionar filme"); } };
-  const handleInvite = async (friendUserId) => { try { await inviteFriend(clubId, friendUserId); toast.success("Convite enviado!"); } catch (e) { if (e.code === "23505") toast.info("Convite já enviado"); else toast.error("Erro ao enviar convite"); } };
-  const handleCopyInviteLink = () => { if (!club) return; const url = `${window.location.origin}?club=${club.invite_code}`; navigator.clipboard.writeText(url).then(() => toast.success("Link do club copiado!")).catch(() => toast.error("Erro ao copiar")); };
+  const handleAddMovie = async (movie) => {
+    try {
+      await addMovie(movie.id, movie.title, tmdb.poster(movie.poster_path));
+      toast.success(`"${movie.title}" adicionado ao club!`);
+    } catch (e) {
+      toast.error(e.message || "Erro ao adicionar filme");
+    }
+  };
+  const handleInvite = async (friendUserId) => {
+    try {
+      await inviteFriend(clubId, friendUserId);
+      toast.success("Convite enviado!");
+    } catch (e) {
+      if (e.code === "23505") toast.info("Convite já enviado");
+      else toast.error("Erro ao enviar convite");
+    }
+  };
+  const handleCopyInviteLink = () => {
+    if (!club) return;
+    const url = `${window.location.origin}?club=${club.invite_code}`;
+    navigator.clipboard
+      .writeText(url)
+      .then(() => toast.success("Link do club copiado!"))
+      .catch(() => toast.error("Erro ao copiar"));
+  };
   if (!clubId) return null;
   const moviesByUser = {};
-  movies.forEach(m => { if (!moviesByUser[m.user_id]) moviesByUser[m.user_id] = []; moviesByUser[m.user_id].push(m); });
+  movies.forEach((m) => {
+    if (!moviesByUser[m.user_id]) moviesByUser[m.user_id] = [];
+    moviesByUser[m.user_id].push(m);
+  });
   return (
     <div style={{ paddingTop: 80, paddingBottom: 60 }}>
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 32px" }}>
-        {loading ? (<div style={{ display: "flex", justifyContent: "center", padding: "60px 0" }}><Spinner size={36} /></div>) : (<>
-            <div style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 20, padding: "26px 28px", marginBottom: 26 }}>
-              <button onClick={() => setPage("groups")} style={{ display: "flex", alignItems: "center", gap: 6, color: C.textMuted, fontSize: 13, marginBottom: 14 }}><BackIcon /> Meus Clubs</button>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
-                <div><h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 24, fontWeight: 700, color: C.text, marginBottom: 4 }}>{club?.name}</h1>{club?.description && <p style={{ fontSize: 13, color: C.textMuted, marginBottom: 8 }}>{club.description}</p>}</div>
-                <div style={{ display: "flex", gap: 8 }}><Btn variant="gold" size="sm" onClick={() => setShowAddMovie(true)}><PlusIcon /> Adicionar Filme</Btn><Btn variant="ghost" size="sm" onClick={() => setShowInvite(true)}><Users size={13} /> Convidar</Btn><Btn variant="ghost" size="sm" onClick={handleCopyInviteLink}><Link2 size={13} /> Link</Btn></div>
+        {loading ? (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              padding: "60px 0",
+            }}
+          >
+            <Spinner size={36} />
+          </div>
+        ) : (
+          <>
+            <div
+              style={{
+                background: C.bgCard,
+                border: `1px solid ${C.border}`,
+                borderRadius: 20,
+                padding: "26px 28px",
+                marginBottom: 26,
+              }}
+            >
+              <button
+                onClick={() => setPage("groups")}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  color: C.textMuted,
+                  fontSize: 13,
+                  marginBottom: 14,
+                }}
+              >
+                <BackIcon /> Meus Clubs
+              </button>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  flexWrap: "wrap",
+                  gap: 12,
+                }}
+              >
+                <div>
+                  <h1
+                    style={{
+                      fontFamily: "'Outfit', sans-serif",
+                      fontSize: 24,
+                      fontWeight: 700,
+                      color: C.text,
+                      marginBottom: 4,
+                    }}
+                  >
+                    {club?.name}
+                  </h1>
+                  {club?.description && (
+                    <p
+                      style={{
+                        fontSize: 13,
+                        color: C.textMuted,
+                        marginBottom: 8,
+                      }}
+                    >
+                      {club.description}
+                    </p>
+                  )}
+                </div>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <Btn
+                    variant="gold"
+                    size="sm"
+                    onClick={() => setShowAddMovie(true)}
+                  >
+                    <PlusIcon /> Adicionar Filme
+                  </Btn>
+                  <Btn
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowInvite(true)}
+                  >
+                    <Users size={13} /> Convidar
+                  </Btn>
+                  <Btn variant="ghost" size="sm" onClick={handleCopyInviteLink}>
+                    <Link2 size={13} /> Link
+                  </Btn>
+                </div>
               </div>
-              <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 14 }}>
-                {members.map(m => { const ini = (m.profile?.display_name || "?").slice(0, 2).toUpperCase(); return (<div key={m.user_id} style={{ display: "flex", alignItems: "center", gap: 6 }}><div style={{ width: 24, height: 24, borderRadius: "50%", overflow: "hidden", background: m.profile?.avatar_url ? "transparent" : `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`, border: `2px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 700, color: C.bgDeep }}>{m.profile?.avatar_url ? <img src={m.profile.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : ini}</div><span style={{ fontSize: 12, color: C.textMuted }}>{m.profile?.display_name || "Membro"}</span>{m.role === "owner" && <span style={{ fontSize: 9, color: C.gold, fontWeight: 600 }}>DONO</span>}</div>); })}
+              <div
+                style={{
+                  display: "flex",
+                  gap: 10,
+                  flexWrap: "wrap",
+                  marginTop: 14,
+                }}
+              >
+                {members.map((m) => {
+                  const ini = (m.profile?.display_name || "?")
+                    .slice(0, 2)
+                    .toUpperCase();
+                  return (
+                    <div
+                      key={m.user_id}
+                      style={{ display: "flex", alignItems: "center", gap: 6 }}
+                    >
+                      <div
+                        style={{
+                          width: 24,
+                          height: 24,
+                          borderRadius: "50%",
+                          overflow: "hidden",
+                          background: m.profile?.avatar_url
+                            ? "transparent"
+                            : `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`,
+                          border: `2px solid ${C.border}`,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: 9,
+                          fontWeight: 700,
+                          color: C.bgDeep,
+                        }}
+                      >
+                        {m.profile?.avatar_url ? (
+                          <img
+                            src={m.profile.avatar_url}
+                            alt=""
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
+                            }}
+                          />
+                        ) : (
+                          ini
+                        )}
+                      </div>
+                      <span style={{ fontSize: 12, color: C.textMuted }}>
+                        {m.profile?.display_name || "Membro"}
+                      </span>
+                      {m.role === "owner" && (
+                        <span
+                          style={{
+                            fontSize: 9,
+                            color: C.gold,
+                            fontWeight: 600,
+                          }}
+                        >
+                          DONO
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
             {movies.length > 0 ? (
-              <div style={{ display: "flex", flexDirection: "column", gap: 40 }}>
-                {members.map(member => { const memberMovies = moviesByUser[member.user_id] || []; if (!memberMovies.length) return null; const ini = (member.profile?.display_name || "?").slice(0, 2).toUpperCase(); return (
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: 40 }}
+              >
+                {members.map((member) => {
+                  const memberMovies = moviesByUser[member.user_id] || [];
+                  if (!memberMovies.length) return null;
+                  const ini = (member.profile?.display_name || "?")
+                    .slice(0, 2)
+                    .toUpperCase();
+                  return (
                     <div key={member.user_id}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16, paddingBottom: 14, borderBottom: `1px solid ${C.border}` }}>
-                        <div style={{ width: 46, height: 46, borderRadius: "50%", overflow: "hidden", background: member.profile?.avatar_url ? "transparent" : `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`, border: `2px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 700, color: C.bgDeep }}>{member.profile?.avatar_url ? <img src={member.profile.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : ini}</div>
-                        <div><h3 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 15, fontWeight: 600, color: C.text, marginBottom: 2 }}>{member.profile?.display_name || "Membro"}</h3><p style={{ fontSize: 12, color: C.textMuted }}>{memberMovies.length} filme{memberMovies.length !== 1 ? "s" : ""}</p></div>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 14,
+                          marginBottom: 16,
+                          paddingBottom: 14,
+                          borderBottom: `1px solid ${C.border}`,
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: 46,
+                            height: 46,
+                            borderRadius: "50%",
+                            overflow: "hidden",
+                            background: member.profile?.avatar_url
+                              ? "transparent"
+                              : `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`,
+                            border: `2px solid ${C.border}`,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontSize: 14,
+                            fontWeight: 700,
+                            color: C.bgDeep,
+                          }}
+                        >
+                          {member.profile?.avatar_url ? (
+                            <img
+                              src={member.profile.avatar_url}
+                              alt=""
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                              }}
+                            />
+                          ) : (
+                            ini
+                          )}
+                        </div>
+                        <div>
+                          <h3
+                            style={{
+                              fontFamily: "'Outfit', sans-serif",
+                              fontSize: 15,
+                              fontWeight: 600,
+                              color: C.text,
+                              marginBottom: 2,
+                            }}
+                          >
+                            {member.profile?.display_name || "Membro"}
+                          </h3>
+                          <p style={{ fontSize: 12, color: C.textMuted }}>
+                            {memberMovies.length} filme
+                            {memberMovies.length !== 1 ? "s" : ""}
+                          </p>
+                        </div>
                       </div>
-                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: 16 }}>
-                        {memberMovies.map(mv => (<div key={mv.id} style={{ position: "relative" }} className="movie-card-netflix"><div style={{ cursor: "pointer" }} onClick={() => { setSelectedMovie({ tmdbId: mv.tmdb_id, title: mv.title, poster: mv.poster_url }); setPage("movie"); }}><div style={{ width: "100%", aspectRatio: "2/3", borderRadius: 12, overflow: "hidden", background: C.bgCard, border: `1px solid ${C.border}` }}>{mv.poster_url ? <img src={mv.poster_url} alt={mv.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", opacity: 0.3 }}><Film size={32} /></div>}</div><p style={{ fontSize: 12, fontWeight: 500, color: C.text, marginTop: 8, lineHeight: 1.3 }}>{mv.title}</p></div>{mv.user_id === userId && (<button onClick={(e) => { e.stopPropagation(); removeMovie(mv.id); }} style={{ position: "absolute", top: 8, right: 8, width: 26, height: 26, borderRadius: "50%", background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)", color: "#ef4444", fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid rgba(239,68,68,0.3)", cursor: "pointer" }}>✕</button>)}</div>))}
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns:
+                            "repeat(auto-fill, minmax(130px, 1fr))",
+                          gap: 16,
+                        }}
+                      >
+                        {memberMovies.map((mv) => (
+                          <div
+                            key={mv.id}
+                            style={{ position: "relative" }}
+                            className="movie-card-netflix"
+                          >
+                            <div
+                              style={{ cursor: "pointer" }}
+                              onClick={() => {
+                                setSelectedMovie({
+                                  tmdbId: mv.tmdb_id,
+                                  title: mv.title,
+                                  poster: mv.poster_url,
+                                });
+                                setPage("movie");
+                              }}
+                            >
+                              <div
+                                style={{
+                                  width: "100%",
+                                  aspectRatio: "2/3",
+                                  borderRadius: 12,
+                                  overflow: "hidden",
+                                  background: C.bgCard,
+                                  border: `1px solid ${C.border}`,
+                                }}
+                              >
+                                {mv.poster_url ? (
+                                  <img
+                                    src={mv.poster_url}
+                                    alt={mv.title}
+                                    style={{
+                                      width: "100%",
+                                      height: "100%",
+                                      objectFit: "cover",
+                                    }}
+                                  />
+                                ) : (
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                      height: "100%",
+                                      opacity: 0.3,
+                                    }}
+                                  >
+                                    <Film size={32} />
+                                  </div>
+                                )}
+                              </div>
+                              <p
+                                style={{
+                                  fontSize: 12,
+                                  fontWeight: 500,
+                                  color: C.text,
+                                  marginTop: 8,
+                                  lineHeight: 1.3,
+                                }}
+                              >
+                                {mv.title}
+                              </p>
+                            </div>
+                            {mv.user_id === userId && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  removeMovie(mv.id);
+                                }}
+                                style={{
+                                  position: "absolute",
+                                  top: 8,
+                                  right: 8,
+                                  width: 26,
+                                  height: 26,
+                                  borderRadius: "50%",
+                                  background: "rgba(0,0,0,0.7)",
+                                  backdropFilter: "blur(4px)",
+                                  color: "#ef4444",
+                                  fontSize: 12,
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  border: "1px solid rgba(239,68,68,0.3)",
+                                  cursor: "pointer",
+                                }}
+                              >
+                                ✕
+                              </button>
+                            )}
+                          </div>
+                        ))}
                       </div>
-                    </div>); })}
+                    </div>
+                  );
+                })}
               </div>
-            ) : (<div style={{ textAlign: "center", padding: "60px 20px" }}><div style={{ marginBottom: 12 }}><Film size={40} style={{ color: "#4A5E72" }} /></div><p style={{ color: C.textMuted, fontSize: 15, fontWeight: 500 }}>Nenhum filme adicionado ainda</p><p style={{ color: C.textDim, fontSize: 13, marginTop: 4 }}>Clique em "Adicionar Filme" para começar!</p></div>)}
-            {showAddMovie && (<div style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }} onClick={() => setShowAddMovie(false)}><div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }} /><div style={{ position: "relative", background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 20, padding: 28, width: "100%", maxWidth: 500, maxHeight: "80vh", overflowY: "auto" }} onClick={e => e.stopPropagation()}><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}><h3 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 18, fontWeight: 700, color: C.text }}>Adicionar Filme</h3><button onClick={() => setShowAddMovie(false)} style={{ width: 32, height: 32, borderRadius: "50%", background: C.bgDeep, border: `1px solid ${C.border}`, color: C.textMuted, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>✕</button></div><input value={movieSearch} onChange={e => setMovieSearch(e.target.value)} placeholder="Buscar filme..." style={{ width: "100%", padding: "12px 16px", borderRadius: 10, background: C.bgDeep, border: `1px solid ${C.border}`, color: C.text, fontSize: 14, outline: "none", marginBottom: 16 }} onFocus={e => e.target.style.borderColor = C.gold} onBlur={e => e.target.style.borderColor = C.border} />{movieSearchLoading ? <div style={{ display: "flex", justifyContent: "center", padding: 20 }}><Spinner size={24} /></div> : (<div style={{ display: "flex", flexDirection: "column", gap: 8 }}>{movieResults.map(m => (<div key={m.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: 12, borderRadius: 10, background: C.bgDeep, border: `1px solid ${C.border}`, cursor: "pointer", transition: "all 0.2s" }} className="card-hover" onClick={() => { handleAddMovie(m); setShowAddMovie(false); setMovieSearch(""); setMovieResults([]); }}><div style={{ width: 40, height: 60, borderRadius: 6, overflow: "hidden", flexShrink: 0, background: C.bgCard }}>{m.poster_path ? <img src={tmdb.poster(m.poster_path)} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <Film size={20} />}</div><div style={{ flex: 1, minWidth: 0 }}><p style={{ fontSize: 14, fontWeight: 600, color: C.text }}>{m.title}</p><p style={{ fontSize: 11, color: C.textDim }}>{m.release_date?.slice(0, 4)}</p></div><PlusIcon /></div>))}</div>)}</div></div>)}
-            {showInvite && (<div style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }} onClick={() => setShowInvite(false)}><div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }} /><div style={{ position: "relative", background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 20, padding: 28, width: "100%", maxWidth: 500, maxHeight: "80vh", overflowY: "auto" }} onClick={e => e.stopPropagation()}><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}><h3 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 18, fontWeight: 700, color: C.text }}>Convidar Amigos</h3><button onClick={() => setShowInvite(false)} style={{ width: 32, height: 32, borderRadius: "50%", background: C.bgDeep, border: `1px solid ${C.border}`, color: C.textMuted, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>✕</button></div><div style={{ marginBottom: 20, padding: 14, borderRadius: 10, background: C.bgDeep, border: `1px solid ${C.border}` }}><p style={{ fontSize: 12, color: C.textMuted, marginBottom: 8 }}>Compartilhe o link de convite:</p><Btn variant="gold" size="sm" onClick={handleCopyInviteLink}><Link2 size={13} /> Copiar Link do Club</Btn></div>{friendProfiles.length > 0 ? (<div style={{ display: "flex", flexDirection: "column", gap: 8 }}>{friendProfiles.map(fp => { const ini = (fp.display_name || "?").slice(0, 2).toUpperCase(); return (<div key={fp.user_id} style={{ display: "flex", alignItems: "center", gap: 12, padding: 12, borderRadius: 10, background: C.bgDeep, border: `1px solid ${C.border}` }}><div style={{ width: 36, height: 36, borderRadius: "50%", overflow: "hidden", background: fp.avatar_url ? "transparent" : `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`, border: `2px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, color: C.bgDeep }}>{fp.avatar_url ? <img src={fp.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : ini}</div><div style={{ flex: 1, minWidth: 0 }}><p style={{ fontSize: 14, fontWeight: 600, color: C.text }}>{fp.display_name || "Sem nome"}</p>{fp.username && <p style={{ fontSize: 11, color: C.gold }}>@{fp.username}</p>}</div><Btn variant="gold" size="sm" onClick={() => handleInvite(fp.user_id)}>Convidar</Btn></div>); })}</div>) : (<div style={{ textAlign: "center", padding: "30px 0", color: C.textDim }}><p style={{ fontSize: 13 }}>Nenhum amigo disponível para convidar</p><p style={{ fontSize: 11, marginTop: 4 }}>Adicione amigos primeiro na aba Social</p></div>)}</div></div>)}
-          </>)}
+            ) : (
+              <div style={{ textAlign: "center", padding: "60px 20px" }}>
+                <div style={{ marginBottom: 12 }}>
+                  <Film size={40} style={{ color: "#4A5E72" }} />
+                </div>
+                <p
+                  style={{ color: C.textMuted, fontSize: 15, fontWeight: 500 }}
+                >
+                  Nenhum filme adicionado ainda
+                </p>
+                <p style={{ color: C.textDim, fontSize: 13, marginTop: 4 }}>
+                  Clique em "Adicionar Filme" para começar!
+                </p>
+              </div>
+            )}
+            {showAddMovie && (
+              <div
+                style={{
+                  position: "fixed",
+                  inset: 0,
+                  zIndex: 200,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: 20,
+                }}
+                onClick={() => setShowAddMovie(false)}
+              >
+                <div
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    background: "rgba(0,0,0,0.7)",
+                    backdropFilter: "blur(4px)",
+                  }}
+                />
+                <div
+                  style={{
+                    position: "relative",
+                    background: C.bgCard,
+                    border: `1px solid ${C.border}`,
+                    borderRadius: 20,
+                    padding: 28,
+                    width: "100%",
+                    maxWidth: 500,
+                    maxHeight: "80vh",
+                    overflowY: "auto",
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      marginBottom: 20,
+                    }}
+                  >
+                    <h3
+                      style={{
+                        fontFamily: "'Outfit', sans-serif",
+                        fontSize: 18,
+                        fontWeight: 700,
+                        color: C.text,
+                      }}
+                    >
+                      Adicionar Filme
+                    </h3>
+                    <button
+                      onClick={() => setShowAddMovie(false)}
+                      style={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: "50%",
+                        background: C.bgDeep,
+                        border: `1px solid ${C.border}`,
+                        color: C.textMuted,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        cursor: "pointer",
+                      }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <input
+                    value={movieSearch}
+                    onChange={(e) => setMovieSearch(e.target.value)}
+                    placeholder="Buscar filme..."
+                    style={{
+                      width: "100%",
+                      padding: "12px 16px",
+                      borderRadius: 10,
+                      background: C.bgDeep,
+                      border: `1px solid ${C.border}`,
+                      color: C.text,
+                      fontSize: 14,
+                      outline: "none",
+                      marginBottom: 16,
+                    }}
+                    onFocus={(e) => (e.target.style.borderColor = C.gold)}
+                    onBlur={(e) => (e.target.style.borderColor = C.border)}
+                  />
+                  {movieSearchLoading ? (
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        padding: 20,
+                      }}
+                    >
+                      <Spinner size={24} />
+                    </div>
+                  ) : (
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 8,
+                      }}
+                    >
+                      {movieResults.map((m) => (
+                        <div
+                          key={m.id}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 12,
+                            padding: 12,
+                            borderRadius: 10,
+                            background: C.bgDeep,
+                            border: `1px solid ${C.border}`,
+                            cursor: "pointer",
+                            transition: "all 0.2s",
+                          }}
+                          className="card-hover"
+                          onClick={() => {
+                            handleAddMovie(m);
+                            setShowAddMovie(false);
+                            setMovieSearch("");
+                            setMovieResults([]);
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: 40,
+                              height: 60,
+                              borderRadius: 6,
+                              overflow: "hidden",
+                              flexShrink: 0,
+                              background: C.bgCard,
+                            }}
+                          >
+                            {m.poster_path ? (
+                              <img
+                                src={tmdb.poster(m.poster_path)}
+                                alt=""
+                                style={{
+                                  width: "100%",
+                                  height: "100%",
+                                  objectFit: "cover",
+                                }}
+                              />
+                            ) : (
+                              <Film size={20} />
+                            )}
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <p
+                              style={{
+                                fontSize: 14,
+                                fontWeight: 600,
+                                color: C.text,
+                              }}
+                            >
+                              {m.title}
+                            </p>
+                            <p style={{ fontSize: 11, color: C.textDim }}>
+                              {m.release_date?.slice(0, 4)}
+                            </p>
+                          </div>
+                          <PlusIcon />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+            {showInvite && (
+              <div
+                style={{
+                  position: "fixed",
+                  inset: 0,
+                  zIndex: 200,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: 20,
+                }}
+                onClick={() => setShowInvite(false)}
+              >
+                <div
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    background: "rgba(0,0,0,0.7)",
+                    backdropFilter: "blur(4px)",
+                  }}
+                />
+                <div
+                  style={{
+                    position: "relative",
+                    background: C.bgCard,
+                    border: `1px solid ${C.border}`,
+                    borderRadius: 20,
+                    padding: 28,
+                    width: "100%",
+                    maxWidth: 500,
+                    maxHeight: "80vh",
+                    overflowY: "auto",
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      marginBottom: 20,
+                    }}
+                  >
+                    <h3
+                      style={{
+                        fontFamily: "'Outfit', sans-serif",
+                        fontSize: 18,
+                        fontWeight: 700,
+                        color: C.text,
+                      }}
+                    >
+                      Convidar Amigos
+                    </h3>
+                    <button
+                      onClick={() => setShowInvite(false)}
+                      style={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: "50%",
+                        background: C.bgDeep,
+                        border: `1px solid ${C.border}`,
+                        color: C.textMuted,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        cursor: "pointer",
+                      }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <div
+                    style={{
+                      marginBottom: 20,
+                      padding: 14,
+                      borderRadius: 10,
+                      background: C.bgDeep,
+                      border: `1px solid ${C.border}`,
+                    }}
+                  >
+                    <p
+                      style={{
+                        fontSize: 12,
+                        color: C.textMuted,
+                        marginBottom: 8,
+                      }}
+                    >
+                      Compartilhe o link de convite:
+                    </p>
+                    <Btn
+                      variant="gold"
+                      size="sm"
+                      onClick={handleCopyInviteLink}
+                    >
+                      <Link2 size={13} /> Copiar Link do Club
+                    </Btn>
+                  </div>
+                  {friendProfiles.length > 0 ? (
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 8,
+                      }}
+                    >
+                      {friendProfiles.map((fp) => {
+                        const ini = (fp.display_name || "?")
+                          .slice(0, 2)
+                          .toUpperCase();
+                        return (
+                          <div
+                            key={fp.user_id}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 12,
+                              padding: 12,
+                              borderRadius: 10,
+                              background: C.bgDeep,
+                              border: `1px solid ${C.border}`,
+                            }}
+                          >
+                            <div
+                              style={{
+                                width: 36,
+                                height: 36,
+                                borderRadius: "50%",
+                                overflow: "hidden",
+                                background: fp.avatar_url
+                                  ? "transparent"
+                                  : `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`,
+                                border: `2px solid ${C.border}`,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                fontSize: 12,
+                                fontWeight: 700,
+                                color: C.bgDeep,
+                              }}
+                            >
+                              {fp.avatar_url ? (
+                                <img
+                                  src={fp.avatar_url}
+                                  alt=""
+                                  style={{
+                                    width: "100%",
+                                    height: "100%",
+                                    objectFit: "cover",
+                                  }}
+                                />
+                              ) : (
+                                ini
+                              )}
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <p
+                                style={{
+                                  fontSize: 14,
+                                  fontWeight: 600,
+                                  color: C.text,
+                                }}
+                              >
+                                {fp.display_name || "Sem nome"}
+                              </p>
+                              {fp.username && (
+                                <p style={{ fontSize: 11, color: C.gold }}>
+                                  @{fp.username}
+                                </p>
+                              )}
+                            </div>
+                            <Btn
+                              variant="gold"
+                              size="sm"
+                              onClick={() => handleInvite(fp.user_id)}
+                            >
+                              Convidar
+                            </Btn>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div
+                      style={{
+                        textAlign: "center",
+                        padding: "30px 0",
+                        color: C.textDim,
+                      }}
+                    >
+                      <p style={{ fontSize: 13 }}>
+                        Nenhum amigo disponível para convidar
+                      </p>
+                      <p style={{ fontSize: 11, marginTop: 4 }}>
+                        Adicione amigos primeiro na aba Social
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );
@@ -2956,20 +8504,37 @@ function SplashScreen({ onFinish }) {
   useEffect(() => {
     const t1 = setTimeout(() => setPhase("out"), 2200);
     const t2 = setTimeout(() => onFinish(), 2700);
-    return () => { clearTimeout(t1); clearTimeout(t2); };
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
   }, [onFinish]);
 
   return (
-    <div style={{
-      position: "fixed", inset: 0, zIndex: 9999,
-      background: `radial-gradient(ellipse at center, #1B2838, ${C.bg})`,
-      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-      animation: phase === "out" ? "splashFadeOut 0.5s ease forwards" : undefined,
-    }}>
-      <img src={logoMain} alt="MovieClub Logo" style={{
-        width: 320, maxWidth: "80vw", animation: "splashFadeIn 1s ease 0.2s both",
-        filter: "drop-shadow(0 0 40px rgba(201,168,76,0.3))",
-      }} />
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 9999,
+        background: `radial-gradient(ellipse at center, #1B2838, ${C.bg})`,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        animation:
+          phase === "out" ? "splashFadeOut 0.5s ease forwards" : undefined,
+      }}
+    >
+      <img
+        src={logoMain}
+        alt="MovieClub Logo"
+        style={{
+          width: 320,
+          maxWidth: "80vw",
+          animation: "splashFadeIn 1s ease 0.2s both",
+          filter: "drop-shadow(0 0 40px rgba(201,168,76,0.3))",
+        }}
+      />
     </div>
   );
 }
@@ -2979,152 +8544,428 @@ function SplashScreen({ onFinish }) {
 // ─────────────────────────────────────────────
 function LoginPage({ onLogin, onSignup, error }) {
   const [mode, setMode] = useState("login");
-  const [email, setEmail] = useState(""), [pass, setPass] = useState(""), [name, setName] = useState(""), [username, setUsername] = useState("");
+  const [email, setEmail] = useState(""),
+    [pass, setPass] = useState(""),
+    [name, setName] = useState(""),
+    [username, setUsername] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
-    if (!email || !pass) { toast.error("Preencha email e senha"); return; }
-    if (mode === "signup" && pass.length < 6) { toast.error("A senha deve ter pelo menos 6 caracteres"); return; }
-    if (mode === "signup" && !name) { toast.error("Preencha seu nome"); return; }
+    if (!email || !pass) {
+      toast.error("Preencha email e senha");
+      return;
+    }
+    if (mode === "signup" && pass.length < 6) {
+      toast.error("A senha deve ter pelo menos 6 caracteres");
+      return;
+    }
+    if (mode === "signup" && !name) {
+      toast.error("Preencha seu nome");
+      return;
+    }
     setLoading(true);
     try {
       if (mode === "login") await onLogin(email, pass);
       else await onSignup(email, pass, name, username);
-    } catch (e) { /* error handled via toast in parent */ }
+    } catch (e) {
+      /* error handled via toast in parent */
+    }
     setLoading(false);
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: C.bg, display: "flex", position: "relative", overflow: "hidden" }}>
+    <div
+      style={{
+        minHeight: "100vh",
+        background: C.bg,
+        display: "flex",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
       {/* ── Left Side: Branding ── */}
-      <div style={{
-        flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-        position: "relative", overflow: "hidden",
-        background: `linear-gradient(135deg, ${C.bgDeep} 0%, ${C.bg} 40%, rgba(201,168,76,0.08) 100%)`,
-      }}>
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          position: "relative",
+          overflow: "hidden",
+          background: `linear-gradient(135deg, ${C.bgDeep} 0%, ${C.bg} 40%, rgba(201,168,76,0.08) 100%)`,
+        }}
+      >
         {/* Decorative circles */}
-        <div style={{ position: "absolute", width: 500, height: 500, borderRadius: "50%", border: `1px solid rgba(201,168,76,0.08)`, top: "-15%", left: "-10%", pointerEvents: "none" }} />
-        <div style={{ position: "absolute", width: 350, height: 350, borderRadius: "50%", border: `1px solid rgba(201,168,76,0.05)`, bottom: "-10%", right: "-5%", pointerEvents: "none" }} />
+        <div
+          style={{
+            position: "absolute",
+            width: 500,
+            height: 500,
+            borderRadius: "50%",
+            border: `1px solid rgba(201,168,76,0.08)`,
+            top: "-15%",
+            left: "-10%",
+            pointerEvents: "none",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            width: 350,
+            height: 350,
+            borderRadius: "50%",
+            border: `1px solid rgba(201,168,76,0.05)`,
+            bottom: "-10%",
+            right: "-5%",
+            pointerEvents: "none",
+          }}
+        />
 
         {/* Logo */}
-        <div style={{ animation: "staggerUp 0.8s ease 0.1s both", textAlign: "center", position: "relative", zIndex: 1 }}>
-          <img src={logoMain} alt="MovieClub Logo" style={{ width: 280, marginBottom: 24, filter: "drop-shadow(0 8px 32px rgba(201,168,76,0.25))" }} />
+        <div
+          style={{
+            animation: "staggerUp 0.8s ease 0.1s both",
+            textAlign: "center",
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
+          <img
+            src={logoMain}
+            alt="MovieClub Logo"
+            style={{
+              width: 280,
+              marginBottom: 24,
+              filter: "drop-shadow(0 8px 32px rgba(201,168,76,0.25))",
+            }}
+          />
         </div>
 
         {/* Text logo */}
-        <div style={{ animation: "staggerUp 0.8s ease 0.3s both", textAlign: "center", position: "relative", zIndex: 1 }}>
-          <img src={logoText} alt="MOVIECLUB" style={{ width: 320, marginBottom: 16, filter: "drop-shadow(0 4px 16px rgba(201,168,76,0.2))" }} />
-          <p style={{ color: C.goldLight, fontSize: 13, letterSpacing: "0.35em", fontWeight: 300, opacity: 0.7, fontFamily: "'DM Sans', sans-serif" }}>
+        <div
+          style={{
+            animation: "staggerUp 0.8s ease 0.3s both",
+            textAlign: "center",
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
+          <img
+            src={logoText}
+            alt="MOVIECLUB"
+            style={{
+              width: 320,
+              marginBottom: 16,
+              filter: "drop-shadow(0 4px 16px rgba(201,168,76,0.2))",
+            }}
+          />
+          <p
+            style={{
+              color: C.goldLight,
+              fontSize: 13,
+              letterSpacing: "0.35em",
+              fontWeight: 300,
+              opacity: 0.7,
+              fontFamily: "'DM Sans', sans-serif",
+            }}
+          >
             SHARED FILM PLATFORM
           </p>
         </div>
 
         {/* Mascots */}
-        <div style={{ animation: "staggerUp 0.8s ease 0.5s both", marginTop: 40, position: "relative", zIndex: 1 }}>
-          <img src={mascotsNav} alt="MovieClub Mascots" loading="lazy" style={{ width: 320, opacity: 0.85, filter: "drop-shadow(0 8px 24px rgba(0,0,0,0.4))" }} />
+        <div
+          style={{
+            animation: "staggerUp 0.8s ease 0.5s both",
+            marginTop: 40,
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
+          <img
+            src={mascotsNav}
+            alt="MovieClub Mascots"
+            loading="lazy"
+            style={{
+              width: 320,
+              opacity: 0.85,
+              filter: "drop-shadow(0 8px 24px rgba(0,0,0,0.4))",
+            }}
+          />
         </div>
 
         {/* Tagline */}
-        <p style={{
-          animation: "staggerUp 0.8s ease 0.7s both",
-          color: C.textMuted, fontSize: 14, marginTop: 32, maxWidth: 300, textAlign: "center", lineHeight: 1.6,
-          fontFamily: "'DM Sans', sans-serif", position: "relative", zIndex: 1,
-        }}>
+        <p
+          style={{
+            animation: "staggerUp 0.8s ease 0.7s both",
+            color: C.textMuted,
+            fontSize: 14,
+            marginTop: 32,
+            maxWidth: 300,
+            textAlign: "center",
+            lineHeight: 1.6,
+            fontFamily: "'DM Sans', sans-serif",
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
           Descubra, avalie e compartilhe filmes com seus amigos em um só lugar.
         </p>
       </div>
 
       {/* ── Right Side: Form ── */}
-      <div style={{
-        flex: 1, display: "flex", alignItems: "center", justifyContent: "center",
-        background: `linear-gradient(180deg, ${C.bgCard} 0%, ${C.bgDeep} 100%)`,
-        borderLeft: `1px solid ${C.border}`,
-        position: "relative",
-      }}>
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: `linear-gradient(180deg, ${C.bgCard} 0%, ${C.bgDeep} 100%)`,
+          borderLeft: `1px solid ${C.border}`,
+          position: "relative",
+        }}
+      >
         {/* Subtle glow */}
-        <div style={{ position: "absolute", inset: 0, background: `radial-gradient(ellipse 70% 50% at 50% 30%, rgba(201,168,76,0.04) 0%, transparent 70%)`, pointerEvents: "none" }} />
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: `radial-gradient(ellipse 70% 50% at 50% 30%, rgba(201,168,76,0.04) 0%, transparent 70%)`,
+            pointerEvents: "none",
+          }}
+        />
 
-        <div style={{ width: 400, position: "relative", zIndex: 1, padding: "0 24px" }}>
+        <div
+          style={{
+            width: 400,
+            position: "relative",
+            zIndex: 1,
+            padding: "0 24px",
+          }}
+        >
           {/* Welcome heading */}
-          <div style={{ marginBottom: 32, animation: "staggerUp 0.6s ease 0.2s both" }}>
-            <h2 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 28, color: C.text, fontWeight: 700, marginBottom: 6 }}>
+          <div
+            style={{
+              marginBottom: 32,
+              animation: "staggerUp 0.6s ease 0.2s both",
+            }}
+          >
+            <h2
+              style={{
+                fontFamily: "'Outfit', sans-serif",
+                fontSize: 28,
+                color: C.text,
+                fontWeight: 700,
+                marginBottom: 6,
+              }}
+            >
               {mode === "login" ? "Bem-vindo de volta" : "Crie sua conta"}
             </h2>
             <p style={{ color: C.textMuted, fontSize: 14 }}>
-              {mode === "login" ? "Entre para continuar sua jornada cinematográfica" : "Junte-se ao clube e descubra novos filmes"}
+              {mode === "login"
+                ? "Entre para continuar sua jornada cinematográfica"
+                : "Junte-se ao clube e descubra novos filmes"}
             </p>
           </div>
 
           {/* Toggle */}
-          <div style={{ display: "flex", marginBottom: 28, background: "rgba(9,21,35,0.6)", borderRadius: 12, padding: 3, animation: "staggerUp 0.6s ease 0.3s both" }}>
-            {["login", "signup"].map(m => (
-              <button key={m} onClick={() => setMode(m)} style={{
-                flex: 1, padding: "10px", borderRadius: 10, fontSize: 13, fontWeight: 600,
-                background: mode === m ? `linear-gradient(135deg, ${C.gold}, ${C.goldLight})` : "transparent",
-                color: mode === m ? C.bgDeep : C.textMuted,
-                border: "none", transition: "all 0.25s",
-              }}>
+          <div
+            style={{
+              display: "flex",
+              marginBottom: 28,
+              background: "rgba(9,21,35,0.6)",
+              borderRadius: 12,
+              padding: 3,
+              animation: "staggerUp 0.6s ease 0.3s both",
+            }}
+          >
+            {["login", "signup"].map((m) => (
+              <button
+                key={m}
+                onClick={() => setMode(m)}
+                style={{
+                  flex: 1,
+                  padding: "10px",
+                  borderRadius: 10,
+                  fontSize: 13,
+                  fontWeight: 600,
+                  background:
+                    mode === m
+                      ? `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`
+                      : "transparent",
+                  color: mode === m ? C.bgDeep : C.textMuted,
+                  border: "none",
+                  transition: "all 0.25s",
+                }}
+              >
                 {m === "login" ? "Entrar" : "Cadastrar"}
               </button>
             ))}
           </div>
 
           {/* Fields */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 16, animation: "staggerUp 0.5s ease 0.4s both" }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 16,
+              animation: "staggerUp 0.5s ease 0.4s both",
+            }}
+          >
             {mode === "signup" && (
               <>
-                <TextInput label="Nome" value={name} onChange={setName} placeholder="Seu nome" />
-                <TextInput label="Username" value={username} onChange={setUsername} placeholder="@username" />
+                <TextInput
+                  label="Nome"
+                  value={name}
+                  onChange={setName}
+                  placeholder="Seu nome"
+                />
+                <TextInput
+                  label="Username"
+                  value={username}
+                  onChange={setUsername}
+                  placeholder="@username"
+                />
               </>
             )}
-            <TextInput label="Email" value={email} onChange={setEmail} placeholder="voce@email.com" type="email" />
-            <TextInput label="Senha" value={pass} onChange={setPass} placeholder="••••••••" type="password" />
+            <TextInput
+              label="Email"
+              value={email}
+              onChange={setEmail}
+              placeholder="voce@email.com"
+              type="email"
+            />
+            <TextInput
+              label="Senha"
+              value={pass}
+              onChange={setPass}
+              placeholder="••••••••"
+              type="password"
+            />
           </div>
 
           {mode === "login" && (
             <div style={{ textAlign: "right", marginTop: 8 }}>
-              <button style={{ color: C.gold, fontSize: 12, fontWeight: 500, opacity: 0.8, transition: "opacity 0.2s" }}
-                onMouseEnter={e => e.currentTarget.style.opacity = "1"}
-                onMouseLeave={e => e.currentTarget.style.opacity = "0.8"}>
+              <button
+                style={{
+                  color: C.gold,
+                  fontSize: 12,
+                  fontWeight: 500,
+                  opacity: 0.8,
+                  transition: "opacity 0.2s",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")}
+                onMouseLeave={(e) => (e.currentTarget.style.opacity = "0.8")}
+              >
                 Esqueceu a senha?
               </button>
             </div>
           )}
 
-          {error && <p style={{ color: C.red, fontSize: 13, textAlign: "center", marginTop: 12, marginBottom: -8 }}>{error}</p>}
+          {error && (
+            <p
+              style={{
+                color: C.red,
+                fontSize: 13,
+                textAlign: "center",
+                marginTop: 12,
+                marginBottom: -8,
+              }}
+            >
+              {error}
+            </p>
+          )}
 
           {/* Submit */}
-          <button onClick={handleSubmit} disabled={loading} className="btn-gold-shimmer"
+          <button
+            onClick={handleSubmit}
+            disabled={loading}
+            className="btn-gold-shimmer"
             style={{
-              width: "100%", marginTop: 24, padding: "14px", color: C.bgDeep,
-              borderRadius: 12, fontSize: 15, fontWeight: 700,
-              fontFamily: "'Outfit', sans-serif", letterSpacing: "0.06em",
+              width: "100%",
+              marginTop: 24,
+              padding: "14px",
+              color: C.bgDeep,
+              borderRadius: 12,
+              fontSize: 15,
+              fontWeight: 700,
+              fontFamily: "'Outfit', sans-serif",
+              letterSpacing: "0.06em",
               transition: "transform 0.15s, box-shadow 0.2s",
               boxShadow: "0 4px 20px rgba(201,168,76,0.25)",
               opacity: loading ? 0.6 : 1,
             }}
-            onMouseEnter={e => { if (!loading) { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 30px rgba(201,168,76,0.35)"; } }}
-            onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = "0 4px 20px rgba(201,168,76,0.25)"; }}>
-            {loading ? "Carregando..." : mode === "login" ? "Entrar" : "Criar Conta"}
+            onMouseEnter={(e) => {
+              if (!loading) {
+                e.currentTarget.style.transform = "translateY(-2px)";
+                e.currentTarget.style.boxShadow =
+                  "0 8px 30px rgba(201,168,76,0.35)";
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "";
+              e.currentTarget.style.boxShadow =
+                "0 4px 20px rgba(201,168,76,0.25)";
+            }}
+          >
+            {loading
+              ? "Carregando..."
+              : mode === "login"
+                ? "Entrar"
+                : "Criar Conta"}
           </button>
 
           {/* Divider */}
-          <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "24px 0" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              margin: "24px 0",
+            }}
+          >
             <div style={{ flex: 1, height: 1, background: C.border }} />
-            <span style={{ color: C.textDim, fontSize: 11, whiteSpace: "nowrap" }}>ou continue com</span>
+            <span
+              style={{ color: C.textDim, fontSize: 11, whiteSpace: "nowrap" }}
+            >
+              ou continue com
+            </span>
             <div style={{ flex: 1, height: 1, background: C.border }} />
           </div>
 
           {/* Social */}
-          <div style={{ display: "flex", gap: 10, animation: "staggerUp 0.5s ease 0.5s both" }}>
-            {["Google", "Apple"].map(p => (
-              <button key={p} onClick={onLogin} style={{
-                flex: 1, padding: "11px", borderRadius: 10, fontSize: 13, fontWeight: 500,
-                background: "rgba(9,21,35,0.5)", color: C.textMuted,
-                border: `1px solid ${C.border}`, transition: "all 0.2s",
-              }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = C.goldDim; e.currentTarget.style.color = C.text; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.color = C.textMuted; }}>
+          <div
+            style={{
+              display: "flex",
+              gap: 10,
+              animation: "staggerUp 0.5s ease 0.5s both",
+            }}
+          >
+            {["Google", "Apple"].map((p) => (
+              <button
+                key={p}
+                onClick={onLogin}
+                style={{
+                  flex: 1,
+                  padding: "11px",
+                  borderRadius: 10,
+                  fontSize: 13,
+                  fontWeight: 500,
+                  background: "rgba(9,21,35,0.5)",
+                  color: C.textMuted,
+                  border: `1px solid ${C.border}`,
+                  transition: "all 0.2s",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = C.goldDim;
+                  e.currentTarget.style.color = C.text;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = C.border;
+                  e.currentTarget.style.color = C.textMuted;
+                }}
+              >
                 {p}
               </button>
             ))}
@@ -3151,12 +8992,22 @@ function QuickRatePage({ setPage, setSelectedMovie, auth }) {
   const [animating, setAnimating] = useState(false);
   const [direction, setDirection] = useState(null);
   const { ratings, upsertRating, getRating } = useRatings(auth?.user?.id);
-  const { items: wl, add: addWl, remove: removeWl, isInList: inWl } = useWatchlist(auth?.user?.id);
+  const {
+    items: wl,
+    add: addWl,
+    remove: removeWl,
+    isInList: inWl,
+  } = useWatchlist(auth?.user?.id);
   const containerRef = useRef(null);
   const loadingMoreRef = useRef(false);
   const recPageRef = useRef(0);
   // Session stats
-  const [sessionStats, setSessionStats] = useState({ rated: [], watchlistAdded: [], skipped: 0, startTime: null });
+  const [sessionStats, setSessionStats] = useState({
+    rated: [],
+    watchlistAdded: [],
+    skipped: 0,
+    startTime: null,
+  });
 
   // Load random movies
   const loadRandom = useCallback(async (append = false) => {
@@ -3168,58 +9019,137 @@ function QuickRatePage({ setPage, setSelectedMovie, auth }) {
         tmdb.topRated(Math.floor(Math.random() * 10) + 1),
         tmdb.trending(Math.floor(Math.random() * 5) + 1),
       ]);
-      const all = [...(pop?.results || []), ...(top?.results || []), ...(trend?.results || [])];
-      const unique = []; const seen = new Set();
-      for (const m of all) { if (!seen.has(m.id) && m.poster_path) { seen.add(m.id); unique.push(m); } }
-      for (let i = unique.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [unique[i], unique[j]] = [unique[j], unique[i]]; }
-      if (append) setMovies(prev => [...prev, ...unique.filter(u => !prev.some(p => p.id === u.id))]);
-      else { setMovies(unique); setIdx(0); }
-    } catch { toast.error("Erro ao carregar filmes"); }
+      const all = [
+        ...(pop?.results || []),
+        ...(top?.results || []),
+        ...(trend?.results || []),
+      ];
+      const unique = [];
+      const seen = new Set();
+      for (const m of all) {
+        if (!seen.has(m.id) && m.poster_path) {
+          seen.add(m.id);
+          unique.push(m);
+        }
+      }
+      for (let i = unique.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [unique[i], unique[j]] = [unique[j], unique[i]];
+      }
+      if (append)
+        setMovies((prev) => [
+          ...prev,
+          ...unique.filter((u) => !prev.some((p) => p.id === u.id)),
+        ]);
+      else {
+        setMovies(unique);
+        setIdx(0);
+      }
+    } catch {
+      toast.error("Erro ao carregar filmes");
+    }
     setLoading(false);
   }, []);
 
   // Load recommended movies (infinite)
-  const loadRecommended = useCallback(async (append = false) => {
-    if (loadingMoreRef.current) return;
-    loadingMoreRef.current = true;
-    setLoading(true);
-    try {
-      const topRated = ratings.filter(r => Number(r.rating) >= 3).sort((a, b) => Number(b.rating) - Number(a.rating));
-      if (!topRated.length) {
-        // Fallback: use popular if no ratings
-        await loadRandom(append);
-        loadingMoreRef.current = false;
-        return;
+  // Load recommended movies (infinite)
+  const loadRecommended = useCallback(
+    async (append = false) => {
+      if (loadingMoreRef.current) return;
+      loadingMoreRef.current = true;
+      setLoading(true);
+      try {
+        if (!ratings.length) {
+          // Fallback: use popular if no ratings yet
+          await loadRandom(append);
+          loadingMoreRef.current = false;
+          return;
+        }
+
+        // 1. Calcula a nota média do usuário
+        const userAverage =
+          ratings.reduce((sum, r) => sum + Number(r.rating), 0) /
+          ratings.length;
+
+        // 2. Baseia as recomendações em filmes avaliados >= à média pessoal
+        let seedCandidates = ratings
+          .filter((r) => Number(r.rating) >= userAverage)
+          .sort((a, b) => Number(b.rating) - Number(a.rating));
+
+        // Fallback de segurança se todos tiverem a mesma nota
+        if (!seedCandidates.length) {
+          seedCandidates = ratings.sort(
+            (a, b) => Number(b.rating) - Number(a.rating),
+          );
+        }
+
+        const ratedIds = new Set(ratings.map((r) => r.tmdb_id));
+        const page = recPageRef.current;
+
+        // Pick different seed movies each page based on the dynamic user standards
+        const seedMovies = [];
+        for (let i = 0; i < 5; i++) {
+          const pick = seedCandidates[(page * 5 + i) % seedCandidates.length];
+          if (pick) seedMovies.push(pick);
+        }
+
+        const results = await Promise.all(
+          seedMovies.map((r) =>
+            tmdb
+              .get(`/movie/${r.tmdb_id}/recommendations`, {
+                page: String((page % 3) + 1),
+              })
+              .catch(() => null),
+          ),
+        );
+
+        const allRecs = results
+          .filter(Boolean)
+          .flatMap((r) => r.results || [])
+          .filter((m) => m.poster_path && !ratedIds.has(m.id));
+        const seen = new Set();
+        const unique = allRecs.filter((m) => {
+          if (seen.has(m.id)) return false;
+          seen.add(m.id);
+          return true;
+        });
+
+        // Shuffle
+        for (let i = unique.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [unique[i], unique[j]] = [unique[j], unique[i]];
+        }
+
+        recPageRef.current = page + 1;
+
+        if (append) {
+          setMovies((prev) => {
+            const existIds = new Set(prev.map((p) => p.id));
+            return [...prev, ...unique.filter((u) => !existIds.has(u.id))];
+          });
+        } else {
+          setMovies(unique);
+          setIdx(0);
+        }
+      } catch {
+        toast.error("Erro ao carregar recomendações");
       }
-      const ratedIds = new Set(ratings.map(r => r.tmdb_id));
-      const page = recPageRef.current;
-      // Pick different seed movies each page
-      const seedMovies = [];
-      for (let i = 0; i < 5; i++) {
-        const pick = topRated[(page * 5 + i) % topRated.length];
-        if (pick) seedMovies.push(pick);
-      }
-      const results = await Promise.all(seedMovies.map(r =>
-        tmdb.get(`/movie/${r.tmdb_id}/recommendations`, { page: String((page % 3) + 1) }).catch(() => null)
-      ));
-      const allRecs = results.filter(Boolean).flatMap(r => r.results || []).filter(m => m.poster_path && !ratedIds.has(m.id));
-      const seen = new Set();
-      const unique = allRecs.filter(m => { if (seen.has(m.id)) return false; seen.add(m.id); return true; });
-      // Shuffle
-      for (let i = unique.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [unique[i], unique[j]] = [unique[j], unique[i]]; }
-      recPageRef.current = page + 1;
-      if (append) setMovies(prev => { const existIds = new Set(prev.map(p => p.id)); return [...prev, ...unique.filter(u => !existIds.has(u.id))]; });
-      else { setMovies(unique); setIdx(0); }
-    } catch { toast.error("Erro ao carregar recomendações"); }
-    setLoading(false);
-    loadingMoreRef.current = false;
-  }, [ratings, loadRandom]);
+      setLoading(false);
+      loadingMoreRef.current = false;
+    },
+    [ratings, loadRandom],
+  );
 
   // Start session
   const startSession = (m) => {
     setMode(m);
     recPageRef.current = 0;
-    setSessionStats({ rated: [], watchlistAdded: [], skipped: 0, startTime: Date.now() });
+    setSessionStats({
+      rated: [],
+      watchlistAdded: [],
+      skipped: 0,
+      startTime: Date.now(),
+    });
     if (m === "random") loadRandom();
     else loadRecommended();
   };
@@ -3246,48 +9176,100 @@ function QuickRatePage({ setPage, setSelectedMovie, auth }) {
     if (!current || !auth?.user) return;
     setLocalRating(stars);
     try {
-      await upsertRating(current.id, stars, null, current.title, tmdb.poster(current.poster_path));
-      setSessionStats(prev => {
-        const exists = prev.rated.find(r => r.id === current.id);
-        if (exists) return { ...prev, rated: prev.rated.map(r => r.id === current.id ? { ...r, stars } : r) };
-        return { ...prev, rated: [...prev.rated, { id: current.id, title: current.title, poster: tmdb.poster(current.poster_path), stars }] };
+      await upsertRating(
+        current.id,
+        stars,
+        null,
+        current.title,
+        tmdb.poster(current.poster_path),
+      );
+      setSessionStats((prev) => {
+        const exists = prev.rated.find((r) => r.id === current.id);
+        if (exists)
+          return {
+            ...prev,
+            rated: prev.rated.map((r) =>
+              r.id === current.id ? { ...r, stars } : r,
+            ),
+          };
+        return {
+          ...prev,
+          rated: [
+            ...prev.rated,
+            {
+              id: current.id,
+              title: current.title,
+              poster: tmdb.poster(current.poster_path),
+              stars,
+            },
+          ],
+        };
       });
-      toast.success(`${stars} estrela${stars !== 1 ? "s" : ""} para ${current.title}`);
-    } catch { toast.error("Erro ao avaliar"); }
+      toast.success(
+        `${stars} estrela${stars !== 1 ? "s" : ""} para ${current.title}`,
+      );
+    } catch {
+      toast.error("Erro ao avaliar");
+    }
   };
 
   const goNext = () => {
     if (idx < movies.length - 1) {
-      setDirection("left"); setAnimating(true);
-      setTimeout(() => { setIdx(i => i + 1); setAnimating(false); setDirection(null); setSwipeX(0); }, 250);
+      setDirection("left");
+      setAnimating(true);
+      setTimeout(() => {
+        setIdx((i) => i + 1);
+        setAnimating(false);
+        setDirection(null);
+        setSwipeX(0);
+      }, 250);
     }
   };
 
   const goPrev = () => {
     if (idx > 0) {
-      setDirection("right"); setAnimating(true);
-      setTimeout(() => { setIdx(i => i - 1); setAnimating(false); setDirection(null); setSwipeX(0); }, 250);
+      setDirection("right");
+      setAnimating(true);
+      setTimeout(() => {
+        setIdx((i) => i - 1);
+        setAnimating(false);
+        setDirection(null);
+        setSwipeX(0);
+      }, 250);
     }
   };
 
   const handleOpenMovie = () => {
     if (!current) return;
-    setSelectedMovie({ tmdbId: current.id, title: current.title, poster: tmdb.poster(current.poster_path) });
+    setSelectedMovie({
+      tmdbId: current.id,
+      title: current.title,
+      poster: tmdb.poster(current.poster_path),
+    });
     setPage("movie");
   };
 
-  const onPointerDown = (e) => { setDragStartX(e.clientX); };
-  const onPointerMove = (e) => { if (dragStartX !== null) setSwipeX(e.clientX - dragStartX); };
+  const onPointerDown = (e) => {
+    setDragStartX(e.clientX);
+  };
+  const onPointerMove = (e) => {
+    if (dragStartX !== null) setSwipeX(e.clientX - dragStartX);
+  };
   const onPointerUp = () => {
     if (dragStartX !== null) {
-      if (swipeX < -80) goNext(); else if (swipeX > 80) goPrev(); else setSwipeX(0);
+      if (swipeX < -80) goNext();
+      else if (swipeX > 80) goPrev();
+      else setSwipeX(0);
       setDragStartX(null);
     }
   };
 
   useEffect(() => {
     if (!mode) return;
-    const fn = (e) => { if (e.key === "ArrowRight") goNext(); if (e.key === "ArrowLeft") goPrev(); };
+    const fn = (e) => {
+      if (e.key === "ArrowRight") goNext();
+      if (e.key === "ArrowLeft") goPrev();
+    };
     window.addEventListener("keydown", fn);
     return () => window.removeEventListener("keydown", fn);
   }, [idx, movies.length, mode]);
@@ -3296,14 +9278,53 @@ function QuickRatePage({ setPage, setSelectedMovie, auth }) {
   if (!mode) {
     const hasRatings = ratings.length > 0;
     return (
-      <div style={{ paddingTop: 80, minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div
+        style={{
+          paddingTop: 80,
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
         <div style={{ maxWidth: 480, width: "100%", padding: "0 24px" }}>
           <div style={{ textAlign: "center", marginBottom: 40 }}>
-            <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 64, height: 64, borderRadius: 20, background: `linear-gradient(135deg, ${C.gold}22, ${C.gold}08)`, border: `1px solid ${C.gold}33`, marginBottom: 16 }}>
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: 64,
+                height: 64,
+                borderRadius: 20,
+                background: `linear-gradient(135deg, ${C.gold}22, ${C.gold}08)`,
+                border: `1px solid ${C.gold}33`,
+                marginBottom: 16,
+              }}
+            >
               <Zap size={28} style={{ color: C.gold }} />
             </div>
-            <h1 style={{ color: C.text, fontSize: 26, fontWeight: 800, margin: "0 0 8px", fontFamily: "'Outfit', sans-serif" }}>Avaliação Rápida</h1>
-            <p style={{ color: C.textMuted, fontSize: 14, margin: 0, lineHeight: 1.5 }}>Escolha como quer descobrir filmes nesta sessão</p>
+            <h1
+              style={{
+                color: C.text,
+                fontSize: 26,
+                fontWeight: 800,
+                margin: "0 0 8px",
+                fontFamily: "'Outfit', sans-serif",
+              }}
+            >
+              Avaliação Rápida
+            </h1>
+            <p
+              style={{
+                color: C.textMuted,
+                fontSize: 14,
+                margin: 0,
+                lineHeight: 1.5,
+              }}
+            >
+              Escolha como quer descobrir filmes nesta sessão
+            </p>
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -3311,18 +9332,63 @@ function QuickRatePage({ setPage, setSelectedMovie, auth }) {
             <button
               onClick={() => startSession("random")}
               style={{
-                padding: 24, borderRadius: 16, background: C.bgCard, border: `1px solid ${C.border}`,
-                cursor: "pointer", textAlign: "left", transition: "all 0.2s", display: "flex", gap: 20, alignItems: "center",
+                padding: 24,
+                borderRadius: 16,
+                background: C.bgCard,
+                border: `1px solid ${C.border}`,
+                cursor: "pointer",
+                textAlign: "left",
+                transition: "all 0.2s",
+                display: "flex",
+                gap: 20,
+                alignItems: "center",
               }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = C.gold; e.currentTarget.style.background = C.bgCardHover; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.background = C.bgCard; }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = C.gold;
+                e.currentTarget.style.background = C.bgCardHover;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = C.border;
+                e.currentTarget.style.background = C.bgCard;
+              }}
             >
-              <div style={{ width: 52, height: 52, borderRadius: 14, background: "rgba(99,102,241,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <div
+                style={{
+                  width: 52,
+                  height: 52,
+                  borderRadius: 14,
+                  background: "rgba(99,102,241,0.12)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                }}
+              >
                 <Film size={24} style={{ color: "#818CF8" }} />
               </div>
               <div>
-                <h3 style={{ color: C.text, fontSize: 16, fontWeight: 700, margin: "0 0 4px", fontFamily: "'DM Sans', sans-serif" }}>Aleatório</h3>
-                <p style={{ color: C.textMuted, fontSize: 13, margin: 0, lineHeight: 1.4 }}>Filmes populares, em alta e bem avaliados misturados aleatoriamente</p>
+                <h3
+                  style={{
+                    color: C.text,
+                    fontSize: 16,
+                    fontWeight: 700,
+                    margin: "0 0 4px",
+                    fontFamily: "'DM Sans', sans-serif",
+                  }}
+                >
+                  Aleatório
+                </h3>
+                <p
+                  style={{
+                    color: C.textMuted,
+                    fontSize: 13,
+                    margin: 0,
+                    lineHeight: 1.4,
+                  }}
+                >
+                  Filmes populares, em alta e bem avaliados misturados
+                  aleatoriamente
+                </p>
               </div>
             </button>
 
@@ -3330,19 +9396,61 @@ function QuickRatePage({ setPage, setSelectedMovie, auth }) {
             <button
               onClick={() => startSession("recommended")}
               style={{
-                padding: 24, borderRadius: 16, background: C.bgCard, border: `1px solid ${C.border}`,
-                cursor: "pointer", textAlign: "left", transition: "all 0.2s", display: "flex", gap: 20, alignItems: "center",
+                padding: 24,
+                borderRadius: 16,
+                background: C.bgCard,
+                border: `1px solid ${C.border}`,
+                cursor: "pointer",
+                textAlign: "left",
+                transition: "all 0.2s",
+                display: "flex",
+                gap: 20,
+                alignItems: "center",
                 opacity: 1,
               }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = C.gold; e.currentTarget.style.background = C.bgCardHover; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.background = C.bgCard; }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = C.gold;
+                e.currentTarget.style.background = C.bgCardHover;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = C.border;
+                e.currentTarget.style.background = C.bgCard;
+              }}
             >
-              <div style={{ width: 52, height: 52, borderRadius: 14, background: `${C.gold}18`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <div
+                style={{
+                  width: 52,
+                  height: 52,
+                  borderRadius: 14,
+                  background: `${C.gold}18`,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                }}
+              >
                 <Target size={24} style={{ color: C.gold }} />
               </div>
               <div>
-                <h3 style={{ color: C.text, fontSize: 16, fontWeight: 700, margin: "0 0 4px", fontFamily: "'DM Sans', sans-serif" }}>Recomendados</h3>
-                <p style={{ color: C.textMuted, fontSize: 13, margin: 0, lineHeight: 1.4 }}>
+                <h3
+                  style={{
+                    color: C.text,
+                    fontSize: 16,
+                    fontWeight: 700,
+                    margin: "0 0 4px",
+                    fontFamily: "'DM Sans', sans-serif",
+                  }}
+                >
+                  Recomendados
+                </h3>
+                <p
+                  style={{
+                    color: C.textMuted,
+                    fontSize: 13,
+                    margin: 0,
+                    lineHeight: 1.4,
+                  }}
+                >
                   {hasRatings
                     ? "Baseado nos filmes que você já avaliou — sessão infinita de descobertas"
                     : "Avalie alguns filmes primeiro para desbloquear recomendações personalizadas (usaremos populares enquanto isso)"}
@@ -3357,60 +9465,187 @@ function QuickRatePage({ setPage, setSelectedMovie, auth }) {
 
   // ── SUMMARY SCREEN ──
   if (mode === "summary") {
-    const elapsed = sessionStats.startTime ? Math.round((Date.now() - sessionStats.startTime) / 60000) : 0;
-    const avgRating = sessionStats.rated.length > 0
-      ? (sessionStats.rated.reduce((sum, r) => sum + r.stars, 0) / sessionStats.rated.length).toFixed(1)
-      : "0";
+    const elapsed = sessionStats.startTime
+      ? Math.round((Date.now() - sessionStats.startTime) / 60000)
+      : 0;
+    const avgRating =
+      sessionStats.rated.length > 0
+        ? (
+            sessionStats.rated.reduce((sum, r) => sum + r.stars, 0) /
+            sessionStats.rated.length
+          ).toFixed(1)
+        : "0";
     const totalViewed = idx + 1;
-    const distribution = [1, 2, 3, 4, 5].map(s => sessionStats.rated.filter(r => Math.ceil(r.stars) === s).length);
+    const distribution = [1, 2, 3, 4, 5].map(
+      (s) => sessionStats.rated.filter((r) => Math.ceil(r.stars) === s).length,
+    );
     const maxDist = Math.max(...distribution, 1);
 
     return (
-      <div style={{ paddingTop: 80, minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div
+        style={{
+          paddingTop: 80,
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
         <div style={{ maxWidth: 500, width: "100%", padding: "0 24px" }}>
           <div style={{ textAlign: "center", marginBottom: 32 }}>
-            <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 64, height: 64, borderRadius: 20, background: `linear-gradient(135deg, ${C.gold}22, ${C.gold}08)`, border: `1px solid ${C.gold}33`, marginBottom: 16 }}>
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: 64,
+                height: 64,
+                borderRadius: 20,
+                background: `linear-gradient(135deg, ${C.gold}22, ${C.gold}08)`,
+                border: `1px solid ${C.gold}33`,
+                marginBottom: 16,
+              }}
+            >
               <Award size={28} style={{ color: C.gold }} />
             </div>
-            <h1 style={{ color: C.text, fontSize: 24, fontWeight: 800, margin: "0 0 6px", fontFamily: "'Outfit', sans-serif" }}>Sessão Finalizada</h1>
-            <p style={{ color: C.textMuted, fontSize: 13 }}>{elapsed > 0 ? `${elapsed} minuto${elapsed !== 1 ? "s" : ""} de sessão` : "Menos de um minuto"}</p>
+            <h1
+              style={{
+                color: C.text,
+                fontSize: 24,
+                fontWeight: 800,
+                margin: "0 0 6px",
+                fontFamily: "'Outfit', sans-serif",
+              }}
+            >
+              Sessão Finalizada
+            </h1>
+            <p style={{ color: C.textMuted, fontSize: 13 }}>
+              {elapsed > 0
+                ? `${elapsed} minuto${elapsed !== 1 ? "s" : ""} de sessão`
+                : "Menos de um minuto"}
+            </p>
           </div>
 
           {/* Stats grid */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 28 }}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(3, 1fr)",
+              gap: 12,
+              marginBottom: 28,
+            }}
+          >
             {[
               [sessionStats.rated.length, "Avaliados", Star, C.gold],
-              [sessionStats.watchlistAdded.length, "Na Watchlist", Bookmark, "#22C55E"],
+              [
+                sessionStats.watchlistAdded.length,
+                "Na Watchlist",
+                Bookmark,
+                "#22C55E",
+              ],
               [totalViewed, "Visualizados", Eye, "#818CF8"],
             ].map(([val, label, Icon, color], i) => (
-              <div key={i} style={{ padding: 16, borderRadius: 14, background: C.bgCard, border: `1px solid ${C.border}`, textAlign: "center" }}>
+              <div
+                key={i}
+                style={{
+                  padding: 16,
+                  borderRadius: 14,
+                  background: C.bgCard,
+                  border: `1px solid ${C.border}`,
+                  textAlign: "center",
+                }}
+              >
                 <Icon size={18} style={{ color, marginBottom: 6 }} />
-                <div style={{ color: C.text, fontSize: 22, fontWeight: 800, fontFamily: "'Outfit', sans-serif" }}>{val}</div>
-                <div style={{ color: C.textMuted, fontSize: 11, marginTop: 2 }}>{label}</div>
+                <div
+                  style={{
+                    color: C.text,
+                    fontSize: 22,
+                    fontWeight: 800,
+                    fontFamily: "'Outfit', sans-serif",
+                  }}
+                >
+                  {val}
+                </div>
+                <div style={{ color: C.textMuted, fontSize: 11, marginTop: 2 }}>
+                  {label}
+                </div>
               </div>
             ))}
           </div>
 
           {/* Average + Distribution */}
           {sessionStats.rated.length > 0 && (
-            <div style={{ padding: 20, borderRadius: 16, background: C.bgCard, border: `1px solid ${C.border}`, marginBottom: 20 }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-                <span style={{ color: C.textMuted, fontSize: 13, fontWeight: 600 }}>Nota Média</span>
+            <div
+              style={{
+                padding: 20,
+                borderRadius: 16,
+                background: C.bgCard,
+                border: `1px solid ${C.border}`,
+                marginBottom: 20,
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  marginBottom: 16,
+                }}
+              >
+                <span
+                  style={{ color: C.textMuted, fontSize: 13, fontWeight: 600 }}
+                >
+                  Nota Média
+                </span>
                 <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                   <Star size={16} fill={C.gold} stroke={C.gold} />
-                  <span style={{ color: C.gold, fontSize: 20, fontWeight: 800, fontFamily: "'Outfit', sans-serif" }}>{avgRating}</span>
+                  <span
+                    style={{
+                      color: C.gold,
+                      fontSize: 20,
+                      fontWeight: 800,
+                      fontFamily: "'Outfit', sans-serif",
+                    }}
+                  >
+                    {avgRating}
+                  </span>
                 </div>
               </div>
-              <div style={{ display: "flex", gap: 8, alignItems: "flex-end", height: 60 }}>
+              <div
+                style={{
+                  display: "flex",
+                  gap: 8,
+                  alignItems: "flex-end",
+                  height: 60,
+                }}
+              >
                 {distribution.map((count, i) => (
-                  <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-                    <div style={{
-                      width: "100%", borderRadius: 4,
-                      height: Math.max(count / maxDist * 48, 4),
-                      background: count > 0 ? `linear-gradient(to top, ${C.gold}, ${C.goldLight})` : C.border,
-                      transition: "height 0.3s",
-                    }} />
-                    <span style={{ fontSize: 10, color: C.textMuted }}>{i + 1}<Star size={8} style={{ marginLeft: 1 }} /></span>
+                  <div
+                    key={i}
+                    style={{
+                      flex: 1,
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: 4,
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "100%",
+                        borderRadius: 4,
+                        height: Math.max((count / maxDist) * 48, 4),
+                        background:
+                          count > 0
+                            ? `linear-gradient(to top, ${C.gold}, ${C.goldLight})`
+                            : C.border,
+                        transition: "height 0.3s",
+                      }}
+                    />
+                    <span style={{ fontSize: 10, color: C.textMuted }}>
+                      {i + 1}
+                      <Star size={8} style={{ marginLeft: 1 }} />
+                    </span>
                   </div>
                 ))}
               </div>
@@ -3420,20 +9655,94 @@ function QuickRatePage({ setPage, setSelectedMovie, auth }) {
           {/* Rated movies list */}
           {sessionStats.rated.length > 0 && (
             <div style={{ marginBottom: 24 }}>
-              <h3 style={{ color: C.text, fontSize: 14, fontWeight: 700, marginBottom: 12, fontFamily: "'DM Sans', sans-serif" }}>Filmes Avaliados</h3>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8, maxHeight: 240, overflowY: "auto" }}>
-                {sessionStats.rated.map(r => (
-                  <div key={r.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "8px 12px", borderRadius: 10, background: "rgba(255,255,255,0.03)", border: `1px solid ${C.border}` }}
-                    onClick={() => { setSelectedMovie({ tmdbId: r.id, title: r.title, poster: r.poster }); setPage("movie"); }}
-                    onMouseEnter={e => e.currentTarget.style.borderColor = C.borderHover}
-                    onMouseLeave={e => e.currentTarget.style.borderColor = C.border}
-                    style_={{ cursor: "pointer" }}>
-                    {r.poster && <img src={r.poster} alt="" style={{ width: 32, height: 48, borderRadius: 6, objectFit: "cover" }} />}
-                    <span style={{ flex: 1, color: C.text, fontSize: 13, fontWeight: 500, cursor: "pointer" }}
-                      onClick={() => { setSelectedMovie({ tmdbId: r.id, title: r.title, poster: r.poster }); setPage("movie"); }}>{r.title}</span>
-                    <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
+              <h3
+                style={{
+                  color: C.text,
+                  fontSize: 14,
+                  fontWeight: 700,
+                  marginBottom: 12,
+                  fontFamily: "'DM Sans', sans-serif",
+                }}
+              >
+                Filmes Avaliados
+              </h3>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 8,
+                  maxHeight: 240,
+                  overflowY: "auto",
+                }}
+              >
+                {sessionStats.rated.map((r) => (
+                  <div
+                    key={r.id}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 12,
+                      padding: "8px 12px",
+                      borderRadius: 10,
+                      background: "rgba(255,255,255,0.03)",
+                      border: `1px solid ${C.border}`,
+                    }}
+                    onClick={() => {
+                      setSelectedMovie({
+                        tmdbId: r.id,
+                        title: r.title,
+                        poster: r.poster,
+                      });
+                      setPage("movie");
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.borderColor = C.borderHover)
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.borderColor = C.border)
+                    }
+                    style_={{ cursor: "pointer" }}
+                  >
+                    {r.poster && (
+                      <img
+                        src={r.poster}
+                        alt=""
+                        style={{
+                          width: 32,
+                          height: 48,
+                          borderRadius: 6,
+                          objectFit: "cover",
+                        }}
+                      />
+                    )}
+                    <span
+                      style={{
+                        flex: 1,
+                        color: C.text,
+                        fontSize: 13,
+                        fontWeight: 500,
+                        cursor: "pointer",
+                      }}
+                      onClick={() => {
+                        setSelectedMovie({
+                          tmdbId: r.id,
+                          title: r.title,
+                          poster: r.poster,
+                        });
+                        setPage("movie");
+                      }}
+                    >
+                      {r.title}
+                    </span>
+                    <div
+                      style={{ display: "flex", alignItems: "center", gap: 3 }}
+                    >
                       <Star size={12} fill={C.gold} stroke={C.gold} />
-                      <span style={{ color: C.gold, fontSize: 13, fontWeight: 700 }}>{r.stars}</span>
+                      <span
+                        style={{ color: C.gold, fontSize: 13, fontWeight: 700 }}
+                      >
+                        {r.stars}
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -3443,167 +9752,472 @@ function QuickRatePage({ setPage, setSelectedMovie, auth }) {
 
           {/* Actions */}
           <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
-            <Btn variant="outline" onClick={() => setMode(null)}>Nova Sessão</Btn>
-            <Btn variant="gold" onClick={() => setPage("home")}>Voltar ao Início</Btn>
+            <Btn variant="outline" onClick={() => setMode(null)}>
+              Nova Sessão
+            </Btn>
+            <Btn variant="gold" onClick={() => setPage("home")}>
+              Voltar ao Início
+            </Btn>
           </div>
         </div>
       </div>
     );
   }
 
-  if (loading && movies.length === 0) return (
-    <div style={{ paddingTop: 100, minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 16 }}>
-      <Spinner size={36} />
-      <p style={{ color: C.textMuted, fontSize: 14 }}>Preparando sessão{mode === "recommended" ? " personalizada" : ""}...</p>
-    </div>
-  );
+  if (loading && movies.length === 0)
+    return (
+      <div
+        style={{
+          paddingTop: 100,
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexDirection: "column",
+          gap: 16,
+        }}
+      >
+        <Spinner size={36} />
+        <p style={{ color: C.textMuted, fontSize: 14 }}>
+          Preparando sessão{mode === "recommended" ? " personalizada" : ""}...
+        </p>
+      </div>
+    );
 
-  if (!current) return (
-    <div style={{ paddingTop: 100, minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 16 }}>
-      <Film size={48} style={{ color: C.textDim }} />
-      <p style={{ color: C.textMuted, fontSize: 14 }}>Nenhum filme encontrado</p>
-      <Btn variant="gold" onClick={() => setMode(null)}>Voltar</Btn>
-    </div>
-  );
+  if (!current)
+    return (
+      <div
+        style={{
+          paddingTop: 100,
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexDirection: "column",
+          gap: 16,
+        }}
+      >
+        <Film size={48} style={{ color: C.textDim }} />
+        <p style={{ color: C.textMuted, fontSize: 14 }}>
+          Nenhum filme encontrado
+        </p>
+        <Btn variant="gold" onClick={() => setMode(null)}>
+          Voltar
+        </Btn>
+      </div>
+    );
 
   const posterUrl = tmdb.poster(current.poster_path, "w500");
   const backdropUrl = tmdb.backdrop(current.backdrop_path);
   const year = current.release_date?.slice(0, 4);
   const cardTransform = animating
-    ? direction === "left" ? "translateX(-120%) rotate(-8deg)" : "translateX(120%) rotate(8deg)"
+    ? direction === "left"
+      ? "translateX(-120%) rotate(-8deg)"
+      : "translateX(120%) rotate(8deg)"
     : `translateX(${swipeX}px) rotate(${swipeX * 0.04}deg)`;
 
   return (
-    <div style={{ paddingTop: 80, minHeight: "100vh", position: "relative", overflow: "hidden" }}>
+    <div
+      style={{
+        paddingTop: 80,
+        minHeight: "100vh",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
       {backdropUrl && (
         <div style={{ position: "fixed", inset: 0, zIndex: 0 }}>
-          <img src={backdropUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.15, filter: "blur(30px)" }} />
-          <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to bottom, ${C.bg}dd, ${C.bg})` }} />
+          <img
+            src={backdropUrl}
+            alt=""
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              opacity: 0.15,
+              filter: "blur(30px)",
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              background: `linear-gradient(to bottom, ${C.bg}dd, ${C.bg})`,
+            }}
+          />
         </div>
       )}
 
-      <div style={{ position: "relative", zIndex: 1, maxWidth: 500, margin: "0 auto", padding: "20px 20px 40px" }}>
+      <div
+        style={{
+          position: "relative",
+          zIndex: 1,
+          maxWidth: 500,
+          margin: "0 auto",
+          padding: "20px 20px 40px",
+        }}
+      >
         {/* Header */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 24,
+          }}
+        >
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <button onClick={() => setMode(null)} style={{ background: "none", border: "none", cursor: "pointer", color: C.textMuted, display: "flex", alignItems: "center", padding: 4, borderRadius: 8, transition: "color 0.2s" }}
-              onMouseEnter={e => e.currentTarget.style.color = C.text} onMouseLeave={e => e.currentTarget.style.color = C.textMuted}>
+            <button
+              onClick={() => setMode(null)}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: C.textMuted,
+                display: "flex",
+                alignItems: "center",
+                padding: 4,
+                borderRadius: 8,
+                transition: "color 0.2s",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = C.text)}
+              onMouseLeave={(e) => (e.currentTarget.style.color = C.textMuted)}
+            >
               <ChevronLeft size={20} />
             </button>
-            {mode === "recommended" ? <Target size={18} style={{ color: C.gold }} /> : <Film size={18} style={{ color: "#818CF8" }} />}
-            <span style={{ color: C.text, fontWeight: 700, fontSize: 16, fontFamily: "'DM Sans', sans-serif" }}>
+            {mode === "recommended" ? (
+              <Target size={18} style={{ color: C.gold }} />
+            ) : (
+              <Film size={18} style={{ color: "#818CF8" }} />
+            )}
+            <span
+              style={{
+                color: C.text,
+                fontWeight: 700,
+                fontSize: 16,
+                fontFamily: "'DM Sans', sans-serif",
+              }}
+            >
               {mode === "recommended" ? "Recomendados" : "Aleatório"}
             </span>
           </div>
-          <span style={{ color: C.textDim, fontSize: 12 }}>{idx + 1} / {movies.length}{mode === "recommended" ? "+" : ""}</span>
+          <span style={{ color: C.textDim, fontSize: 12 }}>
+            {idx + 1} / {movies.length}
+            {mode === "recommended" ? "+" : ""}
+          </span>
         </div>
 
         {/* Movie Card */}
-        <div ref={containerRef} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerLeave={onPointerUp}
-          style={{ touchAction: "pan-y", userSelect: "none" }}>
-          <div style={{
-            transform: cardTransform,
-            transition: animating ? "transform 0.25s ease-out, opacity 0.25s" : dragStartX ? "none" : "transform 0.2s ease-out",
-            opacity: animating ? 0 : 1,
-          }}>
-            <div onClick={handleOpenMovie} style={{
-              cursor: "pointer", borderRadius: 20, overflow: "hidden", position: "relative",
-              aspectRatio: "2/3", width: "100%", boxShadow: "0 20px 60px rgba(0,0,0,0.6)", border: `1px solid ${C.border}`,
-            }}>
-              <img src={posterUrl} alt={current.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "50%", background: "linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%)" }} />
-              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "20px 24px" }}>
-                <h2 style={{ color: "#fff", fontSize: 22, fontWeight: 800, margin: 0, lineHeight: 1.2, fontFamily: "'DM Sans', sans-serif", textShadow: "0 2px 8px rgba(0,0,0,0.5)" }}>{current.title}</h2>
-                <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 8 }}>
-                  {year && <span style={{ color: "rgba(255,255,255,0.7)", fontSize: 13, fontWeight: 500 }}>{year}</span>}
+        <div
+          ref={containerRef}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerLeave={onPointerUp}
+          style={{ touchAction: "pan-y", userSelect: "none" }}
+        >
+          <div
+            style={{
+              transform: cardTransform,
+              transition: animating
+                ? "transform 0.25s ease-out, opacity 0.25s"
+                : dragStartX
+                  ? "none"
+                  : "transform 0.2s ease-out",
+              opacity: animating ? 0 : 1,
+            }}
+          >
+            <div
+              onClick={handleOpenMovie}
+              style={{
+                cursor: "pointer",
+                borderRadius: 20,
+                overflow: "hidden",
+                position: "relative",
+                aspectRatio: "2/3",
+                width: "100%",
+                boxShadow: "0 20px 60px rgba(0,0,0,0.6)",
+                border: `1px solid ${C.border}`,
+              }}
+            >
+              <img
+                src={posterUrl}
+                alt={current.title}
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              />
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  height: "50%",
+                  background:
+                    "linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%)",
+                }}
+              />
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  padding: "20px 24px",
+                }}
+              >
+                <h2
+                  style={{
+                    color: "#fff",
+                    fontSize: 22,
+                    fontWeight: 800,
+                    margin: 0,
+                    lineHeight: 1.2,
+                    fontFamily: "'DM Sans', sans-serif",
+                    textShadow: "0 2px 8px rgba(0,0,0,0.5)",
+                  }}
+                >
+                  {current.title}
+                </h2>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 12,
+                    marginTop: 8,
+                  }}
+                >
+                  {year && (
+                    <span
+                      style={{
+                        color: "rgba(255,255,255,0.7)",
+                        fontSize: 13,
+                        fontWeight: 500,
+                      }}
+                    >
+                      {year}
+                    </span>
+                  )}
                   {current.vote_average > 0 && (
-                    <span style={{ display: "flex", alignItems: "center", gap: 4, color: C.gold, fontSize: 13, fontWeight: 600 }}>
-                      <Star size={13} fill={C.gold} /> {current.vote_average.toFixed(1)}
+                    <span
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 4,
+                        color: C.gold,
+                        fontSize: 13,
+                        fontWeight: 600,
+                      }}
+                    >
+                      <Star size={13} fill={C.gold} />{" "}
+                      {current.vote_average.toFixed(1)}
                     </span>
                   )}
                 </div>
-                <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 11, marginTop: 8 }}>Toque para ver detalhes</p>
+                <p
+                  style={{
+                    color: "rgba(255,255,255,0.4)",
+                    fontSize: 11,
+                    marginTop: 8,
+                  }}
+                >
+                  Toque para ver detalhes
+                </p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Navigation + Stars */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 20 }}>
-          <button onClick={goPrev} disabled={idx === 0} style={{
-            width: 44, height: 44, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
-            background: idx > 0 ? "rgba(255,255,255,0.08)" : "transparent",
-            border: `1px solid ${idx > 0 ? C.border : "transparent"}`,
-            color: idx > 0 ? C.text : C.textDim, cursor: idx > 0 ? "pointer" : "default", transition: "all 0.2s",
-          }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginTop: 20,
+          }}
+        >
+          <button
+            onClick={goPrev}
+            disabled={idx === 0}
+            style={{
+              width: 44,
+              height: 44,
+              borderRadius: "50%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: idx > 0 ? "rgba(255,255,255,0.08)" : "transparent",
+              border: `1px solid ${idx > 0 ? C.border : "transparent"}`,
+              color: idx > 0 ? C.text : C.textDim,
+              cursor: idx > 0 ? "pointer" : "default",
+              transition: "all 0.2s",
+            }}
+          >
             <ChevronLeft size={22} />
           </button>
 
           <div style={{ display: "flex", gap: 6 }}>
-            {[1, 2, 3, 4, 5].map(s => {
+            {[1, 2, 3, 4, 5].map((s) => {
               const filled = s <= (hoverStar || localRating);
               const half = !filled && s - 0.5 === (hoverStar || localRating);
               return (
-                <button key={s} onClick={() => handleRate(s === localRating ? s - 0.5 : s)}
-                  onMouseEnter={() => setHoverStar(s)} onMouseLeave={() => setHoverStar(0)}
-                  style={{ background: "none", border: "none", cursor: "pointer", padding: 4, transform: filled || half ? "scale(1.15)" : "scale(1)", transition: "all 0.15s" }}>
-                  <Star size={28} fill={filled ? C.gold : half ? `url(#halfGrad)` : "transparent"} stroke={filled || half ? C.gold : C.textDim} strokeWidth={1.5} />
+                <button
+                  key={s}
+                  onClick={() => handleRate(s === localRating ? s - 0.5 : s)}
+                  onMouseEnter={() => setHoverStar(s)}
+                  onMouseLeave={() => setHoverStar(0)}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    padding: 4,
+                    transform: filled || half ? "scale(1.15)" : "scale(1)",
+                    transition: "all 0.15s",
+                  }}
+                >
+                  <Star
+                    size={28}
+                    fill={
+                      filled ? C.gold : half ? `url(#halfGrad)` : "transparent"
+                    }
+                    stroke={filled || half ? C.gold : C.textDim}
+                    strokeWidth={1.5}
+                  />
                 </button>
               );
             })}
-            <svg width="0" height="0"><defs><linearGradient id="halfGrad"><stop offset="50%" stopColor={C.gold} /><stop offset="50%" stopColor="transparent" /></linearGradient></defs></svg>
+            <svg width="0" height="0">
+              <defs>
+                <linearGradient id="halfGrad">
+                  <stop offset="50%" stopColor={C.gold} />
+                  <stop offset="50%" stopColor="transparent" />
+                </linearGradient>
+              </defs>
+            </svg>
           </div>
 
-          <button onClick={goNext} style={{
-            width: 44, height: 44, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
-            background: "rgba(255,255,255,0.08)", border: `1px solid ${C.border}`, color: C.text, cursor: "pointer", transition: "all 0.2s",
-          }}>
+          <button
+            onClick={goNext}
+            style={{
+              width: 44,
+              height: 44,
+              borderRadius: "50%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "rgba(255,255,255,0.08)",
+              border: `1px solid ${C.border}`,
+              color: C.text,
+              cursor: "pointer",
+              transition: "all 0.2s",
+            }}
+          >
             <ChevronRight size={22} />
           </button>
         </div>
 
         {/* Watchlist + Skip + Finish */}
-        <div style={{ display: "flex", justifyContent: "center", gap: 12, marginTop: 16 }}>
-          <Btn variant={inWl(current.id) ? "gold" : "outline"} size="sm" onClick={async () => {
-            if (inWl(current.id)) {
-              await removeWl(current.id);
-              setSessionStats(prev => ({ ...prev, watchlistAdded: prev.watchlistAdded.filter(id => id !== current.id) }));
-              toast.success("Removido da watchlist");
-            } else {
-              await addWl(current.id, current.title, tmdb.poster(current.poster_path));
-              setSessionStats(prev => ({ ...prev, watchlistAdded: [...prev.watchlistAdded, current.id] }));
-              toast.success("Adicionado à watchlist");
-            }
-          }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            gap: 12,
+            marginTop: 16,
+          }}
+        >
+          <Btn
+            variant={inWl(current.id) ? "gold" : "outline"}
+            size="sm"
+            onClick={async () => {
+              if (inWl(current.id)) {
+                await removeWl(current.id);
+                setSessionStats((prev) => ({
+                  ...prev,
+                  watchlistAdded: prev.watchlistAdded.filter(
+                    (id) => id !== current.id,
+                  ),
+                }));
+                toast.success("Removido da watchlist");
+              } else {
+                await addWl(
+                  current.id,
+                  current.title,
+                  tmdb.poster(current.poster_path),
+                );
+                setSessionStats((prev) => ({
+                  ...prev,
+                  watchlistAdded: [...prev.watchlistAdded, current.id],
+                }));
+                toast.success("Adicionado à watchlist");
+              }
+            }}
+          >
             <Bookmark size={14} fill={inWl(current.id) ? C.gold : "none"} />
             {inWl(current.id) ? "Na Watchlist" : "Watchlist"}
           </Btn>
-          <Btn variant="ghost" size="sm" onClick={() => {
-            setSessionStats(prev => ({ ...prev, skipped: prev.skipped + 1 }));
-            goNext();
-          }}>Pular <ChevronRight size={14} /></Btn>
+          <Btn
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setSessionStats((prev) => ({
+                ...prev,
+                skipped: prev.skipped + 1,
+              }));
+              goNext();
+            }}
+          >
+            Pular <ChevronRight size={14} />
+          </Btn>
         </div>
 
         {/* Session counter bar */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 20, marginTop: 20, padding: "12px 20px", borderRadius: 12, background: "rgba(255,255,255,0.03)", border: `1px solid ${C.border}` }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 20,
+            marginTop: 20,
+            padding: "12px 20px",
+            borderRadius: 12,
+            background: "rgba(255,255,255,0.03)",
+            border: `1px solid ${C.border}`,
+          }}
+        >
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <Star size={13} style={{ color: C.gold }} />
-            <span style={{ color: C.text, fontSize: 13, fontWeight: 600 }}>{sessionStats.rated.length}</span>
+            <span style={{ color: C.text, fontSize: 13, fontWeight: 600 }}>
+              {sessionStats.rated.length}
+            </span>
             <span style={{ color: C.textDim, fontSize: 11 }}>avaliados</span>
           </div>
           <div style={{ width: 1, height: 16, background: C.border }} />
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <Bookmark size={13} style={{ color: C.gold }} />
-            <span style={{ color: C.text, fontSize: 13, fontWeight: 600 }}>{sessionStats.watchlistAdded.length}</span>
+            <span style={{ color: C.text, fontSize: 13, fontWeight: 600 }}>
+              {sessionStats.watchlistAdded.length}
+            </span>
             <span style={{ color: C.textDim, fontSize: 11 }}>na lista</span>
           </div>
           <div style={{ width: 1, height: 16, background: C.border }} />
-          <Btn variant="outline" size="sm" onClick={() => setMode("summary")} style={{ fontSize: 11, padding: "4px 12px" }}>
+          <Btn
+            variant="outline"
+            size="sm"
+            onClick={() => setMode("summary")}
+            style={{ fontSize: 11, padding: "4px 12px" }}
+          >
             <Award size={13} /> Finalizar
           </Btn>
         </div>
 
-        <p style={{ textAlign: "center", color: C.textDim, fontSize: 11, marginTop: 12 }}>
+        <p
+          style={{
+            textAlign: "center",
+            color: C.textDim,
+            fontSize: 11,
+            marginTop: 12,
+          }}
+        >
           Arraste para os lados ou use as setas ← → para navegar
         </p>
       </div>
@@ -3618,12 +10232,21 @@ export default function MovieClubApp() {
   const [selectedMovie, setSM] = useState(null);
   const [selectedGroup, setSG] = useState(null);
   const [viewProfileUserId, setViewProfileUserId] = useState(null);
-  const [apiStatus, setApiStatus] = useState({ tmdb: false, omdb: false, streaming: false });
+  const [apiStatus, setApiStatus] = useState({
+    tmdb: false,
+    omdb: false,
+    streaming: false,
+  });
   const authCtx = useAuth();
   const [authError, setAuthError] = useState("");
 
   useEffect(() => {
-    tmdb.popular().then(d => { if (d?.results) setApiStatus(s => ({ ...s, tmdb: true })); }).catch(() => { });
+    tmdb
+      .popular()
+      .then((d) => {
+        if (d?.results) setApiStatus((s) => ({ ...s, tmdb: true }));
+      })
+      .catch(() => {});
   }, []);
 
   // Auto-detect profile link in URL
@@ -3634,21 +10257,44 @@ export default function MovieClubApp() {
     const clubCode = params.get("club");
     if (profileId) {
       window.history.replaceState({}, "", window.location.pathname);
-      if (profileId === authCtx.user.id) { setPage("profile"); }
-      else { setViewProfileUserId(profileId); setPage("view-profile"); }
+      if (profileId === authCtx.user.id) {
+        setPage("profile");
+      } else {
+        setViewProfileUserId(profileId);
+        setPage("view-profile");
+      }
     }
     if (clubCode) {
       window.history.replaceState({}, "", window.location.pathname);
       setPage("groups");
       setTimeout(async () => {
         try {
-          const { data: club } = await supabase.from("clubs").select("id").eq("invite_code", clubCode).single();
-          if (!club) { toast.error("Código de club inválido"); return; }
-          const { data: existing } = await supabase.from("club_members").select("id").eq("club_id", club.id).eq("user_id", authCtx.user.id).maybeSingle();
-          if (existing) { toast.info("Você já é membro deste club!"); return; }
-          await supabase.from("club_members").insert({ club_id: club.id, user_id: authCtx.user.id });
+          const { data: club } = await supabase
+            .from("clubs")
+            .select("id")
+            .eq("invite_code", clubCode)
+            .single();
+          if (!club) {
+            toast.error("Código de club inválido");
+            return;
+          }
+          const { data: existing } = await supabase
+            .from("club_members")
+            .select("id")
+            .eq("club_id", club.id)
+            .eq("user_id", authCtx.user.id)
+            .maybeSingle();
+          if (existing) {
+            toast.info("Você já é membro deste club!");
+            return;
+          }
+          await supabase
+            .from("club_members")
+            .insert({ club_id: club.id, user_id: authCtx.user.id });
           toast.success("Você entrou no club! 🎉");
-        } catch (e) { toast.error("Erro ao entrar no club"); }
+        } catch (e) {
+          toast.error("Erro ao entrar no club");
+        }
       }, 500);
     }
   }, [authCtx.user]);
@@ -3665,29 +10311,123 @@ export default function MovieClubApp() {
   const handleSplashDone = useCallback(() => setShowSplash(false), []);
 
   const handleLogin = async (email, password) => {
-    try { setAuthError(""); await authCtx.signIn(email, password); toast.success("Login realizado com sucesso!"); } catch (e) { const msg = e.message || "Erro ao entrar"; setAuthError(msg); toast.error(msg); throw e; }
+    try {
+      setAuthError("");
+      await authCtx.signIn(email, password);
+      toast.success("Login realizado com sucesso!");
+    } catch (e) {
+      const msg = e.message || "Erro ao entrar";
+      setAuthError(msg);
+      toast.error(msg);
+      throw e;
+    }
   };
   const handleSignup = async (email, password, name, username) => {
-    try { setAuthError(""); await authCtx.signUp(email, password, name, username); toast.success("Conta criada com sucesso! Bem-vindo(a)!"); } catch (e) { const msg = e.message || "Erro ao cadastrar"; setAuthError(msg); toast.error(msg); throw e; }
+    try {
+      setAuthError("");
+      await authCtx.signUp(email, password, name, username);
+      toast.success("Conta criada com sucesso! Bem-vindo(a)!");
+    } catch (e) {
+      const msg = e.message || "Erro ao cadastrar";
+      setAuthError(msg);
+      toast.error(msg);
+      throw e;
+    }
   };
 
   if (showSplash) return <SplashScreen onFinish={handleSplashDone} />;
-  if (authCtx.loading) return <div style={{ minHeight: "100vh", background: C.bg, display: "flex", alignItems: "center", justifyContent: "center" }}><Spinner size={32} /></div>;
-  if (!authCtx.user) return <LoginPage onLogin={handleLogin} onSignup={handleSignup} error={authError} />;
+  if (authCtx.loading)
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          background: C.bg,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Spinner size={32} />
+      </div>
+    );
+  if (!authCtx.user)
+    return (
+      <LoginPage
+        onLogin={handleLogin}
+        onSignup={handleSignup}
+        error={authError}
+      />
+    );
 
   return (
     <div style={{ minHeight: "100vh", background: C.bg }}>
-      <Navbar page={page} setPage={setPage} hasKeys={true} apiStatus={apiStatus} />
+      <Navbar
+        page={page}
+        setPage={setPage}
+        hasKeys={true}
+        apiStatus={apiStatus}
+      />
       <div className="page-enter" key={page}>
-        {page === "home" && <HomePage setPage={setPage} setSelectedMovie={setSM} auth={authCtx} />}
-        {page === "quickrate" && <QuickRatePage setPage={setPage} setSelectedMovie={setSM} auth={authCtx} />}
-        {page === "profile" && <ProfilePage setPage={setPage} isOwnProfile auth={authCtx} setSelectedMovie={setSM} />}
-        {page === "view-profile" && <ProfilePage setPage={setPage} auth={authCtx} setSelectedMovie={setSM} viewUserId={viewProfileUserId} />}
-        {page === "movie" && <MoviePage movieInit={selectedMovie} setPage={setPage} setSelectedMovie={setSM} auth={authCtx} />}
-        {page === "friends" && <FriendsPage setPage={setPage} setSelectedMovie={setSM} auth={authCtx} onViewProfile={handleViewProfile} />}
-        {page === "groups" && <GroupsPage setPage={setPage} setSelectedGroup={setSG} auth={authCtx} />}
-        {page === "group" && <GroupPage group={selectedGroup} setPage={setPage} setSelectedMovie={setSM} auth={authCtx} />}
-        {page === "search" && <SearchPage setPage={setPage} setSelectedMovie={setSM} />}
+        {page === "home" && (
+          <HomePage setPage={setPage} setSelectedMovie={setSM} auth={authCtx} />
+        )}
+        {page === "quickrate" && (
+          <QuickRatePage
+            setPage={setPage}
+            setSelectedMovie={setSM}
+            auth={authCtx}
+          />
+        )}
+        {page === "profile" && (
+          <ProfilePage
+            setPage={setPage}
+            isOwnProfile
+            auth={authCtx}
+            setSelectedMovie={setSM}
+          />
+        )}
+        {page === "view-profile" && (
+          <ProfilePage
+            setPage={setPage}
+            auth={authCtx}
+            setSelectedMovie={setSM}
+            viewUserId={viewProfileUserId}
+          />
+        )}
+        {page === "movie" && (
+          <MoviePage
+            movieInit={selectedMovie}
+            setPage={setPage}
+            setSelectedMovie={setSM}
+            auth={authCtx}
+          />
+        )}
+        {page === "friends" && (
+          <FriendsPage
+            setPage={setPage}
+            setSelectedMovie={setSM}
+            auth={authCtx}
+            onViewProfile={handleViewProfile}
+          />
+        )}
+        {page === "groups" && (
+          <GroupsPage
+            setPage={setPage}
+            setSelectedGroup={setSG}
+            auth={authCtx}
+          />
+        )}
+        {page === "group" && (
+          <GroupPage
+            group={selectedGroup}
+            setPage={setPage}
+            setSelectedMovie={setSM}
+            auth={authCtx}
+          />
+        )}
+        {page === "search" && (
+          <SearchPage setPage={setPage} setSelectedMovie={setSM} />
+        )}
         {page === "settings" && <SettingsPage apiStatus={apiStatus} />}
       </div>
     </div>
