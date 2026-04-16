@@ -1,0 +1,1 @@
+ALTER TABLE public.friendships ADD CONSTRAINT friendships_user_pair_unique UNIQUE (user_a_id, user_b_id);
