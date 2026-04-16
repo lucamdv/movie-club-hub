@@ -2046,8 +2046,9 @@ function ProfilePage({ user, setPage, isOwnProfile = true, auth: authCtx, setSel
   const [showImportModal, setShowImportModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
 
-  // Follow hooks - use targetUserId for counts, currentUserId for actions
-  const { following: targetFollowing, followers: targetFollowers, isFollowing, follow, unfollow } = useFollows(targetUserId);
+  // Follow hooks - currentUser for actions, targetUser for display counts
+  const { following: myFollowing, follow, unfollow, isFollowing } = useFollows(currentUserId);
+  const { followers: targetFollowers, following: targetFollowing } = useFollows(targetUserId);
   const { isFriend } = useFriendships(currentUserId);
 
   const displayName = profile?.display_name || (isViewingOther ? "Usuário" : authCtx?.user?.email || "Usuário");
@@ -2360,12 +2361,22 @@ function useFollows(userId) {
     if (!userId) return;
     await supabase.from("follows").insert({ follower_id: userId, following_id: targetId });
     await load();
+    // Check mutual follow → auto-create friendship
+    const { data: mutual } = await supabase.from("follows")
+      .select("id").eq("follower_id", targetId).eq("following_id", userId).limit(1);
+    if (mutual && mutual.length > 0) {
+      const [a, b] = [userId, targetId].sort();
+      await supabase.from("friendships").upsert({ user_a_id: a, user_b_id: b }, { onConflict: "user_a_id,user_b_id" });
+    }
   };
 
   const unfollow = async (targetId) => {
     if (!userId) return;
     await supabase.from("follows").delete().eq("follower_id", userId).eq("following_id", targetId);
     await load();
+    // Remove friendship if no longer mutual
+    const [a, b] = [userId, targetId].sort();
+    await supabase.from("friendships").delete().eq("user_a_id", a).eq("user_b_id", b);
   };
 
   const isFollowing = (targetId) => following.some(f => f.following_id === targetId);
