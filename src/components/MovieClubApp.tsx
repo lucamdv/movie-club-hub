@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -4472,7 +4473,11 @@ function SearchPage({ setPage, setSelectedMovie }) {
 // ─────────────────────────────────────────────
 //  IMPORT DATA MODAL (Letterboxd ZIP)
 // ─────────────────────────────────────────────
-function ImportDataModal({ userId, onClose }) {
+function ImportDataModal(props) {
+  if (typeof document === "undefined") return null;
+  return createPortal(<ImportDataModalInner {...props} />, document.body);
+}
+function ImportDataModalInner({ userId, onClose }) {
   const [step, setStep] = useState("select_platform"); // select_platform | instructions | processing | done
   const [progress, setProgress] = useState({
     total: 0,
@@ -5050,7 +5055,11 @@ function ImportDataModal({ userId, onClose }) {
 // ─────────────────────────────────────────────
 //  PROFILE EDIT MODAL
 // ─────────────────────────────────────────────
-function ProfileEditModal({ profile, user, onClose, onSave }) {
+function ProfileEditModal(props) {
+  if (typeof document === "undefined") return null;
+  return createPortal(<ProfileEditModalInner {...props} />, document.body);
+}
+function ProfileEditModalInner({ profile, user, onClose, onSave }) {
   const [displayName, setDisplayName] = useState(profile?.display_name || "");
   const [username, setUsername] = useState(profile?.username || "");
   const [bio, setBio] = useState(profile?.bio || "");
