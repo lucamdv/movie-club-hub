@@ -47,7 +47,7 @@ import logoMain from "@/assets/logo-main.png";
 import mascotsNav from "@/assets/mascots-nav.png";
 import logoText from "@/assets/logo-text.png";
 import mascotWizard from "@/assets/mascot-wizard.png";
-import mascotSpeak from "@/assets/mascot-speak.png";
+import mascotSpeak from "@/assets/mascot-see.png";
 import mascotSee from "@/assets/mascot-see.png";
 import monkeyDirector from "@/assets/monkey-director.png";
 import monkeyPopcorn from "@/assets/monkey-popcorn.png";
@@ -58,6 +58,9 @@ import monkeyGym from "@/assets/monkey-gym.png";
 import monkeyEars from "@/assets/monkey-ears.png";
 import monkeyStrong from "@/assets/monkey-strong.png";
 import monkeyShy from "@/assets/monkey-shy.png";
+import monkeyFlash from "@/assets/monkey-flash.png";
+import monkeyCrew from "@/assets/monkey-crew.png";
+import monkeySearch from "@/assets/monkey-search.png";
 
 const MONKEY_AVATARS = [
   { id: "mascot-wizard", src: mascotWizard, label: "Mágico" },
@@ -72,6 +75,9 @@ const MONKEY_AVATARS = [
   { id: "shy", src: monkeyShy, label: "Tímido" },
   { id: "gym", src: monkeyGym, label: "Academia" },
   { id: "ears", src: monkeyEars, label: "Surdo" },
+  { id: "flash", src: monkeyFlash, label: "Rápido" },
+  { id: "crew", src: monkeyCrew, label: "Equipe" },
+  { id: "search", src: monkeySearch, label: "Curioso" },
 ];
 
 // ─────────────────────────────────────────────
@@ -1950,11 +1956,11 @@ function Navbar({ page, setPage, hasKeys, apiStatus }) {
   // Monkey mascots: wizard=discover, speak-no-evil=profile, see-no-evil=clubs
   const items = [
     ["home", "Discover", mascotWizard],
-    ["quickrate", "Avaliar", null],
+    ["quickrate", "Avaliar", monkeyFlash],
     ["groups", "Clubs", mascotSee],
-    ["profile", "Perfil", mascotSpeak],
-    ["friends", "Amigos", null],
-    ["search", "Buscar", null],
+    ["profile", "Perfil", monkeyPopcorn],
+    ["friends", "Amigos", monkeyCrew],
+    ["search", "Buscar", monkeySearch],
   ];
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
@@ -4467,7 +4473,7 @@ function SearchPage({ setPage, setSelectedMovie }) {
 //  IMPORT DATA MODAL (Letterboxd ZIP)
 // ─────────────────────────────────────────────
 function ImportDataModal({ userId, onClose }) {
-  const [step, setStep] = useState("upload"); // upload | processing | done
+  const [step, setStep] = useState("select_platform"); // select_platform | instructions | processing | done
   const [progress, setProgress] = useState({
     total: 0,
     matched: 0,
@@ -4724,35 +4730,92 @@ function ImportDataModal({ userId, onClose }) {
           </button>
         </div>
 
-        {step === "upload" && (
+        {step === "select_platform" && (
           <div>
-            <p
+            <p style={{ color: C.textMuted, fontSize: 14, marginBottom: 20 }}>
+              De qual plataforma você deseja importar seu histórico?
+            </p>
+            <button
+              onClick={() => setStep("instructions")}
+              style={{
+                width: "100%",
+                padding: "16px",
+                background: C.bgDeep,
+                border: `1px solid ${C.border}`,
+                borderRadius: 12,
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
+                cursor: "pointer",
+                transition: "all 0.2s",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.borderColor = "#00E054")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.borderColor = C.border)
+              }
+            >
+              <span
+                style={{
+                  fontWeight: 800,
+                  color: "#00E054",
+                  fontSize: 18,
+                  letterSpacing: "-0.5px",
+                }}
+              >
+                Letterboxd
+              </span>
+            </button>
+          </div>
+        )}
+
+        {step === "instructions" && (
+          <div>
+            <button
+              onClick={() => setStep("select_platform")}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                background: "none",
+                border: "none",
+                color: C.textMuted,
+                cursor: "pointer",
+                marginBottom: 20,
+                fontSize: 13,
+              }}
+            >
+              <ChevronLeft size={16} /> Voltar
+            </button>
+
+            <ol
               style={{
                 color: C.textMuted,
                 fontSize: 14,
-                lineHeight: 1.6,
-                marginBottom: 16,
+                lineHeight: 1.8,
+                marginBottom: 24,
+                paddingLeft: 18,
               }}
             >
-              Importe suas avaliações, reviews e watchlist de outros apps como{" "}
-              <span style={{ color: C.gold, fontWeight: 600 }}>Letterboxd</span>
-              .
-            </p>
-            <p style={{ color: C.textMuted, fontSize: 13, marginBottom: 20 }}>
-              Exporte seus dados no app original (geralmente em Configurações →
-              Exportar) e faça upload do arquivo{" "}
-              <code
-                style={{
-                  background: C.bgDeep,
-                  padding: "2px 6px",
-                  borderRadius: 4,
-                  color: C.gold,
-                }}
-              >
-                .zip
-              </code>{" "}
-              aqui.
-            </p>
+              <li>
+                1. Exporte seus dados do letterboxd através do link:{" "}
+                <a
+                  href="https://letterboxd.com/user/exportdata/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: C.gold, textDecoration: "underline" }}
+                >
+                  https://letterboxd.com/user/exportdata/
+                </a>
+              </li>
+              <li>2. Clique em "Export data"</li>
+              <li>3. Faça login com sua conta Letterboxd</li>
+              <li>4. O download dos seus dados iniciará automaticamente</li>
+              <li>5. Anexe o arquivo ZIP extraído na janela abaixo:</li>
+            </ol>
+
+            {/* Sua caixa de upload original continua aqui */}
             <div
               style={{
                 border: `2px dashed ${C.border}`,
@@ -4801,40 +4864,6 @@ function ImportDataModal({ userId, onClose }) {
                   if (f) processZip(f);
                 }}
               />
-            </div>
-
-            <div
-              style={{
-                marginTop: 20,
-                padding: 16,
-                background: C.bgDeep,
-                borderRadius: 12,
-                border: `1px solid ${C.border}`,
-              }}
-            >
-              <p
-                style={{
-                  fontSize: 12,
-                  fontWeight: 600,
-                  color: C.gold,
-                  marginBottom: 8,
-                }}
-              >
-                Arquivos suportados no ZIP:
-              </p>
-              {[
-                "ratings.csv — Avaliações com notas",
-                "reviews.csv — Reviews com texto",
-                "watchlist.csv — Lista para assistir",
-                "diary.csv — Diário de filmes",
-              ].map((t) => (
-                <p
-                  key={t}
-                  style={{ fontSize: 12, color: C.textMuted, marginBottom: 3 }}
-                >
-                  • {t}
-                </p>
-              ))}
             </div>
           </div>
         )}
@@ -5457,25 +5486,30 @@ function ProfilePage({
         ).toFixed(1)
       : "—";
 
-// Gêneros favoritos baseados em TODAS as avaliações do usuário
+  // Gêneros favoritos baseados em TODAS as avaliações do usuário
   const [favGenres, setFavGenres] = useState([]);
   useEffect(() => {
-    if (!ratings.length) { setFavGenres([]); return; }
+    if (!ratings.length) {
+      setFavGenres([]);
+      return;
+    }
     let alive = true;
 
     // Alteração: Agora utilizamos o array 'ratings' completo em vez de apenas .slice(0, 20)
-    const toFetch = ratings; 
+    const toFetch = ratings;
 
-    Promise.all(toFetch.map(r =>
-      cachedFetch(`mini_${r.tmdb_id}`, () => 
-        tmdbProxy({ data: { path: `/movie/${r.tmdb_id}`, params: {} } })
-      ).catch(() => null)
-    )).then(results => {
+    Promise.all(
+      toFetch.map((r) =>
+        cachedFetch(`mini_${r.tmdb_id}`, () =>
+          tmdbProxy({ data: { path: `/movie/${r.tmdb_id}`, params: {} } }),
+        ).catch(() => null),
+      ),
+    ).then((results) => {
       if (!alive) return;
       const genreCount = {};
-      
-      results.filter(Boolean).forEach(m => {
-        (m.genres || []).forEach(g => {
+
+      results.filter(Boolean).forEach((m) => {
+        (m.genres || []).forEach((g) => {
           // O TMDB retorna objetos de gênero com 'name'. Verificamos para evitar erros.
           const genreName = g.name || g;
           if (genreName) {
@@ -5488,15 +5522,19 @@ function ProfilePage({
       const sorted = Object.entries(genreCount)
         .sort((a, b) => b[1] - a[1])
         .slice(0, 6);
-        
+
       const maxCount = sorted[0]?.[1] || 1;
-      setFavGenres(sorted.map(([name, count]) => ({ 
-        name, 
-        count, 
-        pct: Math.round((count / maxCount) * 100) 
-      })));
+      setFavGenres(
+        sorted.map(([name, count]) => ({
+          name,
+          count,
+          pct: Math.round((count / maxCount) * 100),
+        })),
+      );
     });
-    return () => { alive = false; };
+    return () => {
+      alive = false;
+    };
   }, [ratings]);
 
   // Top 3 recent posters for banner collage
@@ -7156,13 +7194,11 @@ function useClubs(userId) {
     return club;
   };
   const inviteFriend = async (clubId, friendUserId) => {
-    const { error } = await supabase
-      .from("club_invites")
-      .insert({
-        club_id: clubId,
-        invited_by: userId,
-        invited_user_id: friendUserId,
-      });
+    const { error } = await supabase.from("club_invites").insert({
+      club_id: clubId,
+      invited_by: userId,
+      invited_user_id: friendUserId,
+    });
     if (error) throw error;
   };
   const acceptInvite = async (inviteId, clubId) => {
@@ -7252,15 +7288,13 @@ function useClubDetail(clubId, userId) {
     load();
   }, [load]);
   const addMovie = async (tmdbId, title, posterUrl) => {
-    const { error } = await supabase
-      .from("club_movies")
-      .insert({
-        club_id: clubId,
-        user_id: userId,
-        tmdb_id: tmdbId,
-        title,
-        poster_url: posterUrl,
-      });
+    const { error } = await supabase.from("club_movies").insert({
+      club_id: clubId,
+      user_id: userId,
+      tmdb_id: tmdbId,
+      title,
+      poster_url: posterUrl,
+    });
     if (error) {
       if (error.code === "23505") throw new Error("Filme já adicionado");
       throw error;

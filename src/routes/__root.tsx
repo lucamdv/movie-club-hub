@@ -1,4 +1,10 @@
-import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import {
+  Outlet,
+  Link,
+  createRootRoute,
+  HeadContent,
+  Scripts,
+} from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
 
@@ -31,11 +37,17 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "MovieClub" }, // O NOME DA PÁGINA FICA AQUI
-      { name: "description", content: "Your cinephile social club — discover, rate & share films." },
+      { title: "MovieClub" },
+      {
+        name: "description",
+        content: "Your cinephile social club — discover, rate & share films.",
+      },
       { name: "author", content: "MovieClub" },
       { property: "og:title", content: "MovieClub" },
-      { property: "og:description", content: "Your cinephile social club — discover, rate & share films." },
+      {
+        property: "og:description",
+        content: "Your cinephile social club — discover, rate & share films.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
@@ -45,11 +57,15 @@ export const Route = createRootRoute({
         rel: "stylesheet",
         href: appCss,
       },
-      // ADICIONE ESTE BLOCO ABAIXO PARA O FAVICON
+      // Ícone Principal .ICO
       {
         rel: "icon",
-        type: "image/png",
-        href: "/logo-main.png",
+        href: "/favicon.ico", // Removido o 'type' e 'sizes' para evitar confusão no navegador
+      },
+      // Atalho para Apple (Obrigatório ser .png)
+      {
+        rel: "apple-touch-icon",
+        href: "/apple-touch-icon.png",
       },
     ],
   }),
