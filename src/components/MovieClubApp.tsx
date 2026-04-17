@@ -9101,7 +9101,6 @@ function QuickRatePage({ setPage, setSelectedMovie, auth }) {
   }, []);
 
   // Load recommended movies (infinite)
-  // Load recommended movies (infinite)
   const loadRecommended = useCallback(
     async (append = false) => {
       if (loadingMoreRef.current) return;
@@ -9120,14 +9119,14 @@ function QuickRatePage({ setPage, setSelectedMovie, auth }) {
           ratings.reduce((sum, r) => sum + Number(r.rating), 0) /
           ratings.length;
 
-        // 2. Baseia as recomendações em filmes avaliados >= à média pessoal
-        let seedCandidates = ratings
+        // 2. Considera TODOS os filmes avaliados acima/igual à média
+        let seeds = ratings
           .filter((r) => Number(r.rating) >= userAverage)
           .sort((a, b) => Number(b.rating) - Number(a.rating));
 
         // Fallback de segurança se todos tiverem a mesma nota
-        if (!seedCandidates.length) {
-          seedCandidates = ratings.sort(
+        if (!seeds.length) {
+          seeds = [...ratings].sort(
             (a, b) => Number(b.rating) - Number(a.rating),
           );
         }
@@ -9135,12 +9134,20 @@ function QuickRatePage({ setPage, setSelectedMovie, auth }) {
         const ratedIds = new Set(ratings.map((r) => r.tmdb_id));
         const page = recPageRef.current;
 
-        // Pick different seed movies each page based on the dynamic user standards
+        // Janela rotativa: a cada página percorremos uma fatia diferente das seeds
+        // garantindo que com o tempo TODOS os filmes acima da média sejam usados.
+        const WINDOW = 8;
+        const total = seeds.length;
+        const start = (page * WINDOW) % total;
         const seedMovies = [];
-        for (let i = 0; i < 5; i++) {
-          const pick = seedCandidates[(page * 5 + i) % seedCandidates.length];
-          if (pick) seedMovies.push(pick);
+        for (let i = 0; i < Math.min(WINDOW, total); i++) {
+          seedMovies.push(seeds[(start + i) % total]);
         }
+
+        const maxRating = Math.max(
+          ...seedMovies.map((s) => Number(s.rating)),
+          1,
+        );
 
         const results = await Promise.all(
           seedMovies.map((r) =>
@@ -9148,26 +9155,26 @@ function QuickRatePage({ setPage, setSelectedMovie, auth }) {
               .get(`/movie/${r.tmdb_id}/recommendations`, {
                 page: String((page % 3) + 1),
               })
+              .then((res) => ({ res, weight: Number(r.rating) / maxRating }))
               .catch(() => null),
           ),
         );
 
-        const allRecs = results
-          .filter(Boolean)
-          .flatMap((r) => r.results || [])
-          .filter((m) => m.poster_path && !ratedIds.has(m.id));
-        const seen = new Set();
-        const unique = allRecs.filter((m) => {
-          if (seen.has(m.id)) return false;
-          seen.add(m.id);
-          return true;
-        });
-
-        // Shuffle
-        for (let i = unique.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [unique[i], unique[j]] = [unique[j], unique[i]];
+        // Scoring ponderado pela nota da seed e pela popularidade do candidato
+        const scoreMap = new Map();
+        for (const item of results) {
+          if (!item?.res?.results) continue;
+          for (const raw of item.res.results) {
+            if (!raw.poster_path || ratedIds.has(raw.id)) continue;
+            const inc = item.weight * (1 + (raw.vote_average || 0) / 10);
+            const prev = scoreMap.get(raw.id);
+            if (prev) prev.score += inc;
+            else scoreMap.set(raw.id, { movie: raw, score: inc });
+          }
         }
+        const unique = Array.from(scoreMap.values())
+          .sort((a, b) => b.score - a.score)
+          .map((x) => x.movie);
 
         recPageRef.current = page + 1;
 
@@ -9188,6 +9195,7 @@ function QuickRatePage({ setPage, setSelectedMovie, auth }) {
     },
     [ratings, loadRandom],
   );
+
 
   // Start session
   const startSession = (m) => {
