@@ -2,19 +2,69 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { toast } from "sonner";
 import {
-  C, MONKEY_AVATARS, tmdb, omdb, streaming, normalizeTmdb, mergeOmdb,
-  STREAM_META, parseStreamingServices,
-  isUpcoming, formatReleaseDateBR,
-  logoMain, mascotsNav, logoText,
-  mascotWizard, mascotSpeak, mascotSee,
-  monkeyDirector, monkeyPopcorn, monkeyDetective, monkeyStar, monkeyAstronaut,
-  monkeyGym, monkeyEars, monkeyStrong, monkeyShy, monkeyFlash, monkeyCrew, monkeySearch,
+  C,
+  MONKEY_AVATARS,
+  tmdb,
+  omdb,
+  streaming,
+  normalizeTmdb,
+  mergeOmdb,
+  STREAM_META,
+  parseStreamingServices,
+  isUpcoming,
+  formatReleaseDateBR,
+  logoMain,
+  mascotsNav,
+  logoText,
+  mascotWizard,
+  mascotSpeak,
+  mascotSee,
+  monkeyDirector,
+  monkeyPopcorn,
+  monkeyDetective,
+  monkeyStar,
+  monkeyAstronaut,
+  monkeyGym,
+  monkeyEars,
+  monkeyStrong,
+  monkeyShy,
+  monkeyFlash,
+  monkeyCrew,
+  monkeySearch,
 } from "./foundation";
 import {
-  Film, ClipboardList, Star, User, Users, Search, Handshake, Pencil, Link2,
-  TrendingUp, Target, Radio, Calendar, X, Flame, UserRound, Bookmark,
-  Clapperboard, Eye, EyeOff, Share2, ListVideo, Award, Zap, ChevronLeft,
-  ChevronRight, Plus, SkipForward, Upload, CheckCircle, AlertCircle, Loader2,
+  Film,
+  ClipboardList,
+  Star,
+  User,
+  Users,
+  Search,
+  Handshake,
+  Pencil,
+  Link2,
+  TrendingUp,
+  Target,
+  Radio,
+  Calendar,
+  X,
+  Flame,
+  UserRound,
+  Bookmark,
+  Clapperboard,
+  Eye,
+  EyeOff,
+  Share2,
+  ListVideo,
+  Award,
+  Zap,
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+  SkipForward,
+  Upload,
+  CheckCircle,
+  AlertCircle,
+  Loader2,
 } from "lucide-react";
 import { useMovieDetails } from "./hooks";
 
@@ -160,7 +210,6 @@ function StarRating({
     </div>
   );
 }
-
 
 function Avatar({ user, size = 40 }) {
   return (
@@ -409,7 +458,6 @@ function FilmStripBg() {
   );
 }
 
-
 function StreamingBadges({ services, loading }) {
   if (loading)
     return (
@@ -516,7 +564,6 @@ function StreamingBadges({ services, loading }) {
   );
 }
 
-
 function RatingsRow({ movie }) {
   const items = [
     movie.rating && {
@@ -621,7 +668,6 @@ function RatingsRow({ movie }) {
     </div>
   );
 }
-
 
 function MovieCard({ movie, size = "md", onClick }) {
   const w = size === "sm" ? 130 : size === "lg" ? 220 : 180;
@@ -803,7 +849,6 @@ function MiniPoster({ tmdbId }) {
     />
   ) : null;
 }
-
 
 const BackIcon = () => (
   <svg
@@ -1109,7 +1154,6 @@ const ChevronRightIcon = () => (
   </svg>
 );
 
-
 function Carousel({ children, movies, onMovieClick }) {
   const ref = useRef(null);
   const [canLeft, setCanLeft] = useState(false);
@@ -1196,7 +1240,6 @@ function Carousel({ children, movies, onMovieClick }) {
     </div>
   );
 }
-
 
 function Navbar({ page, setPage, hasKeys, apiStatus }) {
   // Monkey mascots: wizard=discover, speak-no-evil=profile, see-no-evil=clubs
@@ -1336,7 +1379,6 @@ function Navbar({ page, setPage, hasKeys, apiStatus }) {
   );
 }
 
-
 function PaginationBar({ page, totalPages, totalResults, onPageChange }) {
   if (totalPages <= 1) return null;
   const getVisiblePages = () => {
@@ -1458,31 +1500,41 @@ function HeroBanner({ movies, onSelect }) {
         position: "relative",
         overflow: "hidden",
         marginBottom: 0,
+        background: C.bgDeep, // Fundo sólido para evitar transparência na transição
       }}
     >
-      {/* Backdrop with Ken Burns */}
-      {hero.backdrop && (
-        <img
-          key={hero.id}
-          src={hero.backdrop}
-          alt=""
-          className="hero-backdrop"
-          style={{
-            position: "absolute",
-            inset: 0,
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            opacity: 0.45,
-          }}
-        />
+      {/* 1. Crossfade suave nos Backdrops: evita o "pulo" visual */}
+      {movies.slice(0, 5).map(
+        (m, i) =>
+          m.backdrop && (
+            <img
+              key={`bg-${m.id}`}
+              src={m.backdrop}
+              alt=""
+              className="hero-backdrop"
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                opacity: idx === i ? 0.45 : 0,
+                transition: "opacity 1.2s ease-in-out", // Transição mais fluida
+                zIndex: 0,
+                pointerEvents: "none",
+              }}
+            />
+          ),
       )}
-      {/* Gradient overlays */}
+
+      {/* Gradient Overlays (zIndex 1) */}
       <div
         style={{
           position: "absolute",
           inset: 0,
           background: `linear-gradient(to right, ${C.bg} 0%, rgba(15,25,35,0.6) 50%, rgba(15,25,35,0.1) 100%)`,
+          zIndex: 1,
+          pointerEvents: "none",
         }}
       />
       <div
@@ -1490,17 +1542,19 @@ function HeroBanner({ movies, onSelect }) {
           position: "absolute",
           inset: 0,
           background: `linear-gradient(to top, ${C.bg} 0%, transparent 50%)`,
+          zIndex: 1,
+          pointerEvents: "none",
         }}
       />
 
-      {/* Content */}
+      {/* 2. Content Area (zIndex 10 para ficar acima dos gradientes) */}
       <div
         style={{
           position: "absolute",
           bottom: 80,
           left: 48,
           maxWidth: 560,
-          zIndex: 1,
+          zIndex: 10,
           animation: "fadeIn 0.5s ease",
         }}
         key={hero.id}
@@ -1515,6 +1569,7 @@ function HeroBanner({ movies, onSelect }) {
             </Badge>
           )}
         </div>
+
         <h1
           style={{
             fontFamily: "'Outfit', sans-serif",
@@ -1528,6 +1583,7 @@ function HeroBanner({ movies, onSelect }) {
         >
           {hero.title}
         </h1>
+
         {hero.overview && (
           <p
             style={{
@@ -1544,6 +1600,8 @@ function HeroBanner({ movies, onSelect }) {
             {hero.overview}
           </p>
         )}
+
+        {/* Botões restaurados */}
         <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
           <Btn
             variant="gold"
@@ -1565,7 +1623,7 @@ function HeroBanner({ movies, onSelect }) {
         </div>
       </div>
 
-      {/* Hero indicators */}
+      {/* Hero indicators (Dots) */}
       <div
         style={{
           position: "absolute",
@@ -1573,7 +1631,7 @@ function HeroBanner({ movies, onSelect }) {
           left: 48,
           display: "flex",
           gap: 8,
-          zIndex: 2,
+          zIndex: 10,
         }}
       >
         {movies.slice(0, 5).map((_, i) => (
@@ -1592,7 +1650,7 @@ function HeroBanner({ movies, onSelect }) {
         ))}
       </div>
 
-      {/* Mini posters right side */}
+      {/* Mini posters do carrossel (Restaurados e em HD) */}
       <div
         style={{
           position: "absolute",
@@ -1601,21 +1659,19 @@ function HeroBanner({ movies, onSelect }) {
           display: "flex",
           gap: 10,
           alignItems: "flex-end",
-          zIndex: 1,
+          zIndex: 10,
         }}
       >
         {movies.slice(0, 5).map((m, i) => (
           <div
             key={m.id}
-            onClick={() => {
-              setIdx(i);
-            }}
+            onClick={() => setIdx(i)}
             style={{
               width: 72,
               cursor: "pointer",
               opacity: idx === i ? 1 : 0.5,
               transform: idx === i ? "scale(1.1)" : "scale(1)",
-              transition: "all 0.3s",
+              transition: "all 0.3s ease-in-out",
             }}
           >
             <div
@@ -1626,11 +1682,13 @@ function HeroBanner({ movies, onSelect }) {
                 border:
                   idx === i ? `2px solid ${C.gold}` : `1px solid ${C.border}`,
                 boxShadow: idx === i ? `0 0 20px rgba(201,168,76,0.3)` : "none",
+                background: C.bgCard,
+                transition: "all 0.3s",
               }}
             >
-              {m.poster && (
+              {(m.posterHD || m.poster) && (
                 <img
-                  src={m.poster}
+                  src={m.posterHD || m.poster}
                   alt={m.title}
                   loading="lazy"
                   style={{ width: "100%", height: "100%", objectFit: "cover" }}
@@ -1776,15 +1834,42 @@ function SplashScreen({ onFinish }) {
 // ─────────────────────────────────────────────
 //  LOGIN PAGE (redesigned)
 
-
-
 export {
-  Spinner, SkeletonCard, StarRating,
-  Avatar, Badge, Btn, TextInput, Section, FilmStripBg,
-  StreamingBadges, RatingsRow, MovieCard, MiniPoster,
-  BackIcon, PlusIcon, CheckIcon, UsersIcon, LinkIcon, CopyIcon,
-  UserPlusIcon, UserCheckIcon, ShareIcon, SearchSVG, KeyIcon, PlayIcon,
-  HeartIcon, ChevronLeftIcon, GridIcon, ListIcon, ChevronRightIcon,
-  ViewToolbar, Carousel, Navbar,
-  PaginationBar, HeroBanner, Top10Card, SplashScreen,
+  Spinner,
+  SkeletonCard,
+  StarRating,
+  Avatar,
+  Badge,
+  Btn,
+  TextInput,
+  Section,
+  FilmStripBg,
+  StreamingBadges,
+  RatingsRow,
+  MovieCard,
+  MiniPoster,
+  BackIcon,
+  PlusIcon,
+  CheckIcon,
+  UsersIcon,
+  LinkIcon,
+  CopyIcon,
+  UserPlusIcon,
+  UserCheckIcon,
+  ShareIcon,
+  SearchSVG,
+  KeyIcon,
+  PlayIcon,
+  HeartIcon,
+  ChevronLeftIcon,
+  GridIcon,
+  ListIcon,
+  ChevronRightIcon,
+  ViewToolbar,
+  Carousel,
+  Navbar,
+  PaginationBar,
+  HeroBanner,
+  Top10Card,
+  SplashScreen,
 };
