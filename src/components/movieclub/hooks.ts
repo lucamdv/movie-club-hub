@@ -199,6 +199,8 @@ function useAuth() {
       .update(updates)
       .eq("user_id", user.id);
     if (error) throw error;
+    // Force refetch so UI (avatar, name, etc.) syncs after update
+    profileFetchedRef.current = null;
     fetchProfile(user.id);
   };
 
