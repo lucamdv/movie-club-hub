@@ -1,6 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap");
 
 @custom-variant dark (&:is(.dark *));
 
@@ -47,10 +47,10 @@
   --popover-foreground: oklch(0.94 0.01 80);
   --primary: oklch(0.75 0.12 80);
   --primary-foreground: oklch(0.12 0.02 250);
-  --secondary: oklch(0.20 0.02 250);
+  --secondary: oklch(0.2 0.02 250);
   --secondary-foreground: oklch(0.65 0.03 250);
-  --muted: oklch(0.20 0.02 250);
-  --muted-foreground: oklch(0.60 0.03 250);
+  --muted: oklch(0.2 0.02 250);
+  --muted-foreground: oklch(0.6 0.03 250);
   --accent: oklch(0.55 0.18 260);
   --accent-foreground: oklch(0.94 0.01 80);
   --destructive: oklch(0.577 0.245 27.325);
@@ -61,7 +61,7 @@
   --sidebar-foreground: oklch(0.94 0.01 80);
   --sidebar-primary: oklch(0.75 0.12 80);
   --sidebar-primary-foreground: oklch(0.12 0.02 250);
-  --sidebar-accent: oklch(0.20 0.02 250);
+  --sidebar-accent: oklch(0.2 0.02 250);
   --sidebar-accent-foreground: oklch(0.94 0.01 80);
   --sidebar-border: oklch(0.22 0.02 250);
   --sidebar-ring: oklch(0.75 0.12 80);
@@ -82,7 +82,9 @@
    BASE RESET & TYPOGRAPHY
 ═══════════════════════════════════════════════════════════ */
 @layer base {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     border-color: var(--color-border);
     box-sizing: border-box;
     margin: 0;
@@ -92,15 +94,15 @@
 
   html {
     /* Prevent elastic over-scroll bounce from showing white */
-    background: #0F1923;
+    background: #0f1923;
     /* Smooth momentum scrolling on iOS */
     -webkit-overflow-scrolling: touch;
   }
 
   body {
-    background-color: #0F1923;
-    color: #F0EDE6;
-    font-family: 'DM Sans', sans-serif;
+    background-color: #0f1923;
+    color: #f0ede6;
+    font-family: "DM Sans", sans-serif;
     overflow-x: hidden;
     /* Allow body to fill the full viewport including safe areas */
     padding-top: var(--safe-top);
@@ -108,7 +110,9 @@
   }
 
   /* Prevent zoom on input focus (iOS) */
-  input, textarea, select {
+  input,
+  textarea,
+  select {
     font-size: 16px !important;
     font-family: inherit;
   }
@@ -124,11 +128,21 @@
   }
 
   /* Smooth scroll globally */
-  * { scroll-behavior: smooth; }
+  * {
+    scroll-behavior: smooth;
+  }
 
-  ::-webkit-scrollbar { width: 4px; height: 4px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: #1E3347; border-radius: 3px; }
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #1e3347;
+    border-radius: 3px;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -175,7 +189,7 @@
 
 .top-bar.scrolled {
   background: rgba(15, 25, 35, 0.98);
-  border-bottom-color: #1E3347;
+  border-bottom-color: #1e3347;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -253,7 +267,7 @@
 
   /* Active ring indicator */
   .bottom-nav-item.active .nav-icon::after {
-    content: '';
+    content: "";
     position: absolute;
     inset: -2px;
     border-radius: 16px;
@@ -265,13 +279,13 @@
     font-size: 9px;
     font-weight: 600;
     letter-spacing: 0.02em;
-    color: #4A5E72;
+    color: #4a5e72;
     transition: color 0.2s;
     text-transform: uppercase;
   }
 
   .bottom-nav-item.active .nav-label {
-    color: #C9A84C;
+    color: #c9a84c;
   }
 
   /* Desktop nav hides on mobile */
@@ -295,14 +309,16 @@
   left: 12px;
   right: 12px;
   z-index: 200;
-  background: linear-gradient(135deg, #162130, #1B2838);
+  background: linear-gradient(135deg, #162130, #1b2838);
   border: 1px solid rgba(201, 168, 76, 0.4);
   border-radius: 20px;
   padding: 16px 18px;
   display: flex;
   align-items: center;
   gap: 14px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(201, 168, 76, 0.1);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(201, 168, 76, 0.1);
   animation: bannerSlideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
@@ -321,27 +337,27 @@
 }
 
 .pwa-install-banner .banner-title {
-  font-family: 'Outfit', sans-serif;
+  font-family: "Outfit", sans-serif;
   font-size: 14px;
   font-weight: 700;
-  color: #F0EDE6;
+  color: #f0ede6;
   margin-bottom: 2px;
 }
 
 .pwa-install-banner .banner-sub {
   font-size: 11px;
-  color: #8A9BB0;
+  color: #8a9bb0;
   line-height: 1.4;
 }
 
 .pwa-install-banner .banner-btn-install {
   padding: 8px 16px;
   border-radius: 10px;
-  background: linear-gradient(135deg, #8A6E30, #C9A84C);
-  color: #0F1923;
+  background: linear-gradient(135deg, #8a6e30, #c9a84c);
+  color: #0f1923;
   font-size: 12px;
   font-weight: 700;
-  font-family: 'Outfit', sans-serif;
+  font-family: "Outfit", sans-serif;
   white-space: nowrap;
   flex-shrink: 0;
   min-height: unset;
@@ -357,8 +373,8 @@
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.06);
-  color: #4A5E72;
+  background: rgba(255, 255, 255, 0.06);
+  color: #4a5e72;
   font-size: 12px;
   display: flex;
   align-items: center;
@@ -390,67 +406,130 @@
    ANIMATIONS
 ═══════════════════════════════════════════════════════════ */
 @keyframes splashFadeIn {
-  0% { opacity: 0; transform: scale(0.85); }
-  100% { opacity: 1; transform: scale(1); }
+  0% {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 @keyframes splashFadeOut {
-  0% { opacity: 1; }
-  100% { opacity: 0; pointer-events: none; }
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    pointer-events: none;
+  }
 }
 @keyframes staggerUp {
-  0% { opacity: 0; transform: translateY(24px); }
-  100% { opacity: 1; transform: translateY(0); }
+  0% {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 @keyframes filmRoll {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
 }
 @keyframes shimmerSlide {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 @keyframes goldShimmer {
-  0% { background-position: -200% center; }
-  100% { background-position: 200% center; }
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
 }
 @keyframes heroKen {
-  0% { transform: scale(1); }
-  100% { transform: scale(1.08); }
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.08);
+  }
 }
 @keyframes bannerSlideUp {
-  0% { opacity: 0; transform: translateY(20px) scale(0.97); }
-  100% { opacity: 1; transform: translateY(0) scale(1); }
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 @keyframes navRingPulse {
-  0%, 100% { opacity: 0.5; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.05); }
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
 }
 @keyframes sheetUp {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════
    UTILITY CLASSES
 ═══════════════════════════════════════════════════════════ */
-.page-enter { animation: fadeIn 0.25s ease forwards; }
+.page-enter {
+  animation: fadeIn 0.25s ease forwards;
+}
 
 .card-hover {
-  transition: transform 0.22s ease, border-color 0.22s ease, background 0.22s ease;
+  transition:
+    transform 0.22s ease,
+    border-color 0.22s ease,
+    background 0.22s ease;
 }
 /* Hover effect only on desktop */
 @media (min-width: 768px) {
   .card-hover:hover {
     transform: translateY(-4px);
-    border-color: #2A4660;
-    background: #16293F;
+    border-color: #2a4660;
+    background: #16293f;
   }
 }
 /* Active press on mobile */
@@ -462,7 +541,7 @@
 }
 
 .skeleton {
-  background: linear-gradient(90deg, #112236 25%, #1E3347 50%, #112236 75%);
+  background: linear-gradient(90deg, #112236 25%, #1e3347 50%, #112236 75%);
   background-size: 200% 100%;
   animation: shimmerSlide 1.6s ease infinite;
 }
@@ -501,8 +580,13 @@
   /* Smooth iOS scrolling */
   -webkit-overflow-scrolling: touch;
 }
-.carousel-row::-webkit-scrollbar { display: none; }
-.carousel-row > * { scroll-snap-align: start; flex-shrink: 0; }
+.carousel-row::-webkit-scrollbar {
+  display: none;
+}
+.carousel-row > * {
+  scroll-snap-align: start;
+  flex-shrink: 0;
+}
 
 /* Mobile: extend to screen edges */
 @media (max-width: 767px) {
@@ -512,7 +596,9 @@
     margin-left: -16px;
     margin-right: -16px;
   }
-  .carousel-row > *:last-child { margin-right: 16px; }
+  .carousel-row > *:last-child {
+    margin-right: 16px;
+  }
 }
 
 .carousel-wrapper {
@@ -521,7 +607,9 @@
   padding: 0 4px;
 }
 /* Hide carousel buttons on mobile */
-.carousel-btn { display: none; }
+.carousel-btn {
+  display: none;
+}
 @media (min-width: 768px) {
   .carousel-btn {
     display: flex;
@@ -536,17 +624,30 @@
     background: rgba(15, 25, 35, 0.9);
     backdrop-filter: blur(8px);
     border: none;
-    color: #F0EDE6;
+    color: #f0ede6;
     font-size: 20px;
     cursor: pointer;
-    transition: opacity 0.3s, background 0.3s;
+    transition:
+      opacity 0.3s,
+      background 0.3s;
     min-height: unset;
     min-width: unset;
   }
-  .carousel-wrapper:hover .carousel-btn { opacity: 1; }
-  .carousel-btn:hover { background: rgba(201, 168, 76, 0.35); color: #C9A84C; }
-  .carousel-btn-left { left: -4px; border-radius: 0 8px 8px 0; }
-  .carousel-btn-right { right: -4px; border-radius: 8px 0 0 8px; }
+  .carousel-wrapper:hover .carousel-btn {
+    opacity: 1;
+  }
+  .carousel-btn:hover {
+    background: rgba(201, 168, 76, 0.35);
+    color: #c9a84c;
+  }
+  .carousel-btn-left {
+    left: -4px;
+    border-radius: 0 8px 8px 0;
+  }
+  .carousel-btn-right {
+    right: -4px;
+    border-radius: 8px 0 0 8px;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -564,10 +665,14 @@
     transform: scale(1.06);
     z-index: 10;
   }
-  .movie-card-netflix:hover .movie-card-overlay { opacity: 1; }
+  .movie-card-netflix:hover .movie-card-overlay {
+    opacity: 1;
+  }
 }
 @media (max-width: 767px) {
-  .movie-card-netflix:active { transform: scale(0.95); }
+  .movie-card-netflix:active {
+    transform: scale(0.95);
+  }
 }
 .movie-card-overlay {
   position: absolute;
@@ -600,7 +705,7 @@
   right: 0;
   z-index: 301;
   background: #162130;
-  border-top: 1px solid #1E3347;
+  border-top: 1px solid #1e3347;
   border-radius: 24px 24px 0 0;
   padding: 0 20px calc(20px + var(--safe-bottom));
   max-height: 90dvh;
@@ -611,7 +716,7 @@
 .bottom-sheet-handle {
   width: 36px;
   height: 4px;
-  background: #2A4660;
+  background: #2a4660;
   border-radius: 2px;
   margin: 12px auto 20px;
 }
@@ -625,13 +730,15 @@
     right: auto;
     transform: translate(-50%, -50%);
     border-radius: 20px;
-    border: 1px solid #1E3347;
+    border: 1px solid #1e3347;
     max-width: 520px;
     width: 100%;
     animation: fadeIn 0.2s ease forwards;
     max-height: 85vh;
   }
-  .bottom-sheet-handle { display: none; }
+  .bottom-sheet-handle {
+    display: none;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -657,13 +764,36 @@
   .hero-mini-posters {
     display: none !important;
   }
+  .hero-indicator {
+    height: 3px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.25);
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    cursor: pointer;
+    border: none;
+    padding: 0;
+    flex-shrink: 0;
+    min-height: unset;
+    min-width: unset;
+  }
+  .hero-indicator.active {
+    background: #c9a84c;
+    box-shadow: 0 0 8px rgba(201, 168, 76, 0.6);
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════
    GOLD SHIMMER BUTTON
 ═══════════════════════════════════════════════════════════ */
 .btn-gold-shimmer {
-  background: linear-gradient(135deg, #8A6E30, #C9A84C, #E2C97E, #C9A84C, #8A6E30);
+  background: linear-gradient(
+    135deg,
+    #8a6e30,
+    #c9a84c,
+    #e2c97e,
+    #c9a84c,
+    #8a6e30
+  );
   background-size: 300% 100%;
   animation: goldShimmer 4s ease infinite;
 }
@@ -678,10 +808,15 @@
   }
 
   /* Larger touch targets for interactive elements */
-  .rating-star { min-width: 36px; min-height: 36px; }
+  .rating-star {
+    min-width: 36px;
+    min-height: 36px;
+  }
 
   /* Full-width cards on mobile */
-  .mobile-full { width: 100% !important; }
+  .mobile-full {
+    width: 100% !important;
+  }
 
   /* Stack columns on mobile */
   .mobile-stack {
@@ -690,14 +825,18 @@
   }
 
   /* Tighter gaps on mobile */
-  .mobile-gap-sm { gap: 8px !important; }
+  .mobile-gap-sm {
+    gap: 8px !important;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════
    LOGIN PAGE — MOBILE SINGLE COLUMN
 ═══════════════════════════════════════════════════════════ */
 @media (max-width: 767px) {
-  .login-left-panel { display: none !important; }
+  .login-left-panel {
+    display: none !important;
+  }
   .login-right-panel {
     flex: unset !important;
     width: 100% !important;
@@ -714,7 +853,9 @@
     margin-bottom: 32px;
   }
 }
-.login-logo-mobile { display: none; }
+.login-logo-mobile {
+  display: none;
+}
 
 /* ═══════════════════════════════════════════════════════════
    PROFILE PAGE — MOBILE
@@ -725,19 +866,25 @@
     overflow-x: auto;
     scrollbar-width: none;
   }
-  .profile-stats-row::-webkit-scrollbar { display: none; }
+  .profile-stats-row::-webkit-scrollbar {
+    display: none;
+  }
   .profile-stat-cell {
     min-width: 90px !important;
     padding: 12px 14px !important;
   }
-  .profile-stat-value { font-size: 18px !important; }
+  .profile-stat-value {
+    font-size: 18px !important;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════
    MOVIE PAGE — MOBILE
 ═══════════════════════════════════════════════════════════ */
 @media (max-width: 767px) {
-  .movie-hero { height: 280px !important; }
+  .movie-hero {
+    height: 280px !important;
+  }
   .movie-details-grid {
     grid-template-columns: 1fr !important;
   }
@@ -745,8 +892,27 @@
     width: 120px !important;
     height: 180px !important;
   }
-  .movie-title { font-size: 24px !important; }
-  .movie-sidebar { display: none; }
+  .movie-title {
+    font-size: 24px !important;
+  }
+  .movie-sidebar {
+    display: none;
+  }
+    .hero-indicator {
+      width: 6px;
+    }
+    .hero-indicator.active {
+      width: 20px;
+    }
+  /* Desktop */
+  @media (min-width: 768px) {
+    .hero-indicator {
+      width: 8px;
+    }
+    .hero-indicator.active {
+      width: 28px;
+    }
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -767,3 +933,58 @@
     max-width: 100% !important;
   }
 }
+
+/* ─── CARROSSEL — fix outline roxo ──────────────────── */
+
+/* Remove o outline/ring nativo dos browsers em todos os elementos do carrossel */
+.carousel-wrapper *:focus,
+.carousel-wrapper *:focus-visible,
+.carousel-row *:focus,
+.carousel-row *:focus-visible,
+.movie-card-netflix:focus,
+.movie-card-netflix:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+/* Corrige overflow do wrapper para não vazar visualmente */
+.carousel-wrapper {
+  overflow: hidden;       /* no mobile o overflow:visible criava o artefato */
+  padding: 0;
+}
+@media (min-width: 768px) {
+  .carousel-wrapper {
+    overflow: visible;    /* desktop pode ter overflow para o scale do hover */
+    padding: 0 4px;
+  }
+}
+
+/* Scroll snap mais suave no mobile */
+.carousel-row {
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+.carousel-row > * {
+  scroll-snap-align: start;
+  scroll-snap-stop: normal;
+}
+
+/* ─── 3. REMOVE outline roxo globalmente em touch devices ─ */
+@media (hover: none) and (pointer: coarse) {
+  *:focus,
+  *:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
+  /* Exceto inputs — manter indicador de foco para acessibilidade */
+  input:focus,
+  textarea:focus,
+  select:focus {
+    outline: none !important;
+    /* border gold já cobre o feedback visual */
+  }
+}
+
