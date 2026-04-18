@@ -7,7 +7,7 @@ import JSZip from "jszip";
 import Papa from "papaparse";
 import {
   C, MONKEY_AVATARS, tmdb, omdb, streaming, normalizeTmdb, mergeOmdb,
-  STREAM_META, parseStreamingServices,
+  STREAM_META, parseStreamingServices, cachedFetch,
   MOCK_USERS, MOCK_REVIEWS, MOCK_GROUPS,
   isUpcoming, formatReleaseDateBR,
   logoMain, mascotsNav, logoText,
