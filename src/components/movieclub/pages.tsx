@@ -2543,6 +2543,7 @@ function ProfileEditModalInner({ profile, user, onClose, onSave }) {
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const fileRef = useRef(null);
+  const resolvedAvatarUrl = resolveAvatarUrl(avatarUrl);
 
   const handleUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -2666,7 +2667,7 @@ function ProfileEditModalInner({ profile, user, onClose, onSave }) {
               height: 100,
               borderRadius: "50%",
               margin: "0 auto 16px",
-              background: avatarUrl
+              background: resolvedAvatarUrl
                 ? "transparent"
                 : `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`,
               border: `3px solid ${C.gold}`,
@@ -2681,9 +2682,9 @@ function ProfileEditModalInner({ profile, user, onClose, onSave }) {
               fontFamily: "'Outfit', sans-serif",
             }}
           >
-            {avatarUrl ? (
+            {resolvedAvatarUrl ? (
               <img
-                src={avatarUrl}
+                src={resolvedAvatarUrl}
                 alt="Avatar"
                 style={{ width: "100%", height: "100%", objectFit: "cover" }}
               />
@@ -2738,15 +2739,16 @@ function ProfileEditModalInner({ profile, user, onClose, onSave }) {
               {MONKEY_AVATARS.map((m) => (
                 <button
                   key={m.id}
-                  onClick={() => setAvatarUrl(m.src)}
+                  onClick={() => setAvatarUrl(`monkey:${m.id}`)}
                   style={{
                     padding: 8,
                     borderRadius: 14,
-                    border:
-                      avatarUrl === m.src
-                        ? `2px solid ${C.gold}`
-                        : `1px solid ${C.border}`,
-                    background: avatarUrl === m.src ? `${C.gold}15` : C.bgDeep,
+                    border: isMonkeyAvatarSelected(avatarUrl, m.id)
+                      ? `2px solid ${C.gold}`
+                      : `1px solid ${C.border}`,
+                    background: isMonkeyAvatarSelected(avatarUrl, m.id)
+                      ? `${C.gold}15`
+                      : C.bgDeep,
                     cursor: "pointer",
                     transition: "all 0.2s",
                     display: "flex",
