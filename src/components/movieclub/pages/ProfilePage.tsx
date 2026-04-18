@@ -61,17 +61,26 @@ async function cachedFetch(key, fetcher, ttlMs = 5 * 60 * 1000) {
 
 // ─── Genre colors mapping ───
 const GENRE_COLORS = {
-  "Ação": "#EF4444", "Action": "#EF4444",
-  "Aventura": "#F97316", "Adventure": "#F97316",
-  "Animação": "#8B5CF6", "Animation": "#8B5CF6",
-  "Comédia": "#EAB308", "Comedy": "#EAB308",
-  "Crime": "#6366F1", "Thriller": "#6366F1",
-  "Drama": "#3B82F6",
-  "Fantasia": "#EC4899", "Fantasy": "#EC4899",
-  "Terror": "#9333EA", "Horror": "#9333EA",
-  "Romance": "#F43F5E",
-  "Ficção Científica": "#06B6D4", "Science Fiction": "#06B6D4",
-  "Documentário": "#10B981", "Documentary": "#10B981",
+  Ação: "#EF4444",
+  Action: "#EF4444",
+  Aventura: "#F97316",
+  Adventure: "#F97316",
+  Animação: "#8B5CF6",
+  Animation: "#8B5CF6",
+  Comédia: "#EAB308",
+  Comedy: "#EAB308",
+  Crime: "#6366F1",
+  Thriller: "#6366F1",
+  Drama: "#3B82F6",
+  Fantasia: "#EC4899",
+  Fantasy: "#EC4899",
+  Terror: "#9333EA",
+  Horror: "#9333EA",
+  Romance: "#F43F5E",
+  "Ficção Científica": "#06B6D4",
+  "Science Fiction": "#06B6D4",
+  Documentário: "#10B981",
+  Documentary: "#10B981",
 };
 
 // ─── Import Data Modal ───
@@ -180,19 +189,17 @@ function ImportDataModalInner({ userId, onClose }) {
                 ? `${TMDB_IMG}/w300${match.poster_path}`
                 : null;
               if (movie.rating > 0) {
-                await supabase
-                  .from("ratings")
-                  .upsert(
-                    {
-                      user_id: userId,
-                      tmdb_id: match.id,
-                      rating: movie.rating,
-                      review: movie.review || null,
-                      title: match.title,
-                      poster_url: posterUrl,
-                    },
-                    { onConflict: "user_id,tmdb_id" },
-                  );
+                await supabase.from("ratings").upsert(
+                  {
+                    user_id: userId,
+                    tmdb_id: match.id,
+                    rating: movie.rating,
+                    review: movie.review || null,
+                    title: match.title,
+                    poster_url: posterUrl,
+                  },
+                  { onConflict: "user_id,tmdb_id" },
+                );
                 importedRatings++;
                 if (movie.review) importedReviews++;
               }
@@ -230,17 +237,15 @@ function ImportDataModalInner({ userId, onClose }) {
               const posterUrl = match.poster_path
                 ? `${TMDB_IMG}/w300${match.poster_path}`
                 : null;
-              await supabase
-                .from("watchlist")
-                .upsert(
-                  {
-                    user_id: userId,
-                    tmdb_id: match.id,
-                    title: match.title,
-                    poster_url: posterUrl,
-                  },
-                  { onConflict: "user_id,tmdb_id" },
-                );
+              await supabase.from("watchlist").upsert(
+                {
+                  user_id: userId,
+                  tmdb_id: match.id,
+                  title: match.title,
+                  poster_url: posterUrl,
+                },
+                { onConflict: "user_id,tmdb_id" },
+              );
               importedWl++;
               setProgress((p) => ({
                 ...p,
@@ -1009,8 +1014,13 @@ function ProfileEditModalInner({ profile, user, onClose, onSave }) {
 
 // ─── Profile Page Mobile ───
 export function ProfilePageMobile({
-  setPage, auth: authCtx, setSelectedMovie, viewUserId,
-  isViewingOther, profile, otherProfile,
+  setPage,
+  auth: authCtx,
+  setSelectedMovie,
+  viewUserId,
+  isViewingOther,
+  profile,
+  otherProfile,
   isMobile,
 }) {
   const currentUserId = authCtx?.user?.id;
@@ -1018,32 +1028,50 @@ export function ProfilePageMobile({
   const displayProfile = isViewingOther ? otherProfile : authCtx?.profile;
 
   const { ratings, loading: ratingsLoading } = useRatings(targetUserId);
-  const { items: watchlistItems, loading: wlLoading, remove: removeFromWl } = useWatchlist(targetUserId);
+  const {
+    items: watchlistItems,
+    loading: wlLoading,
+    remove: removeFromWl,
+  } = useWatchlist(targetUserId);
   const [tab, setTab] = useState("ratings");
   const [showEditModal, setShowEditModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
   const { follow, unfollow, isFollowing } = useFollows(currentUserId);
-  const { followers: targetFollowers, following: targetFollowing } = useFollows(targetUserId);
+  const { followers: targetFollowers, following: targetFollowing } =
+    useFollows(targetUserId);
   const { isFriend } = useFriendships(currentUserId);
 
-  const displayName = displayProfile?.display_name || (isViewingOther ? "Usuário" : authCtx?.user?.email || "Usuário");
+  const displayName =
+    displayProfile?.display_name ||
+    (isViewingOther ? "Usuário" : authCtx?.user?.email || "Usuário");
   const initials = displayName.slice(0, 2).toUpperCase();
-  const uname = displayProfile?.username || (!isViewingOther ? authCtx?.user?.email?.split("@")[0] : null) || "user";
+  const uname =
+    displayProfile?.username ||
+    (!isViewingOther ? authCtx?.user?.email?.split("@")[0] : null) ||
+    "user";
   const bio = displayProfile?.bio || "";
-  const avgRating = ratings.length > 0
-    ? (ratings.reduce((s, r) => s + Number(r.rating), 0) / ratings.length).toFixed(1)
-    : null;
+  const avgRating =
+    ratings.length > 0
+      ? (
+          ratings.reduce((s, r) => s + Number(r.rating), 0) / ratings.length
+        ).toFixed(1)
+      : null;
 
   const [favGenres, setFavGenres] = useState([]);
   useEffect(() => {
-    if (!ratings.length) { setFavGenres([]); return; }
+    if (!ratings.length) {
+      setFavGenres([]);
+      return;
+    }
     let alive = true;
     Promise.all(
-      ratings.map((r) => cachedFetch(`mini_${r.tmdb_id}`, () =>
-        tmdbProxy({ data: { path: `/movie/${r.tmdb_id}`, params: {} } })
-      ).catch(() => null))
+      ratings.map((r) =>
+        cachedFetch(`mini_${r.tmdb_id}`, () =>
+          tmdbProxy({ data: { path: `/movie/${r.tmdb_id}`, params: {} } }),
+        ).catch(() => null),
+      ),
     ).then((results) => {
       if (!alive) return;
       const genreCount = {};
@@ -1053,63 +1081,163 @@ export function ProfilePageMobile({
           if (n) genreCount[n] = (genreCount[n] || 0) + 1;
         });
       });
-      const sorted = Object.entries(genreCount).sort((a, b) => b[1] - a[1]).slice(0, 5);
+      const sorted = Object.entries(genreCount)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5);
       setFavGenres(sorted.map(([name, count]) => ({ name, count })));
     });
-    return () => { alive = false; };
+    return () => {
+      alive = false;
+    };
   }, [ratings]);
 
   return (
     <div style={{ background: C.bg, minHeight: "100dvh", paddingBottom: 100 }}>
-
       {/* ── Header barra ── */}
-      <div style={{ position: "sticky", top: 0, zIndex: 10, background: "rgba(15,25,35,0.95)", backdropFilter: "blur(16px)", borderBottom: `1px solid ${C.border}`, padding: "10px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <div
+        style={{
+          position: "sticky",
+          top: 0,
+          zIndex: 10,
+          background: "rgba(15,25,35,0.95)",
+          backdropFilter: "blur(16px)",
+          borderBottom: `1px solid ${C.border}`,
+          padding: "10px 16px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
         {isViewingOther ? (
-          <button onClick={() => setPage("profile")} style={{ display: "flex", alignItems: "center", gap: 6, color: C.textMuted, fontSize: 14, minHeight: "unset", minWidth: "unset", background: "none", border: "none" }}>
+          <button
+            onClick={() => setPage("profile")}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              color: C.textMuted,
+              fontSize: 14,
+              minHeight: "unset",
+              minWidth: "unset",
+              background: "none",
+              border: "none",
+            }}
+          >
             <ChevronLeft size={20} /> Voltar
           </button>
         ) : (
-          <p style={{ fontFamily: "'Outfit', sans-serif", fontSize: 17, fontWeight: 700, color: C.text }}>@{uname}</p>
+          <p
+            style={{
+              fontFamily: "'Outfit', sans-serif",
+              fontSize: 17,
+              fontWeight: 700,
+              color: C.text,
+            }}
+          >
+            @{uname}
+          </p>
         )}
         {!isViewingOther && (
-          <button onClick={() => setShowSettings(true)} style={{ color: C.textMuted, minHeight: "unset", minWidth: "unset", background: "none", border: "none" }}>
+          <button
+            onClick={() => setShowSettings(true)}
+            style={{
+              color: C.textMuted,
+              minHeight: "unset",
+              minWidth: "unset",
+              background: "none",
+              border: "none",
+            }}
+          >
             <Settings size={22} />
           </button>
         )}
         {isViewingOther && (
-          <p style={{ fontFamily: "'Outfit', sans-serif", fontSize: 17, fontWeight: 700, color: C.text }}>@{uname}</p>
+          <p
+            style={{
+              fontFamily: "'Outfit', sans-serif",
+              fontSize: 17,
+              fontWeight: 700,
+              color: C.text,
+            }}
+          >
+            @{uname}
+          </p>
         )}
         {isViewingOther && <div style={{ width: 60 }} />}
       </div>
 
       <div style={{ padding: "20px 16px 0" }}>
         {/* ── Profile header — IG style ── */}
-        <div style={{ display: "flex", alignItems: "flex-start", gap: 16, marginBottom: 14 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+            gap: 16,
+            marginBottom: 14,
+          }}
+        >
           {/* Avatar */}
-          <div style={{
-            width: 80, height: 80, borderRadius: "50%", flexShrink: 0,
-            background: displayProfile?.avatar_url ? "transparent" : `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`,
-            border: `3px solid ${C.gold}`,
-            boxShadow: `0 0 0 2px ${C.bg}, 0 0 0 4px ${C.goldDim}40`,
-            overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 24, fontWeight: 800, color: C.bgDeep, fontFamily: "'Outfit', sans-serif",
-          }}>
-            {displayProfile?.avatar_url
-              ? <img src={displayProfile.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              : initials
-            }
+          <div
+            style={{
+              width: 80,
+              height: 80,
+              borderRadius: "50%",
+              flexShrink: 0,
+              background: displayProfile?.avatar_url
+                ? "transparent"
+                : `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`,
+              border: `3px solid ${C.gold}`,
+              boxShadow: `0 0 0 2px ${C.bg}, 0 0 0 4px ${C.goldDim}40`,
+              overflow: "hidden",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 24,
+              fontWeight: 800,
+              color: C.bgDeep,
+              fontFamily: "'Outfit', sans-serif",
+            }}
+          >
+            {displayProfile?.avatar_url ? (
+              <img
+                src={displayProfile.avatar_url}
+                alt=""
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              />
+            ) : (
+              initials
+            )}
           </div>
 
           {/* Stats — IG style: 3 números */}
-          <div style={{ flex: 1, display: "flex", justifyContent: "space-around", paddingTop: 8 }}>
+          <div
+            style={{
+              flex: 1,
+              display: "flex",
+              justifyContent: "space-around",
+              paddingTop: 8,
+            }}
+          >
             {[
               ["Filmes", ratings.length],
               ["Seguindo", targetFollowing.length],
               ["Seguidores", targetFollowers.length],
             ].map(([label, val]) => (
               <div key={label} style={{ textAlign: "center" }}>
-                <p style={{ fontSize: 20, fontWeight: 800, color: C.text, fontFamily: "'Outfit', sans-serif", lineHeight: 1.1 }}>{val}</p>
-                <p style={{ fontSize: 11, color: C.textMuted, marginTop: 2 }}>{label}</p>
+                <p
+                  style={{
+                    fontSize: 20,
+                    fontWeight: 800,
+                    color: C.text,
+                    fontFamily: "'Outfit', sans-serif",
+                    lineHeight: 1.1,
+                  }}
+                >
+                  {val}
+                </p>
+                <p style={{ fontSize: 11, color: C.textMuted, marginTop: 2 }}>
+                  {label}
+                </p>
               </div>
             ))}
           </div>
@@ -1117,20 +1245,60 @@ export function ProfilePageMobile({
 
         {/* Name + bio */}
         <div style={{ marginBottom: 12 }}>
-          <p style={{ fontSize: 15, fontWeight: 700, color: C.text, fontFamily: "'Outfit', sans-serif" }}>{displayName}</p>
+          <p
+            style={{
+              fontSize: 15,
+              fontWeight: 700,
+              color: C.text,
+              fontFamily: "'Outfit', sans-serif",
+            }}
+          >
+            {displayName}
+          </p>
           {avgRating && (
-            <p style={{ fontSize: 12, color: C.gold, marginTop: 2 }}>★ {avgRating} nota média · {watchlistItems.length} na watchlist</p>
+            <p style={{ fontSize: 12, color: C.gold, marginTop: 2 }}>
+              ★ {avgRating} nota média · {watchlistItems.length} na watchlist
+            </p>
           )}
-          {bio && <p style={{ fontSize: 13, color: C.textMuted, marginTop: 5, lineHeight: 1.5 }}>{bio}</p>}
+          {bio && (
+            <p
+              style={{
+                fontSize: 13,
+                color: C.textMuted,
+                marginTop: 5,
+                lineHeight: 1.5,
+              }}
+            >
+              {bio}
+            </p>
+          )}
         </div>
 
         {/* Fav genres pills */}
         {favGenres.length > 0 && (
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
+          <div
+            style={{
+              display: "flex",
+              gap: 6,
+              flexWrap: "wrap",
+              marginBottom: 14,
+            }}
+          >
             {favGenres.map((g) => {
               const color = GENRE_COLORS[g.name] || C.accent;
               return (
-                <span key={g.name} style={{ fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: 20, background: `${color}18`, border: `1px solid ${color}40`, color }}>
+                <span
+                  key={g.name}
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 600,
+                    padding: "3px 10px",
+                    borderRadius: 20,
+                    background: `${color}18`,
+                    border: `1px solid ${color}40`,
+                    color,
+                  }}
+                >
                   {g.name}
                 </span>
               );
@@ -1143,13 +1311,20 @@ export function ProfilePageMobile({
           {isViewingOther ? (
             <>
               <button
-                onClick={() => { if (isFollowing(viewUserId)) unfollow(viewUserId); else follow(viewUserId); }}
+                onClick={() => {
+                  if (isFollowing(viewUserId)) unfollow(viewUserId);
+                  else follow(viewUserId);
+                }}
                 style={{
                   flex: 1,
                   padding: "10px",
                   borderRadius: 10,
-                  background: isFollowing(viewUserId) ? C.bgCard : `linear-gradient(135deg, ${C.goldDim}, ${C.gold})`,
-                  border: isFollowing(viewUserId) ? `1px solid ${C.border}` : "none",
+                  background: isFollowing(viewUserId)
+                    ? C.bgCard
+                    : `linear-gradient(135deg, ${C.goldDim}, ${C.gold})`,
+                  border: isFollowing(viewUserId)
+                    ? `1px solid ${C.border}`
+                    : "none",
                   color: isFollowing(viewUserId) ? C.text : C.bgDeep,
                   fontSize: 14,
                   fontWeight: 700,
@@ -1160,10 +1335,31 @@ export function ProfilePageMobile({
                   minHeight: "unset",
                 }}
               >
-                {isFollowing(viewUserId) ? <><UserCheck size={16} /> Seguindo</> : <><UserPlus size={16} /> Seguir</>}
+                {isFollowing(viewUserId) ? (
+                  <>
+                    <UserCheck size={16} /> Seguindo
+                  </>
+                ) : (
+                  <>
+                    <UserPlus size={16} /> Seguir
+                  </>
+                )}
               </button>
               {isFriend(viewUserId) && (
-                <div style={{ padding: "10px 14px", borderRadius: 10, background: "rgba(34,197,94,0.12)", border: `1px solid rgba(34,197,94,0.3)`, display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "#22C55E", fontWeight: 600 }}>
+                <div
+                  style={{
+                    padding: "10px 14px",
+                    borderRadius: 10,
+                    background: "rgba(34,197,94,0.12)",
+                    border: `1px solid rgba(34,197,94,0.3)`,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    fontSize: 13,
+                    color: "#22C55E",
+                    fontWeight: 600,
+                  }}
+                >
                   Amigo
                 </div>
               )}
@@ -1171,7 +1367,22 @@ export function ProfilePageMobile({
           ) : (
             <button
               onClick={() => setShowEditModal(true)}
-              style={{ flex: 1, padding: "10px", borderRadius: 10, background: C.bgCard, border: `1px solid ${C.border}`, color: C.text, fontSize: 14, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, minHeight: "unset", cursor: "pointer" }}
+              style={{
+                flex: 1,
+                padding: "10px",
+                borderRadius: 10,
+                background: C.bgCard,
+                border: `1px solid ${C.border}`,
+                color: C.text,
+                fontSize: 14,
+                fontWeight: 600,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 6,
+                minHeight: "unset",
+                cursor: "pointer",
+              }}
             >
               <Pencil size={15} /> Editar Perfil
             </button>
@@ -1180,19 +1391,40 @@ export function ProfilePageMobile({
       </div>
 
       {/* ── Tabs ── */}
-      <div style={{ display: "flex", borderTop: `1px solid ${C.border}`, borderBottom: `1px solid ${C.border}`, background: C.bg, position: "sticky", top: 48, zIndex: 9 }}>
+      <div
+        style={{
+          display: "flex",
+          borderTop: `1px solid ${C.border}`,
+          borderBottom: `1px solid ${C.border}`,
+          background: C.bg,
+          position: "sticky",
+          top: 48,
+          zIndex: 9,
+        }}
+      >
         {[
           { id: "ratings", icon: <Grid3X3 size={18} />, label: ratings.length },
-          { id: "watchlist", icon: <Bookmark size={18} />, label: watchlistItems.length },
+          {
+            id: "watchlist",
+            icon: <Bookmark size={18} />,
+            label: watchlistItems.length,
+          },
         ].map(({ id, icon, label }) => (
           <button
             key={id}
             onClick={() => setTab(id)}
             style={{
-              flex: 1, padding: "12px", display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
+              flex: 1,
+              padding: "12px",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 2,
               color: tab === id ? C.gold : C.textDim,
-              borderBottom: tab === id ? `2px solid ${C.gold}` : "2px solid transparent",
-              background: "none", border: "none",
+              borderBottom:
+                tab === id ? `2px solid ${C.gold}` : "2px solid transparent",
+              background: "none",
+              border: "none",
               transition: "all 0.2s",
               minHeight: "unset",
               cursor: "pointer",
@@ -1205,26 +1437,84 @@ export function ProfilePageMobile({
       </div>
 
       {/* ── Grid de pôsteres — 3 colunas IG style ── */}
-      {tab === "ratings" && (
-        ratingsLoading ? (
-          <div style={{ display: "flex", justifyContent: "center", padding: 40 }}><Spinner size={28} /></div>
+      {tab === "ratings" &&
+        (ratingsLoading ? (
+          <div
+            style={{ display: "flex", justifyContent: "center", padding: 40 }}
+          >
+            <Spinner size={28} />
+          </div>
         ) : ratings.length > 0 ? (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 2 }}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(3, 1fr)",
+              gap: 2,
+            }}
+          >
             {ratings.map((r) => (
               <div
                 key={r.id}
-                onClick={() => { setSelectedMovie?.({ tmdbId: r.tmdb_id, title: r.title, poster: r.poster_url }); setPage("movie"); }}
-                style={{ aspectRatio: "2/3", overflow: "hidden", position: "relative", cursor: "pointer", background: C.bgCard }}
+                onClick={() => {
+                  setSelectedMovie?.({
+                    tmdbId: r.tmdb_id,
+                    title: r.title,
+                    poster: r.poster_url,
+                  });
+                  setPage("movie");
+                }}
+                style={{
+                  aspectRatio: "2/3",
+                  overflow: "hidden",
+                  position: "relative",
+                  cursor: "pointer",
+                  background: C.bgCard,
+                }}
               >
                 {r.poster_url ? (
-                  <img src={r.poster_url} alt={r.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  <img
+                    src={r.poster_url}
+                    alt={r.title}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
                 ) : (
-                  <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", opacity: 0.2 }}><Film size={24} /></div>
+                  <div
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      opacity: 0.2,
+                    }}
+                  >
+                    <Film size={24} />
+                  </div>
                 )}
                 {/* Rating badge overlay */}
-                <div style={{ position: "absolute", bottom: 4, right: 4, background: "rgba(0,0,0,0.75)", borderRadius: 6, padding: "2px 6px", display: "flex", alignItems: "center", gap: 2 }}>
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: 4,
+                    right: 4,
+                    background: "rgba(0,0,0,0.75)",
+                    borderRadius: 6,
+                    padding: "2px 6px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 2,
+                  }}
+                >
                   <Star size={9} fill={C.gold} stroke="none" />
-                  <span style={{ fontSize: 10, color: C.gold, fontWeight: 700 }}>{Number(r.rating).toFixed(0)}</span>
+                  <span
+                    style={{ fontSize: 10, color: C.gold, fontWeight: 700 }}
+                  >
+                    {Number(r.rating).toFixed(0)}
+                  </span>
                 </div>
               </div>
             ))}
@@ -1232,127 +1522,240 @@ export function ProfilePageMobile({
         ) : (
           <div style={{ textAlign: "center", padding: "60px 20px" }}>
             <Film size={40} style={{ color: "#4A5E72", marginBottom: 12 }} />
-            <p style={{ color: C.textMuted, fontSize: 15, fontWeight: 500 }}>Nenhuma avaliação ainda</p>
-            <p style={{ color: C.textDim, fontSize: 13, marginTop: 4 }}>Avalie filmes para construir seu histórico!</p>
+            <p style={{ color: C.textMuted, fontSize: 15, fontWeight: 500 }}>
+              Nenhuma avaliação ainda
+            </p>
+            <p style={{ color: C.textDim, fontSize: 13, marginTop: 4 }}>
+              Avalie filmes para construir seu histórico!
+            </p>
           </div>
-        )
-      )}
+        ))}
 
-      {tab === "watchlist" && (
-        wlLoading ? (
-          <div style={{ display: "flex", justifyContent: "center", padding: 40 }}><Spinner size={28} /></div>
+      {tab === "watchlist" &&
+        (wlLoading ? (
+          <div
+            style={{ display: "flex", justifyContent: "center", padding: 40 }}
+          >
+            <Spinner size={28} />
+          </div>
         ) : watchlistItems.length > 0 ? (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 2 }}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(3, 1fr)",
+              gap: 2,
+            }}
+          >
             {watchlistItems.map((item) => (
               <div
                 key={item.id}
-                style={{ aspectRatio: "2/3", overflow: "hidden", position: "relative", cursor: "pointer", background: C.bgCard }}
-                onClick={() => { setSelectedMovie?.({ tmdbId: item.tmdb_id, title: item.title, poster: item.poster_url }); setPage("movie"); }}
+                style={{
+                  aspectRatio: "2/3",
+                  overflow: "hidden",
+                  position: "relative",
+                  cursor: "pointer",
+                  background: C.bgCard,
+                }}
+                onClick={() => {
+                  setSelectedMovie?.({
+                    tmdbId: item.tmdb_id,
+                    title: item.title,
+                    poster: item.poster_url,
+                  });
+                  setPage("movie");
+                }}
               >
                 {item.poster_url ? (
-                  <img src={item.poster_url} alt={item.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  <img
+                    src={item.poster_url}
+                    alt={item.title}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
                 ) : (
-                  <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", opacity: 0.2 }}><Film size={24} /></div>
+                  <div
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      opacity: 0.2,
+                    }}
+                  >
+                    <Film size={24} />
+                  </div>
                 )}
                 {/* Remove button */}
                 {!isViewingOther && (
                   <button
-                    onClick={(e) => { e.stopPropagation(); removeFromWl(item.tmdb_id); }}
-                    style={{ position: "absolute", top: 4, right: 4, width: 24, height: 24, borderRadius: "50%", background: "rgba(0,0,0,0.7)", color: "#ef4444", fontSize: 11, display: "flex", alignItems: "center", justifyContent: "center", border: "none", minHeight: "unset", minWidth: "unset", cursor: "pointer" }}
-                  >✕</button>
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeFromWl(item.tmdb_id);
+                    }}
+                    style={{
+                      position: "absolute",
+                      top: 4,
+                      right: 4,
+                      width: 24,
+                      height: 24,
+                      borderRadius: "50%",
+                      background: "rgba(0,0,0,0.7)",
+                      color: "#ef4444",
+                      fontSize: 11,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      border: "none",
+                      minHeight: "unset",
+                      minWidth: "unset",
+                      cursor: "pointer",
+                    }}
+                  >
+                    ✕
+                  </button>
                 )}
               </div>
             ))}
           </div>
         ) : (
           <div style={{ textAlign: "center", padding: "60px 20px" }}>
-            <Bookmark size={40} style={{ color: "#4A5E72", marginBottom: 12 }} />
-            <p style={{ color: C.textMuted, fontSize: 15, fontWeight: 500 }}>Watchlist vazia</p>
-            <p style={{ color: C.textDim, fontSize: 13, marginTop: 4 }}>Salve filmes para assistir depois!</p>
+            <Bookmark
+              size={40}
+              style={{ color: "#4A5E72", marginBottom: 12 }}
+            />
+            <p style={{ color: C.textMuted, fontSize: 15, fontWeight: 500 }}>
+              Watchlist vazia
+            </p>
+            <p style={{ color: C.textDim, fontSize: 13, marginTop: 4 }}>
+              Salve filmes para assistir depois!
+            </p>
           </div>
-        )
-      )}
+        ))}
 
       {/* Settings bottom sheet */}
-      {showSettings && createPortal(
-        <>
-          <div className="bottom-sheet-overlay" onClick={() => setShowSettings(false)} />
-          <div className="bottom-sheet">
-            <div className="bottom-sheet-handle" />
-            <div style={{ paddingBottom: 8 }}>
-              <p style={{ fontSize: 16, fontWeight: 700, color: C.text, fontFamily: "'Outfit', sans-serif", marginBottom: 20 }}>Conta</p>
-              {[
-                { icon: <Pencil size={18} />, label: "Editar Perfil", action: () => { setShowSettings(false); setShowEditModal(true); } },
-                { icon: <Upload size={18} />, label: "Importar Dados (Letterboxd)", action: () => { setShowSettings(false); setShowImportModal(true); } },
-                {
-                  icon: <Link2 size={18} />, label: "Compartilhar Perfil", action: () => {
-                    const url = `${window.location.origin}?profile=${currentUserId}`;
-                    navigator.clipboard.writeText(url).then(() => toast.success("Link copiado!"));
+      {showSettings &&
+        createPortal(
+          <>
+            <div
+              className="bottom-sheet-overlay"
+              onClick={() => setShowSettings(false)}
+            />
+            <div className="bottom-sheet">
+              <div className="bottom-sheet-handle" />
+              <div style={{ paddingBottom: 8 }}>
+                <p
+                  style={{
+                    fontSize: 16,
+                    fontWeight: 700,
+                    color: C.text,
+                    fontFamily: "'Outfit', sans-serif",
+                    marginBottom: 20,
+                  }}
+                >
+                  Conta
+                </p>
+                {[
+                  {
+                    icon: <Pencil size={18} />,
+                    label: "Editar Perfil",
+                    action: () => {
+                      setShowSettings(false);
+                      setShowEditModal(true);
+                    },
+                  },
+                  {
+                    icon: <Upload size={18} />,
+                    label: "Importar Dados (Letterboxd)",
+                    action: () => {
+                      setShowSettings(false);
+                      setShowImportModal(true);
+                    },
+                  },
+                  {
+                    icon: <Link2 size={18} />,
+                    label: "Compartilhar Perfil",
+                    action: () => {
+                      const url = `${window.location.origin}?profile=${currentUserId}`;
+                      navigator.clipboard
+                        .writeText(url)
+                        .then(() => toast.success("Link copiado!"));
+                      setShowSettings(false);
+                    },
+                  },
+                ].map(({ icon, label, action }) => (
+                  <button
+                    key={label}
+                    onClick={action}
+                    style={{
+                      width: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 14,
+                      padding: "15px 0",
+                      borderBottom: `1px solid ${C.border}`,
+                      color: C.text,
+                      fontSize: 15,
+                      background: "none",
+                      border: "none",
+                      textAlign: "left",
+                      minHeight: "unset",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <span style={{ color: C.textMuted }}>{icon}</span>
+                    {label}
+                  </button>
+                ))}
+                <button
+                  onClick={() => {
+                    authCtx?.signOut?.();
                     setShowSettings(false);
-                  }
-                },
-              ].map(({ icon, label, action }) => (
-                <button key={label} onClick={action} style={{ width: "100%", display: "flex", alignItems: "center", gap: 14, padding: "15px 0", borderBottom: `1px solid ${C.border}`, color: C.text, fontSize: 15, background: "none", border: "none", textAlign: "left", minHeight: "unset", cursor: "pointer" }}>
-                  <span style={{ color: C.textMuted }}>{icon}</span>
-                  {label}
+                  }}
+                  style={{
+                    width: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 14,
+                    padding: "15px 0",
+                    color: C.red,
+                    fontSize: 15,
+                    background: "none",
+                    border: "none",
+                    textAlign: "left",
+                    marginTop: 4,
+                    minHeight: "unset",
+                    cursor: "pointer",
+                  }}
+                >
+                  <LogOut size={18} />
+                  Sair da conta
                 </button>
-              ))}
-              <button
-                onClick={() => { authCtx?.signOut?.(); setShowSettings(false); }}
-                style={{ width: "100%", display: "flex", alignItems: "center", gap: 14, padding: "15px 0", color: C.red, fontSize: 15, background: "none", border: "none", textAlign: "left", marginTop: 4, minHeight: "unset", cursor: "pointer" }}
-              >
-                <LogOut size={18} />
-                Sair da conta
-              </button>
+              </div>
             </div>
-          </div>
-        </>,
-        document.body
-      )}
+          </>,
+          document.body,
+        )}
     </div>
   );
 }
 
-// ─── Profile Page Desktop ───
-export function ProfilePage(props) {
+// ─── Profile Page Desktop (Para PC) ───
+export function ProfilePageDesktop(props) {
   const {
     setPage,
-    isOwnProfile = true,
     auth: authCtx,
     setSelectedMovie,
     viewUserId,
-    isMobile,
+    isViewingOther,
+    profile
   } = props;
+
   const currentUserId = authCtx?.user?.id;
-  const isViewingOther = viewUserId && viewUserId !== currentUserId;
   const targetUserId = isViewingOther ? viewUserId : currentUserId;
-
-  const [otherProfile, setOtherProfile] = useState(null);
-  useEffect(() => {
-    if (!isViewingOther) {
-      setOtherProfile(null);
-      return;
-    }
-    supabase
-      .from("profiles")
-      .select("*")
-      .eq("user_id", viewUserId)
-      .single()
-      .then(({ data }) => setOtherProfile(data));
-  }, [viewUserId, isViewingOther]);
-
-  const profile = isViewingOther ? otherProfile : authCtx?.profile;
-
-  // Linha adicionada com as propriedades sendo preenchidas
-  if (isMobile)
-    return (
-      <ProfilePageMobile
-        {...props}
-        isViewingOther={isViewingOther}
-        otherProfile={otherProfile}
-        displayProfile={profile}
-      />
-    );
 
   const { ratings, loading: ratingsLoading } = useRatings(targetUserId);
   const {
@@ -1360,35 +1763,22 @@ export function ProfilePage(props) {
     loading: wlLoading,
     remove: removeFromWl,
   } = useWatchlist(targetUserId);
+  
   const [tab, setTab] = useState("ratings");
   const [viewMode, setViewMode] = useState("list");
   const [showImportModal, setShowImportModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
 
-  const {
-    following: myFollowing,
-    follow,
-    unfollow,
-    isFollowing,
-  } = useFollows(currentUserId);
-  const { followers: targetFollowers, following: targetFollowing } =
-    useFollows(targetUserId);
+  const { following: myFollowing, follow, unfollow, isFollowing } = useFollows(currentUserId);
+  const { followers: targetFollowers, following: targetFollowing } = useFollows(targetUserId);
   const { isFriend } = useFriendships(currentUserId);
 
-  const displayName =
-    profile?.display_name ||
-    (isViewingOther ? "Usuário" : authCtx?.user?.email || "Usuário");
+  const displayName = profile?.display_name || (isViewingOther ? "Usuário" : authCtx?.user?.email || "Usuário");
   const initials = displayName.slice(0, 2).toUpperCase();
-  const uname =
-    profile?.username ||
-    (!isViewingOther ? authCtx?.user?.email?.split("@")[0] : null) ||
-    "user";
+  const uname = profile?.username || (!isViewingOther ? authCtx?.user?.email?.split("@")[0] : null) || "user";
   const bio = profile?.bio || "";
-  const avgRating =
-    ratings.length > 0
-      ? (
-          ratings.reduce((s, r) => s + Number(r.rating), 0) / ratings.length
-        ).toFixed(1)
+  const avgRating = ratings.length > 0
+      ? (ratings.reduce((s, r) => s + Number(r.rating), 0) / ratings.length).toFixed(1)
       : "—";
 
   const bannerPosters = ratings
@@ -2307,5 +2697,59 @@ export function ProfilePage(props) {
           ))}
       </div>
     </div>
+  );
+}
+
+// ─── Roteador Principal (Decide se é Mobile ou PC) ───
+export function ProfilePage(props) {
+  const { auth: authCtx, viewUserId } = props;
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Monitora o tamanho da tela
+  useEffect(() => {
+    const checkScreenSize = () => setIsMobile(window.innerWidth <= 768);
+    checkScreenSize();
+    window.addEventListener("resize", checkScreenSize);
+    return () => window.removeEventListener("resize", checkScreenSize);
+  }, []);
+
+  const currentUserId = authCtx?.user?.id;
+  const isViewingOther = viewUserId && viewUserId !== currentUserId;
+
+  const [otherProfile, setOtherProfile] = useState(null);
+  useEffect(() => {
+    if (!isViewingOther) {
+      setOtherProfile(null);
+      return;
+    }
+    supabase
+      .from("profiles")
+      .select("*")
+      .eq("user_id", viewUserId)
+      .single()
+      .then(({ data }) => setOtherProfile(data));
+  }, [viewUserId, isViewingOther]);
+
+  const profile = isViewingOther ? otherProfile : authCtx?.profile;
+
+  // Renderiza o componente correspondente ao tamanho da tela!
+  if (isMobile) {
+    return (
+      <ProfilePageMobile
+        {...props}
+        isViewingOther={isViewingOther}
+        otherProfile={otherProfile}
+        displayProfile={profile}
+      />
+    );
+  }
+
+  return (
+    <ProfilePageDesktop
+      {...props}
+      isViewingOther={isViewingOther}
+      otherProfile={otherProfile}
+      profile={profile}
+    />
   );
 }
