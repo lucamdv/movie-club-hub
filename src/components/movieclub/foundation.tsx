@@ -517,7 +517,7 @@ function formatReleaseDateBR(dateStr) {
 }
 
 export {
-  MONKEY_AVATARS, C, apiCache, TMDB_IMG, tmdb, omdb, streaming,
+  MONKEY_AVATARS, C, apiCache, cachedFetch, TMDB_IMG, tmdb, omdb, streaming,
   normalizeTmdb, mergeOmdb, STREAM_META, parseStreamingServices,
   MOCK_USERS, MOCK_REVIEWS, MOCK_GROUPS,
   isUpcoming, formatReleaseDateBR,

@@ -11,6 +11,7 @@ import {
   mergeOmdb,
   STREAM_META,
   parseStreamingServices,
+  cachedFetch,
   isUpcoming,
   formatReleaseDateBR,
   logoMain,
