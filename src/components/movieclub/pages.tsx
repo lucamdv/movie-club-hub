@@ -26,6 +26,7 @@ import {
   useRecommendations, useFollows, useFriendLinks, useFriendships,
   useClubs, useClubDetail,
 } from "./hooks";
+
 import {
   Spinner, SkeletonCard, StarRating,
   Avatar, Badge, Btn, TextInput, Section, FilmStripBg,
@@ -36,6 +37,36 @@ import {
   ViewToolbar, Carousel, Navbar,
   PaginationBar, HeroBanner, Top10Card, SplashScreen,
 } from "./ui";
+
+const MONKEY_AVATAR_MAP = Object.fromEntries(
+  MONKEY_AVATARS.map((avatar) => [avatar.id, avatar.src]),
+);
+
+function resolveAvatarUrl(avatarValue) {
+  if (!avatarValue) return "";
+  if (avatarValue.startsWith("monkey:")) {
+    return MONKEY_AVATAR_MAP[avatarValue.slice(7)] || "";
+  }
+  const matchedMonkey = MONKEY_AVATARS.find(
+    (avatar) =>
+      avatarValue === avatar.src ||
+      avatarValue.includes(`${avatar.id}.`) ||
+      avatarValue.includes(`/${avatar.id}`) ||
+      avatarValue.includes(avatar.id),
+  );
+  return matchedMonkey?.src || avatarValue;
+}
+
+function isMonkeyAvatarSelected(avatarValue, monkeyId) {
+  if (!avatarValue) return false;
+  return (
+    avatarValue === `monkey:${monkeyId}` ||
+    avatarValue === MONKEY_AVATAR_MAP[monkeyId] ||
+    avatarValue.includes(`${monkeyId}.`) ||
+    avatarValue.includes(`/${monkeyId}`) ||
+    avatarValue.includes(monkeyId)
+  );
+}
 
 function SettingsPage({ apiStatus }) {
   const [testing, setTesting] = useState(false);
@@ -2512,6 +2543,7 @@ function ProfileEditModalInner({ profile, user, onClose, onSave }) {
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const fileRef = useRef(null);
+  const resolvedAvatarUrl = resolveAvatarUrl(avatarUrl);
 
   const handleUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -2635,7 +2667,7 @@ function ProfileEditModalInner({ profile, user, onClose, onSave }) {
               height: 100,
               borderRadius: "50%",
               margin: "0 auto 16px",
-              background: avatarUrl
+              background: resolvedAvatarUrl
                 ? "transparent"
                 : `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`,
               border: `3px solid ${C.gold}`,
@@ -2650,9 +2682,9 @@ function ProfileEditModalInner({ profile, user, onClose, onSave }) {
               fontFamily: "'Outfit', sans-serif",
             }}
           >
-            {avatarUrl ? (
+            {resolvedAvatarUrl ? (
               <img
-                src={avatarUrl}
+                src={resolvedAvatarUrl}
                 alt="Avatar"
                 style={{ width: "100%", height: "100%", objectFit: "cover" }}
               />
@@ -2707,15 +2739,16 @@ function ProfileEditModalInner({ profile, user, onClose, onSave }) {
               {MONKEY_AVATARS.map((m) => (
                 <button
                   key={m.id}
-                  onClick={() => setAvatarUrl(m.src)}
+                  onClick={() => setAvatarUrl(`monkey:${m.id}`)}
                   style={{
                     padding: 8,
                     borderRadius: 14,
-                    border:
-                      avatarUrl === m.src
-                        ? `2px solid ${C.gold}`
-                        : `1px solid ${C.border}`,
-                    background: avatarUrl === m.src ? `${C.gold}15` : C.bgDeep,
+                    border: isMonkeyAvatarSelected(avatarUrl, m.id)
+                      ? `2px solid ${C.gold}`
+                      : `1px solid ${C.border}`,
+                    background: isMonkeyAvatarSelected(avatarUrl, m.id)
+                      ? `${C.gold}15`
+                      : C.bgDeep,
                     cursor: "pointer",
                     transition: "all 0.2s",
                     display: "flex",
@@ -2898,6 +2931,7 @@ function ProfilePage({
   }, [viewUserId, isViewingOther]);
 
   const profile = isViewingOther ? otherProfile : authCtx?.profile;
+  const profileAvatarUrl = resolveAvatarUrl(profile?.avatar_url);
   const { ratings, loading: ratingsLoading } = useRatings(targetUserId);
   const {
     items: watchlistItems,
@@ -3065,7 +3099,7 @@ function ProfilePage({
                 width: 110,
                 height: 110,
                 borderRadius: "50%",
-                background: profile?.avatar_url
+                background: profileAvatarUrl
                   ? "transparent"
                   : `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`,
                 border: `4px solid ${C.bgDeep}`,
@@ -3081,9 +3115,9 @@ function ProfilePage({
                 marginBottom: 14,
               }}
             >
-              {profile?.avatar_url ? (
+              {profileAvatarUrl ? (
                 <img
-                  src={profile.avatar_url}
+                  src={profileAvatarUrl}
                   alt="Avatar"
                   style={{ width: "100%", height: "100%", objectFit: "cover" }}
                 />
@@ -3983,8 +4017,7 @@ function FriendsPage({
   };
 
   const getAvatarForProfile = (profile) => {
-    if (profile?.avatar_url) return profile.avatar_url;
-    return null;
+    return resolveAvatarUrl(profile?.avatar_url);
   };
 
   const UserCard = ({ profile, showActions = true }) => {
@@ -4718,16 +4751,16 @@ function GroupsPage({ setPage, setSelectedGroup, auth: authCtx }) {
                             fontSize: 10,
                             fontWeight: 700,
                             color: C.bgDeep,
-                            background: m.profile?.avatar_url
+                            background: resolveAvatarUrl(m.profile?.avatar_url)
                               ? "transparent"
                               : `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`,
                             border: `2px solid ${C.bgCard}`,
                             overflow: "hidden",
                           }}
                         >
-                          {m.profile?.avatar_url ? (
+                          {resolveAvatarUrl(m.profile?.avatar_url) ? (
                             <img
-                              src={m.profile.avatar_url}
+                              src={resolveAvatarUrl(m.profile?.avatar_url)}
                               alt=""
                               style={{
                                 width: "100%",
@@ -4992,7 +5025,7 @@ function GroupPage({ group, setPage, setSelectedMovie, auth: authCtx }) {
                           height: 24,
                           borderRadius: "50%",
                           overflow: "hidden",
-                          background: m.profile?.avatar_url
+                          background: resolveAvatarUrl(m.profile?.avatar_url)
                             ? "transparent"
                             : `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`,
                           border: `2px solid ${C.border}`,
@@ -5004,9 +5037,9 @@ function GroupPage({ group, setPage, setSelectedMovie, auth: authCtx }) {
                           color: C.bgDeep,
                         }}
                       >
-                        {m.profile?.avatar_url ? (
+                        {resolveAvatarUrl(m.profile?.avatar_url) ? (
                           <img
-                            src={m.profile.avatar_url}
+                            src={resolveAvatarUrl(m.profile?.avatar_url)}
                             alt=""
                             style={{
                               width: "100%",
@@ -5065,7 +5098,7 @@ function GroupPage({ group, setPage, setSelectedMovie, auth: authCtx }) {
                             height: 46,
                             borderRadius: "50%",
                             overflow: "hidden",
-                            background: member.profile?.avatar_url
+                            background: resolveAvatarUrl(member.profile?.avatar_url)
                               ? "transparent"
                               : `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`,
                             border: `2px solid ${C.border}`,
@@ -5077,9 +5110,9 @@ function GroupPage({ group, setPage, setSelectedMovie, auth: authCtx }) {
                             color: C.bgDeep,
                           }}
                         >
-                          {member.profile?.avatar_url ? (
+                          {resolveAvatarUrl(member.profile?.avatar_url) ? (
                             <img
-                              src={member.profile.avatar_url}
+                              src={resolveAvatarUrl(member.profile?.avatar_url)}
                               alt=""
                               style={{
                                 width: "100%",
@@ -5532,7 +5565,7 @@ function GroupPage({ group, setPage, setSelectedMovie, auth: authCtx }) {
                                 height: 36,
                                 borderRadius: "50%",
                                 overflow: "hidden",
-                                background: fp.avatar_url
+                                background: resolveAvatarUrl(fp.avatar_url)
                                   ? "transparent"
                                   : `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`,
                                 border: `2px solid ${C.border}`,
@@ -5544,9 +5577,9 @@ function GroupPage({ group, setPage, setSelectedMovie, auth: authCtx }) {
                                 color: C.bgDeep,
                               }}
                             >
-                              {fp.avatar_url ? (
+                              {resolveAvatarUrl(fp.avatar_url) ? (
                                 <img
-                                  src={fp.avatar_url}
+                                  src={resolveAvatarUrl(fp.avatar_url)}
                                   alt=""
                                   style={{
                                     width: "100%",
