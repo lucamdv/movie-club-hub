@@ -2931,6 +2931,7 @@ function ProfilePage({
   }, [viewUserId, isViewingOther]);
 
   const profile = isViewingOther ? otherProfile : authCtx?.profile;
+  const profileAvatarUrl = resolveAvatarUrl(profile?.avatar_url);
   const { ratings, loading: ratingsLoading } = useRatings(targetUserId);
   const {
     items: watchlistItems,
@@ -3098,7 +3099,7 @@ function ProfilePage({
                 width: 110,
                 height: 110,
                 borderRadius: "50%",
-                background: profile?.avatar_url
+                background: profileAvatarUrl
                   ? "transparent"
                   : `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`,
                 border: `4px solid ${C.bgDeep}`,
@@ -3114,9 +3115,9 @@ function ProfilePage({
                 marginBottom: 14,
               }}
             >
-              {profile?.avatar_url ? (
+              {profileAvatarUrl ? (
                 <img
-                  src={profile.avatar_url}
+                  src={profileAvatarUrl}
                   alt="Avatar"
                   style={{ width: "100%", height: "100%", objectFit: "cover" }}
                 />
@@ -4016,8 +4017,7 @@ function FriendsPage({
   };
 
   const getAvatarForProfile = (profile) => {
-    if (profile?.avatar_url) return profile.avatar_url;
-    return null;
+    return resolveAvatarUrl(profile?.avatar_url);
   };
 
   const UserCard = ({ profile, showActions = true }) => {
@@ -5565,7 +5565,7 @@ function GroupPage({ group, setPage, setSelectedMovie, auth: authCtx }) {
                                 height: 36,
                                 borderRadius: "50%",
                                 overflow: "hidden",
-                                background: fp.avatar_url
+                                background: resolveAvatarUrl(fp.avatar_url)
                                   ? "transparent"
                                   : `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`,
                                 border: `2px solid ${C.border}`,
@@ -5577,9 +5577,9 @@ function GroupPage({ group, setPage, setSelectedMovie, auth: authCtx }) {
                                 color: C.bgDeep,
                               }}
                             >
-                              {fp.avatar_url ? (
+                              {resolveAvatarUrl(fp.avatar_url) ? (
                                 <img
-                                  src={fp.avatar_url}
+                                  src={resolveAvatarUrl(fp.avatar_url)}
                                   alt=""
                                   style={{
                                     width: "100%",
