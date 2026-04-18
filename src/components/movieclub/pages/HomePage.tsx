@@ -67,31 +67,46 @@ export function HomePage({ setPage, setSelectedMovie, auth: authCtx }) {
   const go = (m) => { setSelectedMovie(m); setPage("movie"); };
   const initialLoading = trend.loading && trend.movies.length === 0;
 
+  // Classe utilitária para alinhar os esqueletos de carregamento perfeitamente com os carrosséis
+  const skeletonWrapperClass = "flex overflow-x-hidden pb-4 pt-2 -ml-4 md:-ml-10 px-4 md:px-10 gap-[12px]";
+
   return (
-    <div style={{ paddingTop: 0, paddingBottom: 60 }}>
+    <div className="pt-0 pb-[60px] relative w-full overflow-hidden">
+      
+      {/* O HeroBanner fica FORA da div com max-width. 
+        Isso garante que ele ocupe 100% da tela do celular de ponta a ponta. 
+      */}
       {trend.movies.length > 0 ? (
         <HeroBanner movies={trend.movies} onSelect={go} />
       ) : (
         initialLoading && (
-          <div style={{ height: 520, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div className="h-[450px] md:h-[520px] flex items-center justify-center w-full bg-[#0B0F19]">
             <Spinner size={36} />
           </div>
         )
       )}
 
-      <div style={{ maxWidth: 1400, margin: "0 auto", padding: "0 40px" }}>
-        <Section title={<><Flame size={18} style={{ display: "inline", color: "#EF4444" }} /> Top 10 da Semana</>}>
+      {/* Container Principal: Mantém as listas alinhadas e não deixa o conteúdo 
+        ficar largo demais em monitores gigantes (max-w-[1400px]).
+      */}
+      <div className="max-w-[1400px] mx-auto px-4 md:px-10 w-full overflow-x-hidden mt-6">
+        
+        <Section title={<><Flame size={18} className="inline mr-2 text-red-500" /> Top 10 da Semana</>}>
           {top10Loading ? (
-            <div style={{ display: "flex", gap: 12 }}>{Array(5).fill(0).map((_, i) => <SkeletonCard key={i} w={130} />)}</div>
+            <div className={skeletonWrapperClass} style={{ width: "calc(100% + 32px)" }}>
+              {Array(5).fill(0).map((_, i) => <div key={i} className="flex-none"><SkeletonCard w={130} /></div>)}
+            </div>
           ) : (
             <Carousel>{top10.map((m, i) => <Top10Card key={m.id} movie={m} rank={i + 1} onClick={() => go(m)} />)}</Carousel>
           )}
         </Section>
 
         {recs.length > 0 && (
-          <Section title={<><Target size={18} style={{ display: "inline", color: "#C9A84C" }} /> Recomendados para Você</>}>
+          <Section title={<><Target size={18} className="inline mr-2" style={{ color: "#C9A84C" }} /> Recomendados para Você</>}>
             {recsLoading ? (
-              <div style={{ display: "flex", gap: 12 }}>{Array(8).fill(0).map((_, i) => <SkeletonCard key={i} />)}</div>
+              <div className={skeletonWrapperClass} style={{ width: "calc(100% + 32px)" }}>
+                {Array(8).fill(0).map((_, i) => <div key={i} className="flex-none"><SkeletonCard /></div>)}
+              </div>
             ) : (
               <Carousel movies={recs} onMovieClick={go} />
             )}
@@ -100,7 +115,9 @@ export function HomePage({ setPage, setSelectedMovie, auth: authCtx }) {
 
         <Section title="Em Alta Agora" action={{ label: "Buscar", onClick: () => setPage("search") }}>
           {trend.loading ? (
-            <div style={{ display: "flex", gap: 12 }}>{Array(8).fill(0).map((_, i) => <SkeletonCard key={i} />)}</div>
+            <div className={skeletonWrapperClass} style={{ width: "calc(100% + 32px)" }}>
+              {Array(8).fill(0).map((_, i) => <div key={i} className="flex-none"><SkeletonCard /></div>)}
+            </div>
           ) : (
             <Carousel movies={trend.movies} onMovieClick={go} />
           )}
@@ -108,18 +125,17 @@ export function HomePage({ setPage, setSelectedMovie, auth: authCtx }) {
         </Section>
 
         {genres.length > 0 && (
-          <div style={{ marginBottom: 40 }}>
-            <h3 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 18, fontWeight: 700, color: C.text, marginBottom: 16 }}>
+          <div className="mb-10 w-full">
+            <h3 className="font-outfit text-lg font-bold mb-4" style={{ color: C.text }}>
               Explorar por Gênero
             </h3>
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 20 }}>
+            <div className="flex gap-2 flex-wrap mb-5">
               {genres.map((g) => (
                 <button
                   key={g.id}
                   onClick={() => setActiveG(activeG?.id === g.id ? null : g)}
+                  className="px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-200"
                   style={{
-                    padding: "6px 16px", borderRadius: 20, fontSize: 12, fontWeight: 500,
-                    whiteSpace: "nowrap", transition: "all 0.2s",
                     background: activeG?.id === g.id ? C.gold : C.bgCard,
                     color: activeG?.id === g.id ? C.bgDeep : C.textMuted,
                     border: `1px solid ${activeG?.id === g.id ? C.gold : C.border}`,
@@ -130,7 +146,9 @@ export function HomePage({ setPage, setSelectedMovie, auth: authCtx }) {
               ))}
             </div>
             {activeG && (loadingG ? (
-              <div style={{ display: "flex", gap: 12 }}>{Array(8).fill(0).map((_, i) => <SkeletonCard key={i} />)}</div>
+              <div className={skeletonWrapperClass} style={{ width: "calc(100% + 32px)" }}>
+                {Array(8).fill(0).map((_, i) => <div key={i} className="flex-none"><SkeletonCard /></div>)}
+              </div>
             ) : (
               <>
                 <Carousel movies={genreMovs} onMovieClick={go} />
@@ -142,7 +160,9 @@ export function HomePage({ setPage, setSelectedMovie, auth: authCtx }) {
 
         <Section title="Mais Populares">
           {pop.loading ? (
-            <div style={{ display: "flex", gap: 12 }}>{Array(8).fill(0).map((_, i) => <SkeletonCard key={i} />)}</div>
+             <div className={skeletonWrapperClass} style={{ width: "calc(100% + 32px)" }}>
+               {Array(8).fill(0).map((_, i) => <div key={i} className="flex-none"><SkeletonCard /></div>)}
+             </div>
           ) : (
             <Carousel movies={pop.movies} onMovieClick={go} />
           )}
@@ -151,7 +171,9 @@ export function HomePage({ setPage, setSelectedMovie, auth: authCtx }) {
 
         <Section title="Melhor Avaliados">
           {top.loading ? (
-            <div style={{ display: "flex", gap: 12 }}>{Array(8).fill(0).map((_, i) => <SkeletonCard key={i} />)}</div>
+             <div className={skeletonWrapperClass} style={{ width: "calc(100% + 32px)" }}>
+               {Array(8).fill(0).map((_, i) => <div key={i} className="flex-none"><SkeletonCard /></div>)}
+             </div>
           ) : (
             <Carousel movies={top.movies} onMovieClick={go} />
           )}
@@ -159,8 +181,8 @@ export function HomePage({ setPage, setSelectedMovie, auth: authCtx }) {
         </Section>
       </div>
 
-      <div style={{ display: "flex", justifyContent: "center", padding: "40px 0 20px", opacity: 0.15 }}>
-        <img src={mascotsNav} alt="MovieClub Mascots" style={{ width: 200, filter: "grayscale(0.3)" }} />
+      <div className="flex justify-center py-10 pb-5 opacity-15">
+        <img src={mascotsNav} alt="MovieClub Mascots" className="w-[200px] grayscale-[30%]" />
       </div>
       <FilmStripBg />
     </div>

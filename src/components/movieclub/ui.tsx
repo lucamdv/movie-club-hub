@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { toast } from "sonner";
 import {
   C,
@@ -1475,30 +1475,28 @@ function PaginationBar({ page, totalPages, totalResults, onPageChange }) {
 
 function HeroBanner({ movies, onSelect }) {
   const [idx, setIdx] = useState(0);
-  const hero = movies[idx];
+  const hero = movies?.[idx];
 
   useEffect(() => {
-    if (movies.length <= 1) return;
+    if (!movies || movies.length <= 1) return;
     const t = setInterval(
       () => setIdx((i) => (i + 1) % Math.min(movies.length, 5)),
-      8000,
+      8000
     );
     return () => clearInterval(t);
-  }, [movies.length]);
+  }, [movies?.length]);
 
   if (!hero) return null;
 
   return (
     <div
+      className="relative w-full overflow-hidden"
       style={{
-        height: 520,
-        position: "relative",
-        overflow: "hidden",
-        marginBottom: 0,
-        background: C.bgDeep, // Fundo sólido para evitar transparência na transição
+        height: "clamp(450px, 60vh, 520px)",
+        background: C.bgDeep,
       }}
     >
-      {/* 1. Crossfade suave nos Backdrops: evita o "pulo" visual */}
+      {/* 1. Backdrops com Crossfade */}
       {movies.slice(0, 5).map(
         (m, i) =>
           m.backdrop && (
@@ -1506,55 +1504,39 @@ function HeroBanner({ movies, onSelect }) {
               key={`bg-${m.id}`}
               src={m.backdrop}
               alt=""
-              className="hero-backdrop"
+              className="absolute inset-0 w-full h-full object-cover pointer-events-none"
               style={{
-                position: "absolute",
-                inset: 0,
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
                 opacity: idx === i ? 0.45 : 0,
-                transition: "opacity 1.2s ease-in-out", // Transição mais fluida
+                transition: "opacity 1.2s ease-in-out",
                 zIndex: 0,
-                pointerEvents: "none",
+                objectPosition: "center top",
               }}
             />
-          ),
+          )
       )}
 
-      {/* Gradient Overlays (zIndex 1) */}
+      {/* Gradientes de sobreposição para leitura do texto */}
       <div
+        className="absolute inset-0 pointer-events-none"
         style={{
-          position: "absolute",
-          inset: 0,
-          background: `linear-gradient(to right, ${C.bg} 0%, rgba(15,25,35,0.6) 50%, rgba(15,25,35,0.1) 100%)`,
+          background: `linear-gradient(to right, ${C.bg} 0%, rgba(15,25,35,0.8) 25%, transparent 100%)`,
           zIndex: 1,
-          pointerEvents: "none",
         }}
       />
       <div
+        className="absolute inset-0 pointer-events-none"
         style={{
-          position: "absolute",
-          inset: 0,
-          background: `linear-gradient(to top, ${C.bg} 0%, transparent 50%)`,
+          background: `linear-gradient(to top, ${C.bg} 0%, rgba(15,25,35,0.9) 15%, transparent 60%)`,
           zIndex: 1,
-          pointerEvents: "none",
         }}
       />
 
-      {/* 2. Content Area (zIndex 10 para ficar acima dos gradientes) */}
+      {/* 2. Área de Conteúdo */}
       <div
-        style={{
-          position: "absolute",
-          bottom: 80,
-          left: 48,
-          maxWidth: 560,
-          zIndex: 10,
-          animation: "fadeIn 0.5s ease",
-        }}
+        className="absolute bottom-20 md:bottom-28 left-4 md:left-12 w-[90%] md:max-w-[560px] z-10 animate-fade-in"
         key={hero.id}
       >
-        <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+        <div className="flex flex-wrap gap-2 mb-3">
           <Badge color="rgba(201,168,76,0.15)" textColor={C.gold}>
             ✦ Em Alta Esta Semana
           </Badge>
@@ -1566,14 +1548,10 @@ function HeroBanner({ movies, onSelect }) {
         </div>
 
         <h1
+          className="font-outfit font-black mb-2 leading-tight drop-shadow-2xl"
           style={{
-            fontFamily: "'Outfit', sans-serif",
-            fontSize: 42,
-            fontWeight: 900,
+            fontSize: "clamp(28px, 5vw, 42px)",
             color: C.text,
-            marginBottom: 8,
-            lineHeight: 1.1,
-            textShadow: "0 2px 20px rgba(0,0,0,0.5)",
           }}
         >
           {hero.title}
@@ -1581,116 +1559,53 @@ function HeroBanner({ movies, onSelect }) {
 
         {hero.overview && (
           <p
-            style={{
-              color: C.textMuted,
-              fontSize: 14,
-              lineHeight: 1.7,
-              marginBottom: 24,
-              display: "-webkit-box",
-              WebkitLineClamp: 3,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
-            }}
+            className="text-sm md:text-base leading-relaxed mb-6 line-clamp-2 md:line-clamp-3"
+            style={{ color: C.textMuted }}
           >
             {hero.overview}
           </p>
         )}
 
-        {/* Botões restaurados */}
-        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+        <div className="flex flex-row gap-3 items-center">
           <Btn
             variant="gold"
             onClick={() => onSelect(hero)}
-            style={{ padding: "12px 28px", fontSize: 14 }}
+            className="px-6 py-2.5 md:px-8 md:py-3 text-xs md:text-sm font-bold uppercase tracking-wider"
           >
-            <PlayIcon /> Ver Detalhes
+            <PlayIcon size={16} className="inline mr-2" /> Ver Agora
           </Btn>
           <Btn
             variant="ghost"
             onClick={() => onSelect(hero)}
+            className="px-6 py-2.5 md:px-8 md:py-3 text-xs md:text-sm"
             style={{
               background: "rgba(255,255,255,0.08)",
               border: "1px solid rgba(255,255,255,0.15)",
             }}
           >
-            <PlusIcon /> Minha Lista
+            <PlusIcon size={16} className="inline mr-2" /> Minha Lista
           </Btn>
         </div>
       </div>
 
-      {/* Hero indicators (Dots) */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: 28,
-          left: 48,
-          display: "flex",
-          gap: 8,
-          zIndex: 10,
-        }}
-      >
+      {/* 3. Indicadores */}
+      <div className="absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 flex gap-1.5 z-20 items-center">
         {movies.slice(0, 5).map((_, i) => (
           <button
             key={i}
             onClick={() => setIdx(i)}
+            className={`rounded-full transition-all duration-300 ${
+              idx === i 
+                ? "w-2 h-px opacity-100" // Ativo: uma micro linha (8px de largura por 1px de altura)
+                : "w-px h-px opacity-40 hover:opacity-70" // Inativos: ponto de exato 1px
+            }`}
             style={{
-              width: idx === i ? 28 : 8,
-              height: 4,
-              borderRadius: 2,
-              background: idx === i ? C.gold : "rgba(255,255,255,0.3)",
-              transition: "all 0.3s",
-              cursor: "pointer",
+              background: idx === i ? C.gold : "#FFFFFF",
+              // Brilho reduzido ao mínimo absoluto
+              boxShadow: idx === i ? `0 0 2px ${C.gold}` : "none", 
             }}
+            aria-label={`Slide ${i + 1}`}
           />
-        ))}
-      </div>
-
-      {/* Mini posters do carrossel (Restaurados e em HD) */}
-      <div
-        style={{
-          position: "absolute",
-          right: 40,
-          bottom: 60,
-          display: "flex",
-          gap: 10,
-          alignItems: "flex-end",
-          zIndex: 10,
-        }}
-      >
-        {movies.slice(0, 5).map((m, i) => (
-          <div
-            key={m.id}
-            onClick={() => setIdx(i)}
-            style={{
-              width: 72,
-              cursor: "pointer",
-              opacity: idx === i ? 1 : 0.5,
-              transform: idx === i ? "scale(1.1)" : "scale(1)",
-              transition: "all 0.3s ease-in-out",
-            }}
-          >
-            <div
-              style={{
-                height: 108,
-                borderRadius: 6,
-                overflow: "hidden",
-                border:
-                  idx === i ? `2px solid ${C.gold}` : `1px solid ${C.border}`,
-                boxShadow: idx === i ? `0 0 20px rgba(201,168,76,0.3)` : "none",
-                background: C.bgCard,
-                transition: "all 0.3s",
-              }}
-            >
-              {(m.posterHD || m.poster) && (
-                <img
-                  src={m.posterHD || m.poster}
-                  alt={m.title}
-                  loading="lazy"
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                />
-              )}
-            </div>
-          </div>
         ))}
       </div>
     </div>
