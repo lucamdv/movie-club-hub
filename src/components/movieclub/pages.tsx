@@ -4751,16 +4751,16 @@ function GroupsPage({ setPage, setSelectedGroup, auth: authCtx }) {
                             fontSize: 10,
                             fontWeight: 700,
                             color: C.bgDeep,
-                            background: m.profile?.avatar_url
+                            background: resolveAvatarUrl(m.profile?.avatar_url)
                               ? "transparent"
                               : `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`,
                             border: `2px solid ${C.bgCard}`,
                             overflow: "hidden",
                           }}
                         >
-                          {m.profile?.avatar_url ? (
+                          {resolveAvatarUrl(m.profile?.avatar_url) ? (
                             <img
-                              src={m.profile.avatar_url}
+                              src={resolveAvatarUrl(m.profile?.avatar_url)}
                               alt=""
                               style={{
                                 width: "100%",
@@ -5025,7 +5025,7 @@ function GroupPage({ group, setPage, setSelectedMovie, auth: authCtx }) {
                           height: 24,
                           borderRadius: "50%",
                           overflow: "hidden",
-                          background: m.profile?.avatar_url
+                          background: resolveAvatarUrl(m.profile?.avatar_url)
                             ? "transparent"
                             : `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`,
                           border: `2px solid ${C.border}`,
@@ -5037,9 +5037,9 @@ function GroupPage({ group, setPage, setSelectedMovie, auth: authCtx }) {
                           color: C.bgDeep,
                         }}
                       >
-                        {m.profile?.avatar_url ? (
+                        {resolveAvatarUrl(m.profile?.avatar_url) ? (
                           <img
-                            src={m.profile.avatar_url}
+                            src={resolveAvatarUrl(m.profile?.avatar_url)}
                             alt=""
                             style={{
                               width: "100%",
@@ -5098,7 +5098,7 @@ function GroupPage({ group, setPage, setSelectedMovie, auth: authCtx }) {
                             height: 46,
                             borderRadius: "50%",
                             overflow: "hidden",
-                            background: member.profile?.avatar_url
+                            background: resolveAvatarUrl(member.profile?.avatar_url)
                               ? "transparent"
                               : `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`,
                             border: `2px solid ${C.border}`,
@@ -5110,9 +5110,9 @@ function GroupPage({ group, setPage, setSelectedMovie, auth: authCtx }) {
                             color: C.bgDeep,
                           }}
                         >
-                          {member.profile?.avatar_url ? (
+                          {resolveAvatarUrl(member.profile?.avatar_url) ? (
                             <img
-                              src={member.profile.avatar_url}
+                              src={resolveAvatarUrl(member.profile?.avatar_url)}
                               alt=""
                               style={{
                                 width: "100%",
