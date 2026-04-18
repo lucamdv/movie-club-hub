@@ -1242,141 +1242,135 @@ function Carousel({ children, movies, onMovieClick }) {
   );
 }
 
-function Navbar({ page, setPage, hasKeys, apiStatus }) {
-  // Monkey mascots: wizard=discover, speak-no-evil=profile, see-no-evil=clubs
-  const items = [
-    ["home", "Discover", mascotWizard],
-    ["quickrate", "Avaliar", monkeyFlash],
-    ["groups", "Clubs", mascotSee],
-    ["profile", "Perfil", monkeyPopcorn],
-    ["friends", "Amigos", monkeyCrew],
-    ["search", "Buscar", monkeySearch],
-  ];
+function Navbar({ page, setPage, hasKeys, apiStatus, isMobile }) {
   const [scrolled, setScrolled] = useState(false);
+
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 40);
     window.addEventListener("scroll", fn, { passive: true });
     return () => window.removeEventListener("scroll", fn);
   }, []);
 
-  return (
-    <nav
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 100,
-        background: scrolled ? "rgba(15,25,35,0.95)" : "rgba(15,25,35,0.4)",
-        backdropFilter: "blur(20px)",
-        WebkitBackdropFilter: "blur(20px)",
-        borderBottom: scrolled
-          ? `1px solid ${C.border}`
-          : "1px solid transparent",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "0 32px",
-        height: 64,
-        transition: "all 0.35s ease",
-      }}
-    >
-      <button
-        onClick={() => setPage("home")}
-        style={{ display: "flex", alignItems: "center", gap: 10 }}
-      >
-        <img
-          src={logoText}
-          alt="MovieClub"
-          style={{
-            height: 32,
-            filter: "drop-shadow(0 0 8px rgba(201,168,76,0.2))",
-          }}
-        />
-      </button>
+  // Nav items shared between desktop and mobile bottom nav
+  const items = [
+    { id: "home", label: "Discover", icon: mascotWizard },
+    { id: "quickrate", label: "Avaliar", icon: monkeyFlash },
+    { id: "groups", label: "Clubs", icon: mascotSee },
+    { id: "profile", label: "Perfil", icon: monkeyPopcorn },
+    { id: "friends", label: "Amigos", icon: monkeyCrew },
+    { id: "search", label: "Buscar", icon: monkeySearch },
+  ];
 
-      <div style={{ display: "flex", gap: 6 }}>
-        {items.map(([id, label, icon]) => {
+  return (
+    <>
+      {/* ── Top bar (always visible) ── */}
+      <nav className={`top-bar${scrolled ? " scrolled" : ""}`}>
+        <button
+          onClick={() => setPage("home")}
+          style={{ display: "flex", alignItems: "center", gap: 8 }}
+        >
+          <img
+            src={logoText}
+            alt="MovieClub"
+            style={{
+              height: isMobile ? 26 : 32,
+              filter: "drop-shadow(0 0 8px rgba(201,168,76,0.2))",
+            }}
+          />
+        </button>
+
+        {/* Desktop nav items — hidden on mobile via CSS */}
+        <div className="desktop-nav" style={{ display: "flex", gap: 4 }}>
+          {items.map(({ id, label, icon }) => {
+            const active = page === id;
+            return (
+              <button
+                key={id}
+                onClick={() => setPage(id)}
+                style={{
+                  padding: "8px 16px",
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: active ? C.gold : C.textMuted,
+                  background: active ? "rgba(201,168,76,0.1)" : "transparent",
+                  borderRadius: 12,
+                  transition: "all 0.25s",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  fontFamily: "'DM Sans', sans-serif",
+                  minHeight: "unset",
+                  minWidth: "unset",
+                }}
+                onMouseEnter={(e) => {
+                  if (!active) {
+                    e.currentTarget.style.color = C.text;
+                    e.currentTarget.style.background = "rgba(255,255,255,0.05)";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!active) {
+                    e.currentTarget.style.color = C.textMuted;
+                    e.currentTarget.style.background = "transparent";
+                  }
+                }}
+              >
+                <div
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: "50%",
+                    overflow: "hidden",
+                    border: active ? `2px solid ${C.gold}` : "2px solid rgba(255,255,255,0.1)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    background: active ? "rgba(201,168,76,0.15)" : "rgba(255,255,255,0.06)",
+                    transition: "all 0.25s",
+                    flexShrink: 0,
+                    boxShadow: active ? "0 0 10px rgba(201,168,76,0.3)" : "none",
+                  }}
+                >
+                  <img src={icon} alt="" style={{ width: 26, height: 26, objectFit: "cover", borderRadius: "50%" }} />
+                </div>
+                {label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Mobile: current page title */}
+        {isMobile && (
+          <p style={{
+            fontSize: 13,
+            fontWeight: 600,
+            color: C.textMuted,
+            fontFamily: "'DM Sans', sans-serif",
+          }}>
+            {items.find(i => i.id === page)?.label || ""}
+          </p>
+        )}
+      </nav>
+
+      {/* ── Bottom nav (mobile only, CSS-controlled) ── */}
+      <nav className="bottom-nav">
+        {items.map(({ id, label, icon }) => {
           const active = page === id;
           return (
             <button
               key={id}
+              className={`bottom-nav-item${active ? " active" : ""}`}
               onClick={() => setPage(id)}
-              style={{
-                padding: "8px 18px",
-                fontSize: 13,
-                fontWeight: 600,
-                color: active ? C.gold : C.textMuted,
-                background: active ? "rgba(201,168,76,0.1)" : "transparent",
-                borderRadius: 12,
-                transition: "all 0.25s",
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                fontFamily: "'DM Sans', sans-serif",
-              }}
-              onMouseEnter={(e) => {
-                if (!active) {
-                  e.currentTarget.style.color = C.text;
-                  e.currentTarget.style.background = "rgba(255,255,255,0.05)";
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!active) {
-                  e.currentTarget.style.color = C.textMuted;
-                  e.currentTarget.style.background = active
-                    ? "rgba(201,168,76,0.1)"
-                    : "transparent";
-                }
-              }}
             >
-              {icon ? (
-                <div
-                  style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: "50%",
-                    overflow: "hidden",
-                    border: active
-                      ? `2px solid ${C.gold}`
-                      : "2px solid rgba(255,255,255,0.1)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    background: active
-                      ? "rgba(201,168,76,0.15)"
-                      : "rgba(255,255,255,0.06)",
-                    transition: "all 0.25s",
-                    flexShrink: 0,
-                    boxShadow: active
-                      ? "0 0 12px rgba(201,168,76,0.3)"
-                      : "none",
-                  }}
-                >
-                  <img
-                    src={icon}
-                    alt=""
-                    style={{
-                      width: 30,
-                      height: 30,
-                      objectFit: "cover",
-                      borderRadius: "50%",
-                    }}
-                  />
-                </div>
-              ) : id === "quickrate" ? (
-                <Zap size={16} />
-              ) : id === "friends" ? (
-                <Users size={16} />
-              ) : (
-                <Search size={16} />
-              )}
-              {label}
+              <div className="nav-icon">
+                <img src={icon} alt={label} />
+              </div>
+              <span className="nav-label">{label}</span>
             </button>
           );
         })}
-      </div>
-    </nav>
+      </nav>
+    </>
   );
 }
 
@@ -1794,13 +1788,16 @@ function Top10Card({ movie, rank, onClick }) {
 function SplashScreen({ onFinish }) {
   const [phase, setPhase] = useState("in");
 
+  // Import logoMain dynamically to keep this file standalone
+  const [logoSrc, setLogoSrc] = useState("");
+  useEffect(() => {
+    import("./foundation").then(({ logoMain }) => setLogoSrc(logoMain));
+  }, []);
+
   useEffect(() => {
     const t1 = setTimeout(() => setPhase("out"), 2200);
     const t2 = setTimeout(() => onFinish(), 2700);
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-    };
+    return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [onFinish]);
 
   return (
@@ -1814,20 +1811,20 @@ function SplashScreen({ onFinish }) {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        animation:
-          phase === "out" ? "splashFadeOut 0.5s ease forwards" : undefined,
+        animation: phase === "out" ? "splashFadeOut 0.5s ease forwards" : undefined,
       }}
     >
-      <img
-        src={logoMain}
-        alt="MovieClub Logo"
-        style={{
-          width: 320,
-          maxWidth: "80vw",
-          animation: "splashFadeIn 1s ease 0.2s both",
-          filter: "drop-shadow(0 0 40px rgba(201,168,76,0.3))",
-        }}
-      />
+      {logoSrc && (
+        <img
+          src={logoSrc}
+          alt="MovieClub Logo"
+          style={{
+            width: "min(320px, 75vw)",
+            animation: "splashFadeIn 1s ease 0.2s both",
+            filter: "drop-shadow(0 0 40px rgba(201,168,76,0.3))",
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -1873,4 +1870,39 @@ export {
   HeroBanner,
   Top10Card,
   SplashScreen,
-};
+}
+
+export function InstallBanner({ isIOS, onInstall, onDismiss }) {
+  return (
+    <div className="pwa-install-banner" style={{ position: "relative" }}>
+      <button className="banner-btn-dismiss" onClick={onDismiss}>✕</button>
+
+      <img
+        src="/apple-touch-icon.png"
+        alt="MovieClub"
+        className="banner-icon"
+      />
+
+      <div className="banner-text">
+        <p className="banner-title">Adicionar MovieClub</p>
+        {isIOS ? (
+          <p className="banner-sub">
+            Toque em <strong style={{ color: "#C9A84C" }}>Compartilhar</strong> e depois{" "}
+            <strong style={{ color: "#C9A84C" }}>"Adicionar à Tela Inicial"</strong>
+          </p>
+        ) : (
+          <p className="banner-sub">
+            Instale o app para acesso rápido
+          </p>
+        )}
+      </div>
+
+      {!isIOS && (
+        <button className="banner-btn-install" onClick={onInstall}>
+          Instalar
+        </button>
+      )}
+    </div>
+  );
+}
+;
