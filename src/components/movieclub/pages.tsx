@@ -26,18 +26,37 @@ import {
   useRecommendations, useFollows, useFriendLinks, useFriendships,
   useClubs, useClubDetail,
 } from "./hooks";
-import {
-  Spinner, SkeletonCard, StarRating,
-  Avatar, Badge, Btn, TextInput, Section, FilmStripBg,
-  StreamingBadges, RatingsRow, MovieCard, MiniPoster,
-  BackIcon, PlusIcon, CheckIcon, UsersIcon, LinkIcon, CopyIcon,
-  UserPlusIcon, UserCheckIcon, ShareIcon, SearchSVG, KeyIcon, PlayIcon,
-  HeartIcon, ChevronLeftIcon, GridIcon, ListIcon, ChevronRightIcon,
-  ViewToolbar, Carousel, Navbar,
-  PaginationBar, HeroBanner, Top10Card, SplashScreen,
-} from "./ui";
 
-function SettingsPage({ apiStatus }) {
+const MONKEY_AVATAR_MAP = Object.fromEntries(
+  MONKEY_AVATARS.map((avatar) => [avatar.id, avatar.src]),
+);
+
+function resolveAvatarUrl(avatarValue) {
+  if (!avatarValue) return "";
+  if (avatarValue.startsWith("monkey:")) {
+    return MONKEY_AVATAR_MAP[avatarValue.slice(7)] || "";
+  }
+  const matchedMonkey = MONKEY_AVATARS.find(
+    (avatar) =>
+      avatarValue === avatar.src ||
+      avatarValue.includes(`${avatar.id}.`) ||
+      avatarValue.includes(`/${avatar.id}`) ||
+      avatarValue.includes(avatar.id),
+  );
+  return matchedMonkey?.src || avatarValue;
+}
+
+function isMonkeyAvatarSelected(avatarValue, monkeyId) {
+  if (!avatarValue) return false;
+  return (
+    avatarValue === `monkey:${monkeyId}` ||
+    avatarValue === MONKEY_AVATAR_MAP[monkeyId] ||
+    avatarValue.includes(`${monkeyId}.`) ||
+    avatarValue.includes(`/${monkeyId}`) ||
+    avatarValue.includes(monkeyId)
+  );
+}
+
   const [testing, setTesting] = useState(false);
   const [results, setResults] = useState({});
   const testApis = async () => {
