@@ -27,6 +27,17 @@ import {
   useClubs, useClubDetail,
 } from "./hooks";
 
+import {
+  Spinner, SkeletonCard, StarRating,
+  Avatar, Badge, Btn, TextInput, Section, FilmStripBg,
+  StreamingBadges, RatingsRow, MovieCard, MiniPoster,
+  BackIcon, PlusIcon, CheckIcon, UsersIcon, LinkIcon, CopyIcon,
+  UserPlusIcon, UserCheckIcon, ShareIcon, SearchSVG, KeyIcon, PlayIcon,
+  HeartIcon, ChevronLeftIcon, GridIcon, ListIcon, ChevronRightIcon,
+  ViewToolbar, Carousel, Navbar,
+  PaginationBar, HeroBanner, Top10Card, SplashScreen,
+} from "./ui";
+
 const MONKEY_AVATAR_MAP = Object.fromEntries(
   MONKEY_AVATARS.map((avatar) => [avatar.id, avatar.src]),
 );
@@ -57,6 +68,7 @@ function isMonkeyAvatarSelected(avatarValue, monkeyId) {
   );
 }
 
+function SettingsPage({ apiStatus }) {
   const [testing, setTesting] = useState(false);
   const [results, setResults] = useState({});
   const testApis = async () => {
