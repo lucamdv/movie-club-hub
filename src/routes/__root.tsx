@@ -68,6 +68,12 @@ export const Route = createRootRoute({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@MovieClub" },
+      { name: "twitter:title", content: "MovieClub" },
+      { name: "description", content: "Movie Club Hub is a social platform for movie lovers to discover, rate, and discuss films." },
+      { property: "og:description", content: "Movie Club Hub is a social platform for movie lovers to discover, rate, and discuss films." },
+      { name: "twitter:description", content: "Movie Club Hub is a social platform for movie lovers to discover, rate, and discuss films." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/hUuUvdnOXAWJWIzeF640h0uTjRi1/social-images/social-1776540434356-1000275530.webp" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/hUuUvdnOXAWJWIzeF640h0uTjRi1/social-images/social-1776540434356-1000275530.webp" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
