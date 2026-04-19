@@ -765,12 +765,60 @@ function useClubDetail(clubId, userId) {
 }
 
 // ─────────────────────────────────────────────
-//  GROUPS PAGE (Clubs)
+//  CLUB ACTIVITY (Histórico de atividade)
 
+function useClubActivity(clubId) {
+  const [activity, setActivity] = useState([]);
+  const [loading, setLoading] = useState(false);
 
+  const load = useCallback(async () => {
+    if (!clubId) return;
+    setLoading(true);
+    const { data: rows } = await supabase
+      .from("club_activity")
+      .select("*")
+      .eq("club_id", clubId)
+      .order("created_at", { ascending: false })
+      .limit(50);
+    const userIds = Array.from(new Set((rows || []).map((r) => r.user_id)));
+    let profiles = [];
+    if (userIds.length) {
+      const { data } = await supabase
+        .from("profiles")
+        .select("user_id, display_name, avatar_url, username")
+        .in("user_id", userIds);
+      profiles = data || [];
+    }
+    setActivity(
+      (rows || []).map((r) => ({
+        ...r,
+        profile: profiles.find((p) => p.user_id === r.user_id) || null,
+      })),
+    );
+    setLoading(false);
+  }, [clubId]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const logActivity = async ({ userId, tmdbId, title, posterUrl, rating }) => {
+    if (!clubId || !userId) return;
+    const { error } = await supabase.from("club_activity").insert({
+      club_id: clubId,
+      user_id: userId,
+      tmdb_id: tmdbId,
+      title: title || null,
+      poster_url: posterUrl || null,
+      rating,
+    });
+    if (error) throw error;
+    await load();
+  };
+
+  return { activity, loading, logActivity, reload: load };
+}
 
 export {
   useMovieDetails, usePaginatedMovies, useAuth, useRatings, useWatchlist,
   useRecommendations, useFollows, useFriendLinks, useFriendships,
-  useClubs, useClubDetail,
+  useClubs, useClubDetail, useClubActivity,
 };
