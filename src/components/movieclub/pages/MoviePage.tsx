@@ -442,7 +442,7 @@ export function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx,
 
   // ── DESKTOP LAYOUT (original, mantido intacto) ────────
   return (
-    <div style={{ paddingTop: 60, paddingBottom: 60, minHeight: "100dvh", overflowX: "hidden" }}>
+    <div style={{ paddingTop: 60, paddingBottom: 60, minHeight: "100vh" }}>
       <div style={{ height: 420, position: "relative", overflow: "hidden" }}>
         {m.backdrop ? (
           <img src={m.backdrop} alt="" className="hero-backdrop" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.38 }} />

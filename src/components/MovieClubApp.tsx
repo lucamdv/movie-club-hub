@@ -87,7 +87,7 @@ function usePWAInstall() {
 
 // ─── isMobile Hook ────────────────────────────────────────
 function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   useEffect(() => {
     const mql = window.matchMedia("(max-width: 767px)");
     const onChange = () => setIsMobile(mql.matches);

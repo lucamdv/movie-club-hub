@@ -1501,19 +1501,19 @@ export function ProfilePageMobile({
                     position: "absolute",
                     bottom: 4,
                     right: 4,
-                    background: "rgba(0,0,0,0.78)",
+                    background: "rgba(0,0,0,0.75)",
                     borderRadius: 6,
-                    padding: "2px 7px",
+                    padding: "2px 6px",
                     display: "flex",
                     alignItems: "center",
-                    gap: 3,
+                    gap: 2,
                   }}
                 >
-                  <Star size={10} fill={C.gold} stroke="none" />
+                  <Star size={9} fill={C.gold} stroke="none" />
                   <span
-                    style={{ fontSize: 11, color: C.gold, fontWeight: 700, lineHeight: 1 }}
+                    style={{ fontSize: 10, color: C.gold, fontWeight: 700 }}
                   >
-                    {Number(r.rating).toFixed(1)}
+                    {Number(r.rating).toFixed(0)}
                   </span>
                 </div>
               </div>
@@ -1842,7 +1842,7 @@ export function ProfilePageDesktop(props) {
   }, [ratings]);
 
   return (
-    <div style={{ paddingTop: "calc(var(--top-bar-height) + var(--safe-top))", paddingBottom: "calc(var(--bottom-nav-height) + var(--safe-bottom) + 16px)", minHeight: "100dvh" }}>
+    <div style={{ paddingTop: 64, paddingBottom: 80, minHeight: "100vh" }}>
       {/* Banner */}
       <div style={{ position: "relative", height: 220, overflow: "hidden" }}>
         {bannerPosters.length > 0 ? (

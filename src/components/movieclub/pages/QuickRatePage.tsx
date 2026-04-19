@@ -133,7 +133,7 @@ export function QuickRatePage({ setPage, setSelectedMovie, auth }) {
   if (!mode) {
     const hasRatings = ratings.length > 0;
     return (
-      <div style={{ paddingTop: 80, minHeight: "100dvh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ paddingTop: 80, minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
         <div style={{ maxWidth: 480, width: "100%", padding: "0 24px" }}>
           <div style={{ textAlign: "center", marginBottom: 40 }}>
             <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 64, height: 64, borderRadius: 20, background: `linear-gradient(135deg, ${C.gold}22, ${C.gold}08)`, border: `1px solid ${C.gold}33`, marginBottom: 16 }}>
@@ -169,7 +169,7 @@ export function QuickRatePage({ setPage, setSelectedMovie, auth }) {
     const distribution = [1, 2, 3, 4, 5].map((s) => sessionStats.rated.filter((r) => Math.ceil(r.stars) === s).length);
     const maxDist = Math.max(...distribution, 1);
     return (
-      <div style={{ paddingTop: 80, minHeight: "100dvh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ paddingTop: 80, minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
         <div style={{ maxWidth: 500, width: "100%", padding: "0 24px" }}>
           <div style={{ textAlign: "center", marginBottom: 32 }}>
             <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 64, height: 64, borderRadius: 20, background: `linear-gradient(135deg, ${C.gold}22, ${C.gold}08)`, border: `1px solid ${C.gold}33`, marginBottom: 16 }}><Award size={28} style={{ color: C.gold }} /></div>
@@ -225,14 +225,14 @@ export function QuickRatePage({ setPage, setSelectedMovie, auth }) {
   }
 
   if (loading && movies.length === 0) return (
-    <div style={{ paddingTop: 100, minHeight: "100dvh", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 16 }}>
+    <div style={{ paddingTop: 100, minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 16 }}>
       <Spinner size={36} />
       <p style={{ color: C.textMuted, fontSize: 14 }}>Preparando sessão{mode === "recommended" ? " personalizada" : ""}...</p>
     </div>
   );
 
   if (!current) return (
-    <div style={{ paddingTop: 100, minHeight: "100dvh", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 16 }}>
+    <div style={{ paddingTop: 100, minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 16 }}>
       <Film size={48} style={{ color: C.textDim }} />
       <p style={{ color: C.textMuted, fontSize: 14 }}>Nenhum filme encontrado</p>
       <Btn variant="gold" onClick={() => setMode(null)}>Voltar</Btn>
@@ -245,7 +245,7 @@ export function QuickRatePage({ setPage, setSelectedMovie, auth }) {
   const cardTransform = animating ? (direction === "left" ? "translateX(-120%) rotate(-8deg)" : "translateX(120%) rotate(8deg)") : `translateX(${swipeX}px) rotate(${swipeX * 0.04}deg)`;
 
   return (
-    <div style={{ paddingTop: 80, minHeight: "100dvh", maxHeight: "100dvh", position: "relative", overflow: "hidden" }}>
+    <div style={{ paddingTop: 80, minHeight: "100vh", position: "relative", overflow: "hidden" }}>
       {backdropUrl && (
         <div style={{ position: "fixed", inset: 0, zIndex: 0 }}>
           <img src={backdropUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.15, filter: "blur(30px)" }} />
