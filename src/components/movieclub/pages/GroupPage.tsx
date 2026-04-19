@@ -35,7 +35,7 @@ function WatchRateModal({ movie, existingRating, onClose, onSubmit }) {
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 220, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }} onClick={onClose}>
       <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.75)", backdropFilter: "blur(4px)" }} />
-      <div onClick={(e) => e.stopPropagation()} style={{ position: "relative", background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 20, padding: 26, width: "100%", maxWidth: 420 }}>
+      <div onClick={(e) => e.stopPropagation()} style={{ position: "relative", background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 20, padding: 26, width: "100%", maxWidth: 420, maxHeight: "calc(100dvh - var(--safe-top) - var(--safe-bottom) - 40px)", overflowY: "auto", WebkitOverflowScrolling: "touch", overscrollBehavior: "contain" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
           <h3 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 18, fontWeight: 700, color: C.text }}>
             Marcar como visto
