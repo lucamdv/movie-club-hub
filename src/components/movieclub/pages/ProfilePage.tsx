@@ -1739,6 +1739,21 @@ export function ProfilePageMobile({
           </>,
           document.body,
         )}
+
+      {showEditModal && !isViewingOther && (
+        <ProfileEditModal
+          profile={displayProfile}
+          user={authCtx?.user}
+          onClose={() => setShowEditModal(false)}
+          onSave={authCtx?.updateProfile}
+        />
+      )}
+      {showImportModal && !isViewingOther && (
+        <ImportDataModal
+          userId={currentUserId}
+          onClose={() => setShowImportModal(false)}
+        />
+      )}
     </div>
   );
 }
