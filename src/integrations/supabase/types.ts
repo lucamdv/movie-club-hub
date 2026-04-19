@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      club_activity: {
+        Row: {
+          club_id: string
+          created_at: string
+          id: string
+          poster_url: string | null
+          rating: number
+          title: string | null
+          tmdb_id: number
+          user_id: string
+        }
+        Insert: {
+          club_id: string
+          created_at?: string
+          id?: string
+          poster_url?: string | null
+          rating: number
+          title?: string | null
+          tmdb_id: number
+          user_id: string
+        }
+        Update: {
+          club_id?: string
+          created_at?: string
+          id?: string
+          poster_url?: string | null
+          rating?: number
+          title?: string | null
+          tmdb_id?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       club_invites: {
         Row: {
           club_id: string
