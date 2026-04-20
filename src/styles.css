@@ -1005,3 +1005,203 @@
   }
 }
 
+/* ═══════════════════════════════════════════════════════════
+   CAROUSEL FIX — alinhamento mobile
+   Problema: primeiro card cortado à direita por margin negativa
+   maior que o padding interno do container pai.
+═══════════════════════════════════════════════════════════ */
+
+/* O container pai da HomePage tem px-4 md:px-10 (16px / 40px).
+   O carousel-row precisa compensar exatamente esse valor. */
+
+@media (max-width: 767px) {
+  .carousel-row {
+    /* Compensar o padding do container pai (16px cada lado) */
+    margin-left: -16px;
+    margin-right: -16px;
+    /* Padding interno igual para o primeiro/último card ficarem alinhados */
+    padding: 8px 16px 20px;
+    gap: 10px;
+  }
+
+  /* Garantir que não haja overflow horizontal na página */
+  .max-w-\[1400px\] {
+    overflow-x: hidden;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   HERO INDICATOR — visibilidade desktop vs mobile
+═══════════════════════════════════════════════════════════ */
+.hero-indicator {
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.25);
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  cursor: pointer;
+  border: none;
+  padding: 0;
+  flex-shrink: 0;
+  min-height: unset;
+  min-width: unset;
+  width: 8px;
+}
+
+.hero-indicator.active {
+  background: #c9a84c;
+  box-shadow: 0 0 8px rgba(201, 168, 76, 0.6);
+  width: 28px;
+}
+
+@media (max-width: 767px) {
+  .hero-indicator {
+    width: 6px;
+  }
+  .hero-indicator.active {
+    width: 20px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   GROUPS PAGE DESKTOP — 2-column layout melhoria
+═══════════════════════════════════════════════════════════ */
+
+/* Activity sidebar sticky */
+.club-activity-sidebar {
+  position: sticky;
+  top: 80px;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.club-activity-sidebar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FRIENDS ACTIVITY TAB
+═══════════════════════════════════════════════════════════ */
+.friends-activity-item:hover {
+  border-color: rgba(201, 168, 76, 0.2) !important;
+  background: #1a2d42 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MOVIE CARD — rating badge melhorado
+═══════════════════════════════════════════════════════════ */
+.rating-badge {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  background: rgba(0, 0, 0, 0.82);
+  border-radius: 6px;
+  padding: 2px 7px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  backdrop-filter: blur(4px);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PROFILE PAGE — melhorias de layout
+═══════════════════════════════════════════════════════════ */
+
+/* Grid de pôsteres mais espaçado no desktop */
+@media (min-width: 768px) {
+  .profile-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
+    gap: 20px !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SEARCH PAGE — mobile padding fix
+═══════════════════════════════════════════════════════════ */
+@media (max-width: 767px) {
+  .search-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   HOME PAGE — section headers mobile
+═══════════════════════════════════════════════════════════ */
+@media (max-width: 767px) {
+  /* Ensure section titles align with page padding */
+  .section-title-row {
+    padding: 0 !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MOVIE PAGE MOBILE — poster overlap fix
+═══════════════════════════════════════════════════════════ */
+@media (max-width: 767px) {
+  .movie-header-overlap {
+    margin-top: -80px;
+    position: relative;
+    z-index: 2;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   QUICK RATE — card sizing mobile
+═══════════════════════════════════════════════════════════ */
+@media (max-width: 767px) {
+  .quickrate-poster {
+    max-width: calc(100vw - 40px) !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BOTTOM SHEET — scroll fix
+═══════════════════════════════════════════════════════════ */
+.bottom-sheet {
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   GENERAL MOBILE TWEAKS
+═══════════════════════════════════════════════════════════ */
+@media (max-width: 767px) {
+  /* Evitar que modais e overlays causem scroll horizontal */
+  body.modal-open {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+  }
+
+  /* Melhora espaçamento de cards em listas */
+  .card-list-item {
+    padding: 14px 16px !important;
+  }
+
+  /* Tags e badges menores no mobile */
+  .badge-sm-mobile {
+    font-size: 9px !important;
+    padding: 1px 6px !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   WATCH BUTTON — hover state
+═══════════════════════════════════════════════════════════ */
+.watch-btn:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   GROUPS DESKTOP — movie card watch button transition
+═══════════════════════════════════════════════════════════ */
+@media (min-width: 768px) {
+  .club-movie-watch-btn {
+    opacity: 0;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  .movie-card-netflix:hover .club-movie-watch-btn {
+    opacity: 1;
+  }
+}
