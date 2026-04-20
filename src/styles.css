@@ -595,12 +595,15 @@
 @media (max-width: 767px) {
   .carousel-row {
     gap: 10px;
+    /* Container pai aplica px-4 (16px). Compensamos com margem negativa igual
+       e usamos o mesmo valor no padding interno para que o primeiro/último
+       card alinhe exatamente com a borda lateral da tela. */
     padding: 8px 16px 20px;
-    margin-left: -20px;
-    margin-right: -20px;
+    margin-left: -16px;
+    margin-right: -16px;
   }
   .carousel-row > *:last-child {
-    margin-right: 16px;
+    margin-right: 0;
   }
   /* Hide side fade gradients on mobile — no scroll buttons, fades misalign cards with screen edges */
   .carousel-fade {
