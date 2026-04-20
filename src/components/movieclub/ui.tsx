@@ -1159,6 +1159,7 @@ function Carousel({ children, movies, onMovieClick }) {
   const ref = useRef(null);
   const [canLeft, setCanLeft] = useState(false);
   const [canRight, setCanRight] = useState(true);
+  const itemsCount = children ? React.Children.count(children) : (movies?.length ?? 0);
 
   const checkScroll = useCallback(() => {
     if (!ref.current) return;
@@ -1170,10 +1171,18 @@ function Carousel({ children, movies, onMovieClick }) {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    el.scrollLeft = 0;
     el.addEventListener("scroll", checkScroll, { passive: true });
     checkScroll();
     return () => el.removeEventListener("scroll", checkScroll);
   }, [checkScroll]);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.scrollTo({ left: 0, behavior: "auto" });
+    checkScroll();
+  }, [itemsCount, checkScroll]);
 
   const scroll = (dir) => {
     if (!ref.current) return;
