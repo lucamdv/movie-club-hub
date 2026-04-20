@@ -196,29 +196,30 @@ export function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx,
           )}
 
           {/* Action bar */}
-          <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
+          <div style={{ display: "flex", gap: 6, marginBottom: 20 }}>
             {/* Rate */}
             <button
               onClick={() => setShowRatingSheet(true)}
               style={{
                 flex: 1,
-                padding: "12px 8px",
+                padding: "11px 4px",
+                minWidth: 0,
                 borderRadius: 14,
                 background: existingRating ? `linear-gradient(135deg, ${C.goldDim}60, ${C.gold}60)` : C.bgCard,
                 border: `1px solid ${existingRating ? C.gold : C.border}`,
                 color: existingRating ? C.gold : C.textMuted,
-                fontSize: 12,
+                fontSize: 11,
                 fontWeight: 700,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                gap: 4,
+                gap: 3,
                 minHeight: "unset",
-                minWidth: "unset",
                 transition: "all 0.2s",
+                whiteSpace: "nowrap",
               }}
             >
-              <StarIcon size={18} fill={existingRating ? C.gold : "none"} stroke={existingRating ? C.gold : C.textMuted} />
+              <StarIcon size={17} fill={existingRating ? C.gold : "none"} stroke={existingRating ? C.gold : C.textMuted} />
               {existingRating ? `${Number(existingRating.rating).toFixed(1)} ★` : "Avaliar"}
             </button>
 
@@ -227,23 +228,24 @@ export function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx,
               onClick={() => { const id = m.tmdbId || m.id; inWatchlist ? removeFromWatchlist(id) : addToWatchlist(id, m.title, m.poster); }}
               style={{
                 flex: 1,
-                padding: "12px 8px",
+                padding: "11px 4px",
+                minWidth: 0,
                 borderRadius: 14,
                 background: inWatchlist ? "rgba(34,197,94,0.12)" : C.bgCard,
                 border: `1px solid ${inWatchlist ? "#22C55E" : C.border}`,
                 color: inWatchlist ? "#22C55E" : C.textMuted,
-                fontSize: 12,
+                fontSize: 11,
                 fontWeight: 700,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                gap: 4,
+                gap: 3,
                 minHeight: "unset",
-                minWidth: "unset",
                 transition: "all 0.2s",
+                whiteSpace: "nowrap",
               }}
             >
-              {inWatchlist ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
+              {inWatchlist ? <BookmarkCheck size={17} /> : <Bookmark size={17} />}
               {inWatchlist ? "Salvo" : "Salvar"}
             </button>
 
@@ -252,23 +254,24 @@ export function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx,
               onClick={() => setLiked((l) => !l)}
               style={{
                 flex: 1,
-                padding: "12px 8px",
+                padding: "11px 4px",
+                minWidth: 0,
                 borderRadius: 14,
                 background: liked ? "rgba(239,68,68,0.12)" : C.bgCard,
                 border: `1px solid ${liked ? C.red : C.border}`,
                 color: liked ? C.red : C.textMuted,
-                fontSize: 12,
+                fontSize: 11,
                 fontWeight: 700,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                gap: 4,
+                gap: 3,
                 minHeight: "unset",
-                minWidth: "unset",
                 transition: "all 0.2s",
+                whiteSpace: "nowrap",
               }}
             >
-              <Heart size={18} fill={liked ? C.red : "none"} stroke={liked ? C.red : C.textMuted} />
+              <Heart size={17} fill={liked ? C.red : "none"} stroke={liked ? C.red : C.textMuted} />
               Curtir
             </button>
 
@@ -280,21 +283,23 @@ export function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx,
                 rel="noopener noreferrer"
                 style={{
                   flex: 1,
-                  padding: "12px 8px",
+                  padding: "11px 4px",
+                  minWidth: 0,
                   borderRadius: 14,
                   background: C.bgCard,
                   border: `1px solid ${C.border}`,
                   color: C.textMuted,
-                  fontSize: 12,
+                  fontSize: 11,
                   fontWeight: 700,
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
-                  gap: 4,
+                  gap: 3,
                   textDecoration: "none",
+                  whiteSpace: "nowrap",
                 }}
               >
-                <Play size={18} />
+                <Play size={17} />
                 Trailer
               </a>
             )}
