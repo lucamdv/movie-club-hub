@@ -410,13 +410,13 @@ export function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx,
           {m.similar?.length > 0 && (
             <div style={{ marginBottom: 14 }}>
               <p style={{ fontSize: 12, fontWeight: 700, color: C.textMuted, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 12 }}>Similares</p>
-              <div style={{ display: "flex", gap: 10, overflowX: "auto", paddingBottom: 4, scrollbarWidth: "none", margin: "0 -16px", padding: "0 16px 4px" }}>
+              <div style={{ display: "flex", gap: 10, overflowX: "auto", overflowY: "hidden", scrollbarWidth: "none", margin: "0 -14px", padding: "0 14px 4px", WebkitOverflowScrolling: "touch", overscrollBehaviorX: "contain", scrollSnapType: "x proximity" }}>
                 {m.similar.slice(0, 8).map((s) => (
-                  <div key={s.id} onClick={() => { setSelectedMovie(s); }} style={{ flexShrink: 0, cursor: "pointer", width: 90 }}>
+                  <div key={s.id} onClick={() => { setSelectedMovie(s); }} style={{ flexShrink: 0, cursor: "pointer", width: 92, scrollSnapAlign: "start" }}>
                     <div style={{ height: 135, borderRadius: 10, overflow: "hidden", background: C.bgCard, border: `1px solid ${C.border}`, marginBottom: 5 }}>
                       {s.poster && <img src={s.poster} alt={s.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
                     </div>
-                    <p style={{ fontSize: 11, color: C.text, lineHeight: 1.2, fontWeight: 500 }}>{s.title}</p>
+                    <p style={{ fontSize: 11, color: C.text, lineHeight: 1.2, fontWeight: 500, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{s.title}</p>
                     {s.rating && <p style={{ fontSize: 10, color: C.gold }}>★ {s.rating}</p>}
                   </div>
                 ))}
