@@ -163,22 +163,22 @@ export function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx,
         </div>
 
         {/* Poster + Info header — overlaps hero */}
-        <div style={{ margin: "-60px 16px 0", position: "relative", zIndex: 2 }}>
+        <div style={{ margin: "-70px 14px 0", position: "relative", zIndex: 2 }}>
           <div style={{ display: "flex", gap: 14, alignItems: "flex-end", marginBottom: 14 }}>
             {/* Poster */}
-            <div style={{ width: 100, height: 150, borderRadius: 12, overflow: "hidden", flexShrink: 0, boxShadow: "0 12px 40px rgba(0,0,0,0.7)", border: `2px solid ${C.border}`, background: C.bgCard }}>
+            <div style={{ width: 104, height: 156, borderRadius: 12, overflow: "hidden", flexShrink: 0, boxShadow: "0 14px 44px rgba(0,0,0,0.75)", border: `2px solid ${C.border}`, background: C.bgCard }}>
               {m.poster && <img src={m.posterHD || m.poster} alt={m.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
             </div>
 
             {/* Quick info */}
-            <div style={{ flex: 1, paddingBottom: 4 }}>
+            <div style={{ flex: 1, paddingBottom: 4, minWidth: 0 }}>
               <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginBottom: 6 }}>
                 {(m.genres?.length ? m.genres : [m.genre]).slice(0, 2).map((g) => (
                   <span key={g} style={{ fontSize: 10, fontWeight: 600, color: C.goldDim, background: "rgba(201,168,76,0.1)", padding: "2px 8px", borderRadius: 6, textTransform: "uppercase", letterSpacing: "0.04em" }}>{g}</span>
                 ))}
               </div>
-              <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 20, fontWeight: 900, color: C.text, lineHeight: 1.2, marginBottom: 6 }}>{m.title}</h1>
-              {m.tagline && <p style={{ fontSize: 12, color: C.gold, fontStyle: "italic", marginBottom: 6, opacity: 0.8 }}>"{m.tagline}"</p>}
+              <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 19, fontWeight: 900, color: C.text, lineHeight: 1.2, marginBottom: 6, wordBreak: "break-word" }}>{m.title}</h1>
+              {m.tagline && <p style={{ fontSize: 11, color: C.gold, fontStyle: "italic", marginBottom: 6, opacity: 0.85, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>"{m.tagline}"</p>}
               <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
                 {m.year && <span style={{ fontSize: 12, color: C.textMuted }}>{m.year}</span>}
                 {m.runtime && <span style={{ fontSize: 12, color: C.textDim }}>·</span>}
