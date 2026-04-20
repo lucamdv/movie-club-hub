@@ -131,10 +131,10 @@ export function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx,
   // ── MOBILE LAYOUT ─────────────────────────────────────
   if (isMobile) {
     return (
-      <div style={{ background: C.bg, minHeight: "100dvh", paddingBottom: 100 }}>
+      <div style={{ background: C.bg, minHeight: "100dvh", paddingBottom: "calc(var(--bottom-nav-height, 64px) + var(--safe-bottom, 0px) + 24px)", overflowX: "hidden", width: "100%" }}>
 
         {/* Hero backdrop + back button */}
-        <div style={{ position: "relative", height: 260, overflow: "hidden" }}>
+        <div style={{ position: "relative", height: "min(260px, 38dvh)", minHeight: 200, overflow: "hidden" }}>
           {m.backdrop ? (
             <img src={m.backdrop} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.5 }} />
           ) : m.poster ? (
@@ -143,12 +143,12 @@ export function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx,
             <div style={{ width: "100%", height: "100%", background: `linear-gradient(135deg, #0a1e34, #1a2d48)` }} />
           )}
           {/* Top gradient */}
-          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(15,25,35,0.4) 0%, transparent 40%, rgba(15,25,35,0.95) 100%)" }} />
+          <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to bottom, rgba(15,25,35,0.55) 0%, transparent 35%, ${C.bg} 100%)` }} />
 
           {/* Back button */}
           <button
             onClick={() => setPage("home")}
-            style={{ position: "absolute", top: 16, left: 16, width: 38, height: 38, borderRadius: "50%", background: "rgba(9,21,35,0.75)", backdropFilter: "blur(8px)", border: `1px solid rgba(255,255,255,0.12)`, color: C.text, display: "flex", alignItems: "center", justifyContent: "center", zIndex: 10, minHeight: "unset", minWidth: "unset" }}
+            style={{ position: "absolute", top: "calc(var(--safe-top, 0px) + 12px)", left: 14, width: 40, height: 40, borderRadius: "50%", background: "rgba(9,21,35,0.78)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", border: `1px solid rgba(255,255,255,0.14)`, color: C.text, display: "flex", alignItems: "center", justifyContent: "center", zIndex: 10, minHeight: "unset", minWidth: "unset", padding: 0 }}
           >
             <ChevronLeft size={20} />
           </button>
@@ -156,7 +156,7 @@ export function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx,
           {/* Share */}
           <button
             onClick={() => { if (navigator.share) navigator.share({ title: m.title, url: window.location.href }); }}
-            style={{ position: "absolute", top: 16, right: 16, width: 38, height: 38, borderRadius: "50%", background: "rgba(9,21,35,0.75)", backdropFilter: "blur(8px)", border: `1px solid rgba(255,255,255,0.12)`, color: C.text, display: "flex", alignItems: "center", justifyContent: "center", zIndex: 10, minHeight: "unset", minWidth: "unset" }}
+            style={{ position: "absolute", top: "calc(var(--safe-top, 0px) + 12px)", right: 14, width: 40, height: 40, borderRadius: "50%", background: "rgba(9,21,35,0.78)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", border: `1px solid rgba(255,255,255,0.14)`, color: C.text, display: "flex", alignItems: "center", justifyContent: "center", zIndex: 10, minHeight: "unset", minWidth: "unset", padding: 0 }}
           >
             <Share2 size={16} />
           </button>
