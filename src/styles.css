@@ -596,11 +596,19 @@
   .carousel-row {
     gap: 10px;
     padding: 8px 16px 20px;
-    margin-left: -16px;
-    margin-right: -16px;
+    margin-left: -20px;
+    margin-right: -20px;
   }
   .carousel-row > *:last-child {
     margin-right: 16px;
+  }
+  /* Hide side fade gradients on mobile — no scroll buttons, fades misalign cards with screen edges */
+  .carousel-fade {
+    display: none !important;
+  }
+  /* Remove wrapper inner padding on mobile so carousel hits screen edges cleanly */
+  .carousel-wrapper {
+    padding: 0;
   }
 }
 

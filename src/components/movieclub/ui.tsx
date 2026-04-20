@@ -1212,6 +1212,7 @@ function Carousel({ children, movies, onMovieClick }) {
       {/* Fade edges */}
       {canLeft && (
         <div
+          className="carousel-fade carousel-fade-left"
           style={{
             position: "absolute",
             top: 0,
@@ -1226,6 +1227,7 @@ function Carousel({ children, movies, onMovieClick }) {
       )}
       {canRight && (
         <div
+          className="carousel-fade carousel-fade-right"
           style={{
             position: "absolute",
             top: 0,
