@@ -349,7 +349,7 @@ export function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx,
               {m.cast?.length > 0 && (
                 <div>
                   <p style={{ fontSize: 11, color: C.textDim, marginBottom: 10, textTransform: "uppercase", letterSpacing: "0.05em" }}>Elenco</p>
-                  <div style={{ display: "flex", gap: 12, overflowX: "auto", paddingBottom: 4, scrollbarWidth: "none" }}>
+                  <div style={{ display: "flex", gap: 12, overflowX: "auto", overflowY: "hidden", paddingBottom: 4, scrollbarWidth: "none", margin: "0 -16px", padding: "0 16px 4px", WebkitOverflowScrolling: "touch", overscrollBehaviorX: "contain" }}>
                     {(castExpanded ? m.cast : m.cast.slice(0, 6)).map((actor) => (
                       <div key={actor.id} style={{ textAlign: "center", flexShrink: 0, width: 60 }}>
                         <div style={{ width: 52, height: 52, borderRadius: "50%", overflow: "hidden", margin: "0 auto 5px", background: C.bgDeep, border: `2px solid ${C.border}` }}>
@@ -359,7 +359,7 @@ export function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx,
                             <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", opacity: 0.3 }}><UserRound size={18} /></div>
                           )}
                         </div>
-                        <p style={{ fontSize: 10, fontWeight: 600, color: C.text, lineHeight: 1.2 }}>{actor.name.split(" ")[0]}</p>
+                        <p style={{ fontSize: 10, fontWeight: 600, color: C.text, lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{actor.name.split(" ")[0]}</p>
                       </div>
                     ))}
                   </div>
