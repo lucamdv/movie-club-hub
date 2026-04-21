@@ -197,7 +197,7 @@ function FriendActivityFeed({ userId, friendIds, setPage, setSelectedMovie, onVi
   );
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+    <div className="friends-activity-grid" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
       {activity.map(entry => (
         <FriendActivityItem
           key={entry.id}
@@ -282,9 +282,10 @@ export function FriendsPage({ setPage, setSelectedMovie, auth: authCtx, onViewPr
 
   return (
     <div style={{ background: C.bg, minHeight: "100dvh", paddingBottom: 100 }}>
+      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
 
       {/* ── Header ── */}
-      <div style={{ padding: "20px 16px 0" }}>
+      <div style={{ padding: "20px 16px 0" }} className="friends-header">
         <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 26, fontWeight: 800, color: C.text, marginBottom: 4 }}>Social</h1>
         <p style={{ fontSize: 13, color: C.textMuted, marginBottom: 16 }}>Encontre amigos cinéfilos</p>
 
@@ -382,7 +383,7 @@ export function FriendsPage({ setPage, setSelectedMovie, auth: authCtx, onViewPr
         {/* Search results */}
         {tab === "search" && (
           searchResults.length > 0 ? (
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <div className="friends-grid" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {searchResults.map((p) => <UserCard key={p.id} {...cardProps(p)} />)}
             </div>
           ) : searchQuery && !searchLoading ? (
@@ -398,7 +399,7 @@ export function FriendsPage({ setPage, setSelectedMovie, auth: authCtx, onViewPr
         {tab === "following" && (
           followsLoading ? <div style={{ display: "flex", justifyContent: "center", padding: 40 }}><Spinner size={28} /></div>
           : followingProfiles.length > 0
-            ? <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>{followingProfiles.map((p) => <UserCard key={p.id} {...cardProps(p)} />)}</div>
+            ? <div className="friends-grid" style={{ display: "flex", flexDirection: "column", gap: 10 }}>{followingProfiles.map((p) => <UserCard key={p.id} {...cardProps(p)} />)}</div>
             : <EmptyState icon={UserRound} title="Você não segue ninguém" sub="Busque por pessoas e comece a seguir!" />
         )}
 
@@ -406,20 +407,21 @@ export function FriendsPage({ setPage, setSelectedMovie, auth: authCtx, onViewPr
         {tab === "followers" && (
           followsLoading ? <div style={{ display: "flex", justifyContent: "center", padding: 40 }}><Spinner size={28} /></div>
           : followerProfiles.length > 0
-            ? <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>{followerProfiles.map((p) => <UserCard key={p.id} {...cardProps(p)} />)}</div>
+            ? <div className="friends-grid" style={{ display: "flex", flexDirection: "column", gap: 10 }}>{followerProfiles.map((p) => <UserCard key={p.id} {...cardProps(p)} />)}</div>
             : <EmptyState icon={UserRound} title="Nenhum seguidor ainda" sub="Compartilhe seu perfil para ganhar seguidores!" />
         )}
 
         {/* Friends */}
         {tab === "friends" && (
           friendProfiles.length > 0 ? (
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <div className="friends-grid" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {friendProfiles.map((p) => <UserCard key={p.id} {...cardProps(p)} />)}
             </div>
           ) : (
             <EmptyState icon={Handshake} title="Nenhum amigo ainda" sub="Amizades são formadas quando dois usuários se seguem mutuamente" />
           )
         )}
+      </div>
       </div>
     </div>
   );
