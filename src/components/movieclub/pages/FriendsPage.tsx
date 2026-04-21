@@ -282,9 +282,10 @@ export function FriendsPage({ setPage, setSelectedMovie, auth: authCtx, onViewPr
 
   return (
     <div style={{ background: C.bg, minHeight: "100dvh", paddingBottom: 100 }}>
+      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
 
       {/* ── Header ── */}
-      <div style={{ padding: "20px 16px 0" }}>
+      <div style={{ padding: "20px 16px 0" }} className="friends-header">
         <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 26, fontWeight: 800, color: C.text, marginBottom: 4 }}>Social</h1>
         <p style={{ fontSize: 13, color: C.textMuted, marginBottom: 16 }}>Encontre amigos cinéfilos</p>
 
