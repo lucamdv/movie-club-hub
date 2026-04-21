@@ -414,13 +414,14 @@ export function FriendsPage({ setPage, setSelectedMovie, auth: authCtx, onViewPr
         {/* Friends */}
         {tab === "friends" && (
           friendProfiles.length > 0 ? (
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <div className="friends-grid" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {friendProfiles.map((p) => <UserCard key={p.id} {...cardProps(p)} />)}
             </div>
           ) : (
             <EmptyState icon={Handshake} title="Nenhum amigo ainda" sub="Amizades são formadas quando dois usuários se seguem mutuamente" />
           )
         )}
+      </div>
       </div>
     </div>
   );
