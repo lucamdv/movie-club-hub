@@ -383,7 +383,7 @@ export function FriendsPage({ setPage, setSelectedMovie, auth: authCtx, onViewPr
         {/* Search results */}
         {tab === "search" && (
           searchResults.length > 0 ? (
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <div className="friends-grid" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {searchResults.map((p) => <UserCard key={p.id} {...cardProps(p)} />)}
             </div>
           ) : searchQuery && !searchLoading ? (
@@ -399,7 +399,7 @@ export function FriendsPage({ setPage, setSelectedMovie, auth: authCtx, onViewPr
         {tab === "following" && (
           followsLoading ? <div style={{ display: "flex", justifyContent: "center", padding: 40 }}><Spinner size={28} /></div>
           : followingProfiles.length > 0
-            ? <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>{followingProfiles.map((p) => <UserCard key={p.id} {...cardProps(p)} />)}</div>
+            ? <div className="friends-grid" style={{ display: "flex", flexDirection: "column", gap: 10 }}>{followingProfiles.map((p) => <UserCard key={p.id} {...cardProps(p)} />)}</div>
             : <EmptyState icon={UserRound} title="Você não segue ninguém" sub="Busque por pessoas e comece a seguir!" />
         )}
 
@@ -407,7 +407,7 @@ export function FriendsPage({ setPage, setSelectedMovie, auth: authCtx, onViewPr
         {tab === "followers" && (
           followsLoading ? <div style={{ display: "flex", justifyContent: "center", padding: 40 }}><Spinner size={28} /></div>
           : followerProfiles.length > 0
-            ? <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>{followerProfiles.map((p) => <UserCard key={p.id} {...cardProps(p)} />)}</div>
+            ? <div className="friends-grid" style={{ display: "flex", flexDirection: "column", gap: 10 }}>{followerProfiles.map((p) => <UserCard key={p.id} {...cardProps(p)} />)}</div>
             : <EmptyState icon={UserRound} title="Nenhum seguidor ainda" sub="Compartilhe seu perfil para ganhar seguidores!" />
         )}
 
