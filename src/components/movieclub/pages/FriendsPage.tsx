@@ -197,7 +197,7 @@ function FriendActivityFeed({ userId, friendIds, setPage, setSelectedMovie, onVi
   );
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+    <div className="friends-activity-grid" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
       {activity.map(entry => (
         <FriendActivityItem
           key={entry.id}
