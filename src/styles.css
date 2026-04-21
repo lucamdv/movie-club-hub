@@ -1235,3 +1235,81 @@
     grid-template-columns: repeat(3, 1fr) !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   CLUBS PAGE — animations & responsive
+═══════════════════════════════════════════════════════════ */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.55; transform: scale(1.4); }
+}
+
+/* Club card 3D tilt on hover (desktop) */
+.club-card-3d {
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.club-card-3d:hover {
+  transform: translateY(-4px);
+  border-color: rgba(201, 168, 76, 0.55) !important;
+  box-shadow:
+    0 22px 50px -10px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(201, 168, 76, 0.18),
+    0 0 60px -20px rgba(201, 168, 76, 0.4);
+}
+.club-card-3d:hover .club-poster-tile {
+  transform: translateY(-6px) scale(1.04);
+}
+.club-card-3d:hover .club-card-cta {
+  transform: translateX(3px);
+}
+
+/* Action card hover */
+.club-action-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(201, 168, 76, 0.45) !important;
+}
+
+/* DESKTOP refinements */
+@media (min-width: 768px) {
+  .clubs-container {
+    padding: 0 32px !important;
+  }
+  .clubs-hero {
+    padding: 36px 32px !important;
+  }
+  .clubs-hero-title {
+    font-size: 42px !important;
+  }
+  .clubs-hero-mascot {
+    width: 140px !important;
+    height: 140px !important;
+  }
+}
+
+/* MOBILE refinements */
+@media (max-width: 480px) {
+  .clubs-hero-row {
+    flex-direction: column !important;
+    text-align: center !important;
+    gap: 14px !important;
+  }
+  .clubs-hero-mascot {
+    width: 96px !important;
+    height: 96px !important;
+  }
+  .clubs-hero-title {
+    font-size: 26px !important;
+  }
+  .clubs-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .clubs-actions {
+    grid-template-columns: 1fr !important;
+  }
+}
