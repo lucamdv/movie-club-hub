@@ -11,12 +11,14 @@ function useMovieDetails(tmdbId) {
   const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(false);
   const [streamServices, setStreamServices] = useState([]);
+  const [streamError, setStreamError] = useState(null);
   useEffect(() => {
     if (!tmdbId) return;
     let alive = true;
     setLoading(true);
     setMovie(null);
     setStreamServices([]);
+    setStreamError(null);
     tmdb
       .details(tmdbId)
       .then(async (raw) => {
@@ -32,7 +34,10 @@ function useMovieDetails(tmdbId) {
         ]);
         if (!alive) return;
         setMovie(mergeOmdb(base, omdbRes.value));
-        setStreamServices(parseStreamingServices(streamRes.value));
+        const sv = streamRes.status === "fulfilled" ? streamRes.value : null;
+        if (sv && sv.__error) setStreamError(sv.__error);
+        else setStreamError(streamRes.status === "rejected" ? "network" : null);
+        setStreamServices(parseStreamingServices(sv));
       })
       .catch(() => {
         if (alive) setLoading(false);
@@ -41,7 +46,7 @@ function useMovieDetails(tmdbId) {
       alive = false;
     };
   }, [tmdbId]);
-  return { movie, loading, streamServices };
+  return { movie, loading, streamServices, streamError };
 }
 
 function usePaginatedMovies(fetcher) {
