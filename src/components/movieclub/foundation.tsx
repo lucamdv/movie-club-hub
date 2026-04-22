@@ -446,8 +446,8 @@ function formatReleaseDateBR(dateStr) {
 }
 
 export {
-  MONKEY_AVATARS, C, apiCache, cachedFetch, TMDB_IMG, tmdb, omdb, streaming,
-  normalizeTmdb, mergeOmdb, STREAM_META, parseStreamingServices,
+  MONKEY_AVATARS, C, apiCache, cachedFetch, TMDB_IMG, tmdb, omdb,
+  normalizeTmdb, mergeOmdb,
   MOCK_USERS, MOCK_REVIEWS, MOCK_GROUPS,
   isUpcoming, formatReleaseDateBR,
 };
@@ -466,4 +466,4 @@ export { supabase };
 export { toast };
 export { useState, useEffect, useRef, useCallback, useMemo };
 export { createPortal };
-export { tmdbProxy, omdbProxy, streamingProxy };
+export { tmdbProxy, omdbProxy };
