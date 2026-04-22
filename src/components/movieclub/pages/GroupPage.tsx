@@ -6,7 +6,7 @@ import { C, tmdb } from "../foundation";
 import {
   Film, Users, Link2, Eye, Star, Activity,
   ChevronLeft, Crown, Plus, X, Clock, Clapperboard,
-  Sparkles, Ticket, Check, ArrowRight,
+  Sparkles, Ticket, Check, ArrowRight, LogOut, Trash2, AlertTriangle,
 } from "lucide-react";
 import { Spinner, Btn } from "../ui";
 import { BackIcon, PlusIcon } from "../ui";
