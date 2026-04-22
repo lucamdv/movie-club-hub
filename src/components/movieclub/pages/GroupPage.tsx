@@ -672,6 +672,7 @@ export function GroupPage({ group, setPage, setSelectedMovie, auth: authCtx }) {
         {showAddMovie && <AddMovieModal movieSearch={movieSearch} setMovieSearch={setMovieSearch} movieResults={movieResults} movieSearchLoading={movieSearchLoading} onAdd={handleAddMovie} onClose={() => { setShowAddMovie(false); setMovieSearch(""); setMovieResults([]); }} />}
         {showInvite && <InviteModal friendProfiles={friendProfiles} onInvite={handleInvite} onCopyLink={handleCopyInviteLink} onClose={() => setShowInvite(false)} />}
         {watchTarget && <WatchRateModal movie={watchTarget} existingRating={getRating(watchTarget.tmdb_id)} onClose={() => setWatchTarget(null)} onSubmit={handleConfirmWatch} />}
+        {showLeaveConfirm && <LeaveConfirmModal isOwner={isOwner} clubName={club?.name || "este club"} loading={leaving} onConfirm={handleLeaveClub} onClose={() => setShowLeaveConfirm(false)} />}
       </div>
     );
   }
@@ -785,6 +786,7 @@ export function GroupPage({ group, setPage, setSelectedMovie, auth: authCtx }) {
       {showAddMovie && <AddMovieModal movieSearch={movieSearch} setMovieSearch={setMovieSearch} movieResults={movieResults} movieSearchLoading={movieSearchLoading} onAdd={handleAddMovie} onClose={() => { setShowAddMovie(false); setMovieSearch(""); setMovieResults([]); }} />}
       {showInvite && <InviteModal friendProfiles={friendProfiles} onInvite={handleInvite} onCopyLink={handleCopyInviteLink} onClose={() => setShowInvite(false)} />}
       {watchTarget && <WatchRateModal movie={watchTarget} existingRating={getRating(watchTarget.tmdb_id)} onClose={() => setWatchTarget(null)} onSubmit={handleConfirmWatch} />}
+      {showLeaveConfirm && <LeaveConfirmModal isOwner={isOwner} clubName={club?.name || "este club"} loading={leaving} onConfirm={handleLeaveClub} onClose={() => setShowLeaveConfirm(false)} />}
     </div>
   );
 }
