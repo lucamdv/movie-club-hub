@@ -1063,7 +1063,7 @@ export function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx,
               >
                 Onde Assistir no Brasil
               </p>
-              <StreamingBadges services={streamServices} loading={loading && !streamServices.length} />
+              <StreamingBadges services={streamServices} loading={loading && !streamServices.length} error={streamError} />
             </div>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
               <Btn
