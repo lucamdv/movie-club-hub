@@ -304,9 +304,9 @@ function ClubMovieCard({ mv, myRating, isMine, userId, onOpen, onWatch, onRemove
 export function GroupPage({ group, setPage, setSelectedMovie, auth: authCtx }) {
   const userId = authCtx?.user?.id;
   const clubId = group?.id;
-  const { club, members, movies, loading, addMovie, removeMovie } = useClubDetail(clubId, userId);
+  const { club, members, movies, loading, addMovie, removeMovie, leaveClub, deleteClub } = useClubDetail(clubId, userId);
   const { friends } = useFriendships(userId);
-  const { inviteFriend } = useClubs(userId);
+  const { inviteFriend, reload: reloadClubs } = useClubs(userId);
   const { upsertRating, getRating } = useRatings(userId);
   const { activity, logActivity } = useClubActivity(clubId);
   const [showAddMovie, setShowAddMovie] = useState(false);
@@ -317,6 +317,8 @@ export function GroupPage({ group, setPage, setSelectedMovie, auth: authCtx }) {
   const [friendProfiles, setFriendProfiles] = useState([]);
   const [watchTarget, setWatchTarget] = useState(null);
   const [activeTab, setActiveTab] = useState("movies");
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
+  const [leaving, setLeaving] = useState(false);
   const debRef = useRef(null);
 
   // Stats
