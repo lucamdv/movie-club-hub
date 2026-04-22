@@ -62,6 +62,13 @@ export function SettingsPage({ apiStatus }) {
       desc: "Ratings IMDb, Rotten Tomatoes, Metacritic, bilheteria e prêmios.",
       secret: "OMDB_API_KEY",
     },
+    {
+      key: "streaming",
+      label: "Streaming Availability",
+      color: "#0055DA",
+      desc: "Onde assistir no Brasil — Netflix, Prime, Disney+, Max e mais.",
+      secret: "STREAMING_AVAILABILITY_API_KEY",
+    },
   ];
 
   return (
