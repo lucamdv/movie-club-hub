@@ -552,7 +552,7 @@ export function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx,
           </div>
 
           {/* Onde assistir */}
-          {streamServices.length > 0 && (
+          {(streamServices.length > 0 || streamError) && (
             <div style={{ marginBottom: 20 }}>
               <p
                 style={{
@@ -566,7 +566,7 @@ export function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx,
               >
                 Onde assistir
               </p>
-              <StreamingBadges services={streamServices} loading={loading && !streamServices.length} />
+              <StreamingBadges services={streamServices} loading={loading && !streamServices.length} error={streamError} />
             </div>
           )}
 
