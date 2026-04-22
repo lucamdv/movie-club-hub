@@ -263,6 +263,43 @@ function InviteModal({ friendProfiles, onInvite, onCopyLink, onClose }) {
   );
 }
 
+// ─── Leave/Delete Club Confirm Modal ─────────────────────
+function LeaveConfirmModal({ isOwner, clubName, loading, onConfirm, onClose }) {
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 230, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "10vh 20px 20px", overflowY: "auto" }} onClick={onClose}>
+      <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.82)", backdropFilter: "blur(8px)" }} />
+      <div onClick={e => e.stopPropagation()} style={{
+        position: "relative", background: `linear-gradient(135deg, ${C.bgCard}, #1a2d42)`,
+        border: `1px solid rgba(239,68,68,0.32)`, borderRadius: 22, padding: 26,
+        width: "100%", maxWidth: 400, boxShadow: "0 24px 64px rgba(0,0,0,0.6)", margin: "0 auto",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+          <div style={{ width: 44, height: 44, borderRadius: 12, background: "rgba(239,68,68,0.12)", border: `1px solid rgba(239,68,68,0.3)`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <AlertTriangle size={20} style={{ color: "#ef4444" }} />
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <h3 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 17, fontWeight: 800, color: C.text, marginBottom: 2 }}>
+              {isOwner ? "Excluir club?" : "Sair do club?"}
+            </h3>
+            <p style={{ fontSize: 12, color: C.textMuted }}>{isOwner ? "Esta ação é permanente" : "Você poderá voltar via convite"}</p>
+          </div>
+        </div>
+        <p style={{ fontSize: 13, color: C.textMuted, lineHeight: 1.5, marginBottom: 22 }}>
+          {isOwner
+            ? <>Você é o dono de <strong style={{ color: C.text }}>{clubName}</strong>. Excluir vai remover o club, todos os filmes e o histórico de atividade para todos os membros.</>
+            : <>Você deixará de ver os filmes e a atividade de <strong style={{ color: C.text }}>{clubName}</strong>. Sua avaliação dos filmes não será apagada.</>}
+        </p>
+        <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+          <button onClick={onClose} disabled={loading} style={{ padding: "10px 18px", borderRadius: 12, background: "transparent", border: `1px solid ${C.border}`, color: C.textMuted, fontSize: 13, fontWeight: 600, cursor: "pointer", minHeight: "unset" }}>Cancelar</button>
+          <button onClick={onConfirm} disabled={loading} style={{ padding: "10px 20px", borderRadius: 12, background: "linear-gradient(135deg, #dc2626, #ef4444)", color: "#fff", fontSize: 13, fontWeight: 700, fontFamily: "'Outfit', sans-serif", border: "none", cursor: loading ? "wait" : "pointer", opacity: loading ? 0.7 : 1, minHeight: "unset", display: "flex", alignItems: "center", gap: 6, boxShadow: "0 4px 14px rgba(239,68,68,0.35)" }}>
+            {loading ? <><Spinner size={14} /> Aguarde...</> : isOwner ? <><Trash2 size={14} /> Excluir</> : <><LogOut size={14} /> Sair</>}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Movie Card do Club ──────────────────────────────────
 function ClubMovieCard({ mv, myRating, isMine, userId, onOpen, onWatch, onRemove }) {
   const watched = !!myRating;
