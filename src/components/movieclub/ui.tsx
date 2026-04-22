@@ -1,5 +1,11 @@
 // @ts-nocheck
-import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+} from "react";
 import { toast } from "sonner";
 import {
   C,
@@ -1159,7 +1165,9 @@ function Carousel({ children, movies, onMovieClick }) {
   const ref = useRef(null);
   const [canLeft, setCanLeft] = useState(false);
   const [canRight, setCanRight] = useState(true);
-  const itemsCount = children ? React.Children.count(children) : (movies?.length ?? 0);
+  const itemsCount = children
+    ? React.Children.count(children)
+    : (movies?.length ?? 0);
 
   const checkScroll = useCallback(() => {
     if (!ref.current) return;
@@ -1332,17 +1340,32 @@ function Navbar({ page, setPage, hasKeys, apiStatus, isMobile }) {
                     height: 32,
                     borderRadius: "50%",
                     overflow: "hidden",
-                    border: active ? `2px solid ${C.gold}` : "2px solid rgba(255,255,255,0.1)",
+                    border: active
+                      ? `2px solid ${C.gold}`
+                      : "2px solid rgba(255,255,255,0.1)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    background: active ? "rgba(201,168,76,0.15)" : "rgba(255,255,255,0.06)",
+                    background: active
+                      ? "rgba(201,168,76,0.15)"
+                      : "rgba(255,255,255,0.06)",
                     transition: "all 0.25s",
                     flexShrink: 0,
-                    boxShadow: active ? "0 0 10px rgba(201,168,76,0.3)" : "none",
+                    boxShadow: active
+                      ? "0 0 10px rgba(201,168,76,0.3)"
+                      : "none",
                   }}
                 >
-                  <img src={icon} alt="" style={{ width: 26, height: 26, objectFit: "cover", borderRadius: "50%" }} />
+                  <img
+                    src={icon}
+                    alt=""
+                    style={{
+                      width: 26,
+                      height: 26,
+                      objectFit: "cover",
+                      borderRadius: "50%",
+                    }}
+                  />
                 </div>
                 {label}
               </button>
@@ -1352,13 +1375,15 @@ function Navbar({ page, setPage, hasKeys, apiStatus, isMobile }) {
 
         {/* Mobile: current page title */}
         {isMobile && (
-          <p style={{
-            fontSize: 13,
-            fontWeight: 600,
-            color: C.textMuted,
-            fontFamily: "'DM Sans', sans-serif",
-          }}>
-            {items.find(i => i.id === page)?.label || ""}
+          <p
+            style={{
+              fontSize: 13,
+              fontWeight: 600,
+              color: C.textMuted,
+              fontFamily: "'DM Sans', sans-serif",
+            }}
+          >
+            {items.find((i) => i.id === page)?.label || ""}
           </p>
         )}
       </nav>
@@ -1528,8 +1553,20 @@ function HeroBanner({ movies, onSelect }) {
       )}
 
       {/* Gradient overlays */}
-      <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to right, ${C.bg} 0%, rgba(15,25,35,0.6) 50%, rgba(15,25,35,0.1) 100%)` }} />
-      <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to top, ${C.bg} 0%, transparent 50%)` }} />
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: `linear-gradient(to right, ${C.bg} 0%, rgba(15,25,35,0.6) 50%, rgba(15,25,35,0.1) 100%)`,
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: `linear-gradient(to top, ${C.bg} 0%, transparent 50%)`,
+        }}
+      />
 
       {/* Content */}
       <div
@@ -1544,7 +1581,14 @@ function HeroBanner({ movies, onSelect }) {
         }}
         key={hero.id}
       >
-        <div style={{ display: "flex", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
+        <div
+          style={{
+            display: "flex",
+            gap: 8,
+            marginBottom: 10,
+            flexWrap: "wrap",
+          }}
+        >
           <Badge color="rgba(201,168,76,0.15)" textColor={C.gold}>
             ✦ Em Alta Esta Semana
           </Badge>
@@ -1584,7 +1628,14 @@ function HeroBanner({ movies, onSelect }) {
             {hero.overview}
           </p>
         )}
-        <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+        <div
+          style={{
+            display: "flex",
+            gap: 10,
+            alignItems: "center",
+            flexWrap: "wrap",
+          }}
+        >
           <Btn
             variant="gold"
             onClick={() => onSelect(hero)}
@@ -1647,7 +1698,8 @@ function HeroBanner({ movies, onSelect }) {
                 height: 108,
                 borderRadius: 6,
                 overflow: "hidden",
-                border: idx === i ? `2px solid ${C.gold}` : `1px solid ${C.border}`,
+                border:
+                  idx === i ? `2px solid ${C.gold}` : `1px solid ${C.border}`,
                 boxShadow: idx === i ? `0 0 20px rgba(201,168,76,0.3)` : "none",
               }}
             >
@@ -1666,7 +1718,6 @@ function HeroBanner({ movies, onSelect }) {
     </div>
   );
 }
-
 
 // ─────────────────────────────────────────────
 //  HOME PAGE (Netflix layout)
@@ -1768,7 +1819,10 @@ function SplashScreen({ onFinish }) {
   useEffect(() => {
     const t1 = setTimeout(() => setPhase("out"), 2200);
     const t2 = setTimeout(() => onFinish(), 2700);
-    return () => { clearTimeout(t1); clearTimeout(t2); };
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
   }, [onFinish]);
 
   return (
@@ -1782,7 +1836,8 @@ function SplashScreen({ onFinish }) {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        animation: phase === "out" ? "splashFadeOut 0.5s ease forwards" : undefined,
+        animation:
+          phase === "out" ? "splashFadeOut 0.5s ease forwards" : undefined,
       }}
     >
       {logoSrc && (
@@ -1841,7 +1896,7 @@ export {
   HeroBanner,
   Top10Card,
   SplashScreen,
-}
+};
 
 // @ts-nocheck
 // InstallBanner — centralized & polished for all devices
@@ -1863,22 +1918,29 @@ export function InstallBanner({ isIOS, onInstall, onDismiss }) {
         }}
       />
 
-      {/* Banner — centered horizontally, pinned above bottom nav */}
+      {/* Banner — perfeitamente centralizado e responsivo */}
       <div
         style={{
           position: "fixed",
-          left: "50%",
-          transform: "translateX(-50%)",
-          bottom: "calc(var(--bottom-nav-height, 64px) + var(--safe-bottom, 0px) + 16px)",
+          // Respeita a safe-area do celular (como o "notch" inferior do iPhone)
+          // e ainda permite somar a altura de uma navbar customizada, se existir.
+          bottom:
+            "calc(var(--bottom-nav-height, 0px) + env(safe-area-inset-bottom, 16px) + 24px)",
+          // Centralização universal sem usar transform
+          left: 16,
+          right: 16,
+          margin: "0 auto",
+          maxWidth: 480,
+          boxSizing: "border-box", // Garante que o padding não quebre a largura
           zIndex: 1999,
-          width: "min(calc(100vw - 32px), 480px)",
           background: "linear-gradient(135deg, #162130 0%, #1b2d42 100%)",
           border: "1px solid rgba(201,168,76,0.45)",
           borderRadius: 22,
-          padding: "18px 18px 18px 18px",
+          padding: 18,
           boxShadow:
             "0 12px 40px rgba(0,0,0,0.55), 0 0 0 1px rgba(201,168,76,0.12), inset 0 1px 0 rgba(255,255,255,0.06)",
-          animation: "bannerSlideUp 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards",
+          animation:
+            "bannerSlideUp 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards",
           display: "flex",
           alignItems: "center",
           gap: 14,
@@ -1908,54 +1970,81 @@ export function InstallBanner({ isIOS, onInstall, onDismiss }) {
             lineHeight: 1,
             transition: "all 0.18s",
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.12)"; e.currentTarget.style.color = "#8a9bb0"; }}
-          onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.07)"; e.currentTarget.style.color = "#4a5e72"; }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "rgba(255,255,255,0.12)";
+            e.currentTarget.style.color = "#8a9bb0";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "rgba(255,255,255,0.07)";
+            e.currentTarget.style.color = "#4a5e72";
+          }}
         >
           ✕
         </button>
 
         {/* App icon */}
-        <div style={{
-          width: 54,
-          height: 54,
-          borderRadius: 14,
-          overflow: "hidden",
-          flexShrink: 0,
-          border: "1.5px solid rgba(201,168,76,0.35)",
-          boxShadow: "0 4px 14px rgba(201,168,76,0.2)",
-          background: "#0f1923",
-        }}>
+        <div
+          style={{
+            width: 54,
+            height: 54,
+            borderRadius: 14,
+            overflow: "hidden",
+            flexShrink: 0,
+            border: "1.5px solid rgba(201,168,76,0.35)",
+            boxShadow: "0 4px 14px rgba(201,168,76,0.2)",
+            background: "#0f1923",
+          }}
+        >
           <img
             src="/apple-touch-icon.png"
             alt="MovieClub"
             style={{ width: "100%", height: "100%", objectFit: "cover" }}
             onError={(e) => {
               e.target.style.display = "none";
-              e.target.parentElement.style.background = "linear-gradient(135deg, #8a6e30, #c9a84c)";
+              e.target.parentElement.style.background =
+                "linear-gradient(135deg, #8a6e30, #c9a84c)";
             }}
           />
         </div>
 
         {/* Text */}
         <div style={{ flex: 1, minWidth: 0, paddingRight: 20 }}>
-          <p style={{
-            fontFamily: "'Outfit', sans-serif",
-            fontSize: 15,
-            fontWeight: 800,
-            color: "#f0ede6",
-            marginBottom: 3,
-          }}>
+          <p
+            style={{
+              fontFamily: "'Outfit', sans-serif",
+              fontSize: 15,
+              fontWeight: 800,
+              color: "#f0ede6",
+              marginBottom: 3,
+              margin: 0, // Reset de margin nativo
+              paddingBottom: 3,
+            }}
+          >
             Instalar MovieClub
           </p>
           {isIOS ? (
-            <p style={{ fontSize: 12, color: "#8a9bb0", lineHeight: 1.5 }}>
+            <p
+              style={{
+                fontSize: 12,
+                color: "#8a9bb0",
+                lineHeight: 1.5,
+                margin: 0,
+              }}
+            >
               Toque em{" "}
-              <strong style={{ color: "#c9a84c" }}>Compartilhar</strong>{" "}
-              e depois{" "}
+              <strong style={{ color: "#c9a84c" }}>Compartilhar</strong> e
+              depois{" "}
               <strong style={{ color: "#c9a84c" }}>"Tela de Início"</strong>
             </p>
           ) : (
-            <p style={{ fontSize: 12, color: "#8a9bb0", lineHeight: 1.5 }}>
+            <p
+              style={{
+                fontSize: 12,
+                color: "#8a9bb0",
+                lineHeight: 1.5,
+                margin: 0,
+              }}
+            >
               Acesso rápido direto da tela inicial
             </p>
           )}
@@ -1982,8 +2071,16 @@ export function InstallBanner({ isIOS, onInstall, onDismiss }) {
               boxShadow: "0 4px 14px rgba(201,168,76,0.3)",
               transition: "all 0.18s",
             }}
-            onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.boxShadow = "0 6px 18px rgba(201,168,76,0.4)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 14px rgba(201,168,76,0.3)"; }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateY(-1px)";
+              e.currentTarget.style.boxShadow =
+                "0 6px 18px rgba(201,168,76,0.4)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.boxShadow =
+                "0 4px 14px rgba(201,168,76,0.3)";
+            }}
           >
             Instalar
           </button>
@@ -1992,5 +2089,3 @@ export function InstallBanner({ isIOS, onInstall, onDismiss }) {
     </>
   );
 }
-
-;
