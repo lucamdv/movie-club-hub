@@ -551,25 +551,6 @@ export function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx,
             )}
           </div>
 
-          {/* Onde assistir */}
-          {(streamServices.length > 0 || streamError) && (
-            <div style={{ marginBottom: 20 }}>
-              <p
-                style={{
-                  fontSize: 11,
-                  color: C.textDim,
-                  marginBottom: 10,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.07em",
-                  fontWeight: 600,
-                }}
-              >
-                Onde assistir
-              </p>
-              <StreamingBadges services={streamServices} loading={loading && !streamServices.length} error={streamError} />
-            </div>
-          )}
-
           {/* Sinopse */}
           <div
             style={{
@@ -1052,19 +1033,6 @@ export function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx,
               <RatingsRow movie={m} />
             </div>
             <div style={{ marginBottom: 16 }}>
-              <p
-                style={{
-                  fontSize: 10,
-                  color: C.textDim,
-                  marginBottom: 7,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.08em",
-                }}
-              >
-                Onde Assistir no Brasil
-              </p>
-              <StreamingBadges services={streamServices} loading={loading && !streamServices.length} error={streamError} />
-            </div>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
               <Btn
                 variant={inWatchlist ? "ghost" : "gold"}
