@@ -7,7 +7,6 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   tmdbProxy,
   omdbProxy,
-  streamingProxy,
 } from "@/lib/movie-api.functions";
 import {
   Film,
@@ -204,15 +203,6 @@ const omdb = {
   },
 };
 
-const streaming = {
-  async byTmdb(tmdbId, country = "br") {
-    const cacheKey = `stream:${tmdbId}:${country}`;
-    return cachedFetch(cacheKey, () =>
-      streamingProxy({ data: { tmdbId: Number(tmdbId), country } }),
-    );
-  },
-};
-
 // ─────────────────────────────────────────────
 //  DATA NORMALIZER
 // ─────────────────────────────────────────────
@@ -290,78 +280,17 @@ function mergeOmdb(movie, d) {
   };
 }
 
-const STREAM_META = {
-  netflix: { name: "Netflix", color: "#E50914", icon: "N" },
-  prime: { name: "Prime Video", color: "#00A8E1", icon: "P" },
-  disney: { name: "Disney+", color: "#113CCF", icon: "D+" },
-  hbo: { name: "Max", color: "#5822B4", icon: "M" },
-  apple: { name: "Apple TV+", color: "#888888", icon: "A" },
-  paramount: { name: "Paramount+", color: "#0064FF", icon: "P+" },
-  hulu: { name: "Hulu", color: "#1CE783", icon: "H" },
-  mubi: { name: "MUBI", color: "#001C42", icon: "M" },
-  globoplay: { name: "Globoplay", color: "#E10048", icon: "G" },
-};
-
-function parseStreamingServices(raw) {
-  if (!raw) return [];
-  // Server returned an error sentinel (e.g. unauthorized/missing_key) — propagate as empty list
-  if (raw && raw.__error) return [];
-  const br =
-    raw.streamingOptions?.br ||
-    raw.streamingOptions?.us ||
-    raw.streamingInfo?.br ||
-    raw.streamingInfo?.us ||
-    {};
-  const opts = Array.isArray(br)
-    ? br.reduce((acc, s) => {
-        if (!acc[s.service]) acc[s.service] = [];
-        acc[s.service].push(s);
-        return acc;
-      }, {})
-    : br;
-  return Object.entries(opts)
-    .flatMap(([svc, entries]) => {
-      const meta = STREAM_META[svc] || {
-        name: svc,
-        color: C.textDim,
-        icon: svc[0]?.toUpperCase() || "?",
-      };
-      const list = Array.isArray(entries) ? entries : [entries];
-      return list.slice(0, 1).map((entry) => ({
-        service: svc,
-        name: meta.name,
-        color: meta.color,
-        icon: meta.icon,
-        type: entry?.type || "subscription",
-        link: entry?.link || entry?.url || null,
-        quality: entry?.quality || entry?.videoQuality || null,
-        price:
-          entry?.price?.formatted || (entry?.price ? `$${entry.price}` : null),
-        leaving: entry?.leaving
-          ? new Date(entry.leaving * 1000).toLocaleDateString("pt-BR")
-          : null,
-      }));
-    })
-    .filter((s) => s.name)
-    .sort((a, b) => {
-      const order = { subscription: 0, free: 0, rent: 1, buy: 2 };
-      return (order[a.type] ?? 3) - (order[b.type] ?? 3);
-    });
-}
-
 // ─────────────────────────────────────────────
 //  HOOKS
 // ─────────────────────────────────────────────
 function useMovieDetails(tmdbId) {
   const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [streamServices, setStreamServices] = useState([]);
   useEffect(() => {
     if (!tmdbId) return;
     let alive = true;
     setLoading(true);
     setMovie(null);
-    setStreamServices([]);
     tmdb
       .details(tmdbId)
       .then(async (raw) => {
@@ -369,15 +298,13 @@ function useMovieDetails(tmdbId) {
         const base = normalizeTmdb(raw);
         setMovie(base);
         setLoading(false);
-        const [omdbRes, streamRes] = await Promise.allSettled([
+        const [omdbRes] = await Promise.allSettled([
           base.imdbId
             ? omdb.byImdbId(base.imdbId)
             : omdb.byTitle(base.title, base.year),
-          streaming.byTmdb(tmdbId),
         ]);
         if (!alive) return;
         setMovie(mergeOmdb(base, omdbRes.value));
-        setStreamServices(parseStreamingServices(streamRes.value));
       })
       .catch(() => {
         if (alive) setLoading(false);
@@ -386,7 +313,7 @@ function useMovieDetails(tmdbId) {
       alive = false;
     };
   }, [tmdbId]);
-  return { movie, loading, streamServices };
+  return { movie, loading };
 }
 
 function usePaginatedMovies(fetcher) {
@@ -519,8 +446,8 @@ function formatReleaseDateBR(dateStr) {
 }
 
 export {
-  MONKEY_AVATARS, C, apiCache, cachedFetch, TMDB_IMG, tmdb, omdb, streaming,
-  normalizeTmdb, mergeOmdb, STREAM_META, parseStreamingServices,
+  MONKEY_AVATARS, C, apiCache, cachedFetch, TMDB_IMG, tmdb, omdb,
+  normalizeTmdb, mergeOmdb,
   MOCK_USERS, MOCK_REVIEWS, MOCK_GROUPS,
   isUpcoming, formatReleaseDateBR,
 };
@@ -539,4 +466,4 @@ export { supabase };
 export { toast };
 export { useState, useEffect, useRef, useCallback, useMemo };
 export { createPortal };
-export { tmdbProxy, omdbProxy, streamingProxy };
+export { tmdbProxy, omdbProxy };

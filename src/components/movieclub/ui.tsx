@@ -6,11 +6,8 @@ import {
   MONKEY_AVATARS,
   tmdb,
   omdb,
-  streaming,
   normalizeTmdb,
   mergeOmdb,
-  STREAM_META,
-  parseStreamingServices,
   cachedFetch,
   isUpcoming,
   formatReleaseDateBR,
@@ -455,138 +452,6 @@ function FilmStripBg() {
           </div>
         ))}
       </div>
-    </div>
-  );
-}
-
-function StreamingBadges({ services, loading, error }) {
-  if (loading)
-    return (
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-        {[1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className="skeleton"
-            style={{ width: 110, height: 36, borderRadius: 9 }}
-          />
-        ))}
-      </div>
-    );
-  if (!services?.length && error) {
-    const msg =
-      error === "missing_key"
-        ? "Serviço de streaming não configurado"
-        : error === "unauthorized"
-        ? "Chave da API de streaming inválida ou sem assinatura ativa"
-        : error === "rate_limited"
-        ? "Limite de consultas atingido — tente novamente em instantes"
-        : "Não foi possível consultar serviços de streaming";
-    return (
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          padding: "10px 14px",
-          borderRadius: 9,
-          background: "rgba(239,68,68,0.08)",
-          border: `1px dashed rgba(239,68,68,0.35)`,
-        }}
-      >
-        <Radio size={14} style={{ color: "#ef4444", flexShrink: 0 }} />
-        <p style={{ fontSize: 12, color: "#fca5a5", lineHeight: 1.4 }}>{msg}</p>
-      </div>
-    );
-  }
-  if (!services?.length)
-    return (
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          padding: "8px 12px",
-          borderRadius: 9,
-          background: "rgba(74,94,114,0.12)",
-          border: `1px dashed ${C.border}`,
-        }}
-      >
-        <Radio size={14} />
-        <p style={{ fontSize: 12, color: C.textDim, fontStyle: "italic" }}>
-          Não encontrado em streaming no Brasil
-        </p>
-      </div>
-    );
-  const typeLabel = {
-    subscription: "Incluso",
-    free: "Grátis",
-    rent: "Aluguel",
-    buy: "Comprar",
-  };
-  return (
-    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-      {services.map((s, i) => (
-        <a
-          key={i}
-          href={s.link || "#"}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 7,
-            padding: "7px 13px",
-            borderRadius: 9,
-            background: `${s.color}18`,
-            border: `1px solid ${s.color}40`,
-            color: s.color,
-            fontSize: 12,
-            fontWeight: 600,
-            textDecoration: "none",
-            transition: "all 0.2s",
-            flexDirection: "column",
-            minWidth: 90,
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = `${s.color}30`;
-            e.currentTarget.style.transform = "translateY(-2px)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = `${s.color}18`;
-            e.currentTarget.style.transform = "";
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <span style={{ fontSize: 11, fontWeight: 900, lineHeight: 1 }}>
-              {s.icon}
-            </span>
-            <span style={{ fontSize: 12 }}>{s.name}</span>
-          </div>
-          <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-            <span style={{ fontSize: 10, opacity: 0.75, fontWeight: 500 }}>
-              {s.price || typeLabel[s.type] || s.type}
-            </span>
-            {s.quality && (
-              <span
-                style={{
-                  fontSize: 9,
-                  padding: "1px 5px",
-                  borderRadius: 3,
-                  background: `${s.color}30`,
-                  fontWeight: 700,
-                }}
-              >
-                {s.quality}
-              </span>
-            )}
-          </div>
-          {s.leaving && (
-            <span style={{ fontSize: 9, color: C.orange, opacity: 0.9 }}>
-              Sai em {s.leaving}
-            </span>
-          )}
-        </a>
-      ))}
     </div>
   );
 }
@@ -1839,7 +1704,6 @@ export {
   TextInput,
   Section,
   FilmStripBg,
-  StreamingBadges,
   RatingsRow,
   MovieCard,
   MiniPoster,

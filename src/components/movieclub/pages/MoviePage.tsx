@@ -17,7 +17,7 @@ import {
   ChevronLeft,
   X,
 } from "lucide-react";
-import { Spinner, StarRating, Avatar, Badge, Btn, Section, StreamingBadges, RatingsRow } from "../ui";
+import { Spinner, StarRating, Avatar, Badge, Btn, Section, RatingsRow } from "../ui";
 import { useMovieDetails, useRatings, useWatchlist } from "../hooks";
 
 // ─── Mobile Rating Sheet ──────────────────────────────────
@@ -197,7 +197,7 @@ function RatingSheet({ movie, existingRating, onSave, onRemove, onClose }) {
 
 // ─── MoviePage ────────────────────────────────────────────
 export function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx, isMobile }) {
-  const { movie, loading, streamServices, streamError } = useMovieDetails(movieInit?.tmdbId || movieInit?.id);
+  const { movie, loading } = useMovieDetails(movieInit?.tmdbId || movieInit?.id);
   const m = movie || movieInit;
   const [liked, setLiked] = useState(false);
   const [showRatingSheet, setShowRatingSheet] = useState(false);
@@ -550,25 +550,6 @@ export function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx,
               </a>
             )}
           </div>
-
-          {/* Onde assistir */}
-          {(streamServices.length > 0 || streamError) && (
-            <div style={{ marginBottom: 20 }}>
-              <p
-                style={{
-                  fontSize: 11,
-                  color: C.textDim,
-                  marginBottom: 10,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.07em",
-                  fontWeight: 600,
-                }}
-              >
-                Onde assistir
-              </p>
-              <StreamingBadges services={streamServices} loading={loading && !streamServices.length} error={streamError} />
-            </div>
-          )}
 
           {/* Sinopse */}
           <div
@@ -1050,20 +1031,6 @@ export function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx,
             </div>
             <div style={{ marginBottom: 16 }}>
               <RatingsRow movie={m} />
-            </div>
-            <div style={{ marginBottom: 16 }}>
-              <p
-                style={{
-                  fontSize: 10,
-                  color: C.textDim,
-                  marginBottom: 7,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.08em",
-                }}
-              >
-                Onde Assistir no Brasil
-              </p>
-              <StreamingBadges services={streamServices} loading={loading && !streamServices.length} error={streamError} />
             </div>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
               <Btn
