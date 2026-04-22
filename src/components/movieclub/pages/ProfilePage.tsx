@@ -28,6 +28,7 @@ import {
   UserRound,
   Bookmark,
   Upload,
+  Download,
   CheckCircle,
   AlertCircle,
   Loader2,
@@ -82,6 +83,39 @@ const GENRE_COLORS = {
   Documentário: "#10B981",
   Documentary: "#10B981",
 };
+
+function exportRatingsCSV(ratings, displayName = "user") {
+  if (!ratings || ratings.length === 0) {
+    toast.info("Nenhuma avaliação para exportar ainda!");
+    return;
+  }
+  const headers = ["Título", "Nota (1-5)", "Review", "Data"];
+  const rows = ratings.map((r) => {
+    const title = (r.title || "Desconhecido").replace(/"/g, '""');
+    const rating = Number(r.rating).toFixed(1);
+    const review = (r.review || "").replace(/"/g, '""');
+    const date = r.updated_at
+      ? new Date(r.updated_at).toLocaleDateString("pt-BR")
+      : "";
+    return `"${title}","${rating}","${review}","${date}"`;
+  });
+  const csvContent = [headers.join(","), ...rows].join("\n");
+  const BOM = "\uFEFF";
+  const blob = new Blob([BOM + csvContent], {
+    type: "text/csv;charset=utf-8;",
+  });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `movieclub-avaliacoes-${displayName.replace(/\s+/g, "-").toLowerCase()}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  toast.success(
+    `${ratings.length} avaliação${ratings.length !== 1 ? "ões" : ""} exportada${ratings.length !== 1 ? "s" : ""}!`,
+  );
+}
 
 // ─── Import Data Modal ───
 function ImportDataModal(props) {
@@ -1511,7 +1545,12 @@ export function ProfilePageMobile({
                 >
                   <Star size={10} fill={C.gold} stroke="none" />
                   <span
-                    style={{ fontSize: 11, color: C.gold, fontWeight: 700, lineHeight: 1 }}
+                    style={{
+                      fontSize: 11,
+                      color: C.gold,
+                      fontWeight: 700,
+                      lineHeight: 1,
+                    }}
                   >
                     {Number(r.rating).toFixed(1)}
                   </span>
@@ -1676,6 +1715,14 @@ export function ProfilePageMobile({
                     },
                   },
                   {
+                    icon: <Download size={18} />,
+                    label: "Exportar Avaliações (CSV)",
+                    action: () => {
+                      exportRatingsCSV(ratings, displayName);
+                      setShowSettings(false);
+                    },
+                  },
+                  {
                     icon: <Link2 size={18} />,
                     label: "Compartilhar Perfil",
                     action: () => {
@@ -1766,7 +1813,7 @@ export function ProfilePageDesktop(props) {
     setSelectedMovie,
     viewUserId,
     isViewingOther,
-    profile
+    profile,
   } = props;
 
   const currentUserId = authCtx?.user?.id;
@@ -1778,22 +1825,36 @@ export function ProfilePageDesktop(props) {
     loading: wlLoading,
     remove: removeFromWl,
   } = useWatchlist(targetUserId);
-  
+
   const [tab, setTab] = useState("ratings");
   const [viewMode, setViewMode] = useState("list");
   const [showImportModal, setShowImportModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
 
-  const { following: myFollowing, follow, unfollow, isFollowing } = useFollows(currentUserId);
-  const { followers: targetFollowers, following: targetFollowing } = useFollows(targetUserId);
+  const {
+    following: myFollowing,
+    follow,
+    unfollow,
+    isFollowing,
+  } = useFollows(currentUserId);
+  const { followers: targetFollowers, following: targetFollowing } =
+    useFollows(targetUserId);
   const { isFriend } = useFriendships(currentUserId);
 
-  const displayName = profile?.display_name || (isViewingOther ? "Usuário" : authCtx?.user?.email || "Usuário");
+  const displayName =
+    profile?.display_name ||
+    (isViewingOther ? "Usuário" : authCtx?.user?.email || "Usuário");
   const initials = displayName.slice(0, 2).toUpperCase();
-  const uname = profile?.username || (!isViewingOther ? authCtx?.user?.email?.split("@")[0] : null) || "user";
+  const uname =
+    profile?.username ||
+    (!isViewingOther ? authCtx?.user?.email?.split("@")[0] : null) ||
+    "user";
   const bio = profile?.bio || "";
-  const avgRating = ratings.length > 0
-      ? (ratings.reduce((s, r) => s + Number(r.rating), 0) / ratings.length).toFixed(1)
+  const avgRating =
+    ratings.length > 0
+      ? (
+          ratings.reduce((s, r) => s + Number(r.rating), 0) / ratings.length
+        ).toFixed(1)
       : "—";
 
   const bannerPosters = ratings
@@ -1842,7 +1903,14 @@ export function ProfilePageDesktop(props) {
   }, [ratings]);
 
   return (
-    <div style={{ paddingTop: "calc(var(--top-bar-height) + var(--safe-top))", paddingBottom: "calc(var(--bottom-nav-height) + var(--safe-bottom) + 16px)", minHeight: "100dvh" }}>
+    <div
+      style={{
+        paddingTop: "calc(var(--top-bar-height) + var(--safe-top))",
+        paddingBottom:
+          "calc(var(--bottom-nav-height) + var(--safe-bottom) + 16px)",
+        minHeight: "100dvh",
+      }}
+    >
       {/* Banner */}
       <div style={{ position: "relative", height: 220, overflow: "hidden" }}>
         {bannerPosters.length > 0 ? (
@@ -2165,6 +2233,13 @@ export function ProfilePageDesktop(props) {
                     onClick={() => setShowImportModal(true)}
                   >
                     <Upload size={13} /> Importar Dados
+                  </Btn>
+                  <Btn
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => exportRatingsCSV(ratings, displayName)}
+                  >
+                    <Download size={13} /> Exportar CSV
                   </Btn>
                   <Btn
                     variant="ghost"

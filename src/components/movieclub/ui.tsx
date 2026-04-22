@@ -1843,37 +1843,154 @@ export {
   SplashScreen,
 }
 
+// @ts-nocheck
+// InstallBanner — centralized & polished for all devices
+// Replace the existing InstallBanner export in ui.tsx with this
+
 export function InstallBanner({ isIOS, onInstall, onDismiss }) {
   return (
-    <div className="pwa-install-banner" style={{ position: "relative" }}>
-      <button className="banner-btn-dismiss" onClick={onDismiss}>✕</button>
-
-      <img
-        src="/apple-touch-icon.png"
-        alt="MovieClub"
-        className="banner-icon"
+    <>
+      {/* Backdrop overlay */}
+      <div
+        onClick={onDismiss}
+        style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 1998,
+          background: "rgba(0,0,0,0.45)",
+          backdropFilter: "blur(3px)",
+          WebkitBackdropFilter: "blur(3px)",
+        }}
       />
 
-      <div className="banner-text">
-        <p className="banner-title">Adicionar MovieClub</p>
-        {isIOS ? (
-          <p className="banner-sub">
-            Toque em <strong style={{ color: "#C9A84C" }}>Compartilhar</strong> e depois{" "}
-            <strong style={{ color: "#C9A84C" }}>"Adicionar à Tela Inicial"</strong>
+      {/* Banner — centered horizontally, pinned above bottom nav */}
+      <div
+        style={{
+          position: "fixed",
+          left: "50%",
+          transform: "translateX(-50%)",
+          bottom: "calc(var(--bottom-nav-height, 64px) + var(--safe-bottom, 0px) + 16px)",
+          zIndex: 1999,
+          width: "min(calc(100vw - 32px), 480px)",
+          background: "linear-gradient(135deg, #162130 0%, #1b2d42 100%)",
+          border: "1px solid rgba(201,168,76,0.45)",
+          borderRadius: 22,
+          padding: "18px 18px 18px 18px",
+          boxShadow:
+            "0 12px 40px rgba(0,0,0,0.55), 0 0 0 1px rgba(201,168,76,0.12), inset 0 1px 0 rgba(255,255,255,0.06)",
+          animation: "bannerSlideUp 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards",
+          display: "flex",
+          alignItems: "center",
+          gap: 14,
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Dismiss */}
+        <button
+          onClick={onDismiss}
+          style={{
+            position: "absolute",
+            top: 10,
+            right: 10,
+            width: 26,
+            height: 26,
+            borderRadius: "50%",
+            background: "rgba(255,255,255,0.07)",
+            border: "1px solid rgba(255,255,255,0.1)",
+            color: "#4a5e72",
+            fontSize: 13,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            minHeight: "unset",
+            minWidth: "unset",
+            lineHeight: 1,
+            transition: "all 0.18s",
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.12)"; e.currentTarget.style.color = "#8a9bb0"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.07)"; e.currentTarget.style.color = "#4a5e72"; }}
+        >
+          ✕
+        </button>
+
+        {/* App icon */}
+        <div style={{
+          width: 54,
+          height: 54,
+          borderRadius: 14,
+          overflow: "hidden",
+          flexShrink: 0,
+          border: "1.5px solid rgba(201,168,76,0.35)",
+          boxShadow: "0 4px 14px rgba(201,168,76,0.2)",
+          background: "#0f1923",
+        }}>
+          <img
+            src="/apple-touch-icon.png"
+            alt="MovieClub"
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            onError={(e) => {
+              e.target.style.display = "none";
+              e.target.parentElement.style.background = "linear-gradient(135deg, #8a6e30, #c9a84c)";
+            }}
+          />
+        </div>
+
+        {/* Text */}
+        <div style={{ flex: 1, minWidth: 0, paddingRight: 20 }}>
+          <p style={{
+            fontFamily: "'Outfit', sans-serif",
+            fontSize: 15,
+            fontWeight: 800,
+            color: "#f0ede6",
+            marginBottom: 3,
+          }}>
+            Instalar MovieClub
           </p>
-        ) : (
-          <p className="banner-sub">
-            Instale o app para acesso rápido
-          </p>
+          {isIOS ? (
+            <p style={{ fontSize: 12, color: "#8a9bb0", lineHeight: 1.5 }}>
+              Toque em{" "}
+              <strong style={{ color: "#c9a84c" }}>Compartilhar</strong>{" "}
+              e depois{" "}
+              <strong style={{ color: "#c9a84c" }}>"Tela de Início"</strong>
+            </p>
+          ) : (
+            <p style={{ fontSize: 12, color: "#8a9bb0", lineHeight: 1.5 }}>
+              Acesso rápido direto da tela inicial
+            </p>
+          )}
+        </div>
+
+        {/* Install button (Android only) */}
+        {!isIOS && (
+          <button
+            onClick={onInstall}
+            style={{
+              padding: "9px 18px",
+              borderRadius: 12,
+              background: "linear-gradient(135deg, #8a6e30, #c9a84c)",
+              color: "#0f1923",
+              fontSize: 13,
+              fontWeight: 800,
+              fontFamily: "'Outfit', sans-serif",
+              border: "none",
+              cursor: "pointer",
+              flexShrink: 0,
+              minHeight: "unset",
+              minWidth: "unset",
+              whiteSpace: "nowrap",
+              boxShadow: "0 4px 14px rgba(201,168,76,0.3)",
+              transition: "all 0.18s",
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.boxShadow = "0 6px 18px rgba(201,168,76,0.4)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 14px rgba(201,168,76,0.3)"; }}
+          >
+            Instalar
+          </button>
         )}
       </div>
-
-      {!isIOS && (
-        <button className="banner-btn-install" onClick={onInstall}>
-          Instalar
-        </button>
-      )}
-    </div>
+    </>
   );
 }
+
 ;
