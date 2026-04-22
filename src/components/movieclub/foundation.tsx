@@ -7,7 +7,6 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   tmdbProxy,
   omdbProxy,
-  streamingProxy,
 } from "@/lib/movie-api.functions";
 import {
   Film,

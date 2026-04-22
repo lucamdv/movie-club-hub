@@ -1,11 +1,10 @@
 const TMDB_BASE = "https://api.themoviedb.org/3";
 const OMDB_BASE = "https://www.omdbapi.com";
-const STREAMING_BASE = "https://streaming-availability.p.rapidapi.com";
 
 function getTmdbKey() {
   const key = process.env.TMDB_API_KEY;
   if (!key) {
-    console.error("TMDB_API_KEY is not configured in process.env. Available env keys:", Object.keys(process.env).filter(k => k.includes("TMDB") || k.includes("OMDB") || k.includes("STREAMING")));
+    console.error("TMDB_API_KEY is not configured in process.env. Available env keys:", Object.keys(process.env).filter(k => k.includes("TMDB") || k.includes("OMDB")));
     throw new Error("TMDB_API_KEY is not configured. Please ensure the secret is saved in Lovable Cloud.");
   }
   return key;
@@ -13,10 +12,6 @@ function getTmdbKey() {
 
 function getOmdbKey() {
   return process.env.OMDB_API_KEY || null;
-}
-
-function getStreamingKey() {
-  return process.env.STREAMING_AVAILABILITY_API_KEY || null;
 }
 
 export async function tmdbGet(path: string, params: Record<string, string> = {}) {
@@ -39,25 +34,4 @@ export async function omdbGet(params: Record<string, string>) {
   if (!r.ok) return null;
   const d = await r.json();
   return d.Response === "True" ? d : null;
-}
-
-export async function streamingGet(tmdbId: number, country = "br") {
-  const key = getStreamingKey();
-  if (!key) return { __error: "missing_key" };
-  const url = `${STREAMING_BASE}/shows/movie/${tmdbId}?country=${country}`;
-  const r = await fetch(url, {
-    headers: {
-      "x-rapidapi-key": key,
-      "x-rapidapi-host": "streaming-availability.p.rapidapi.com",
-    },
-  });
-  if (!r.ok) {
-    const body = await r.text().catch(() => "");
-    console.warn(`[streamingGet] tmdbId=${tmdbId} status=${r.status} body=${body.slice(0, 200)}`);
-    if (r.status === 401 || r.status === 403) return { __error: "unauthorized", status: r.status };
-    if (r.status === 404) return { __error: "not_found" };
-    if (r.status === 429) return { __error: "rate_limited" };
-    return { __error: "http", status: r.status };
-  }
-  return r.json();
 }
