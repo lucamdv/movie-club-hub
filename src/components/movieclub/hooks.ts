@@ -753,6 +753,20 @@ function useClubDetail(clubId, userId) {
     await supabase.from("club_movies").delete().eq("id", movieId);
     await load();
   };
+  const leaveClub = async () => {
+    if (!clubId || !userId) return;
+    const { error } = await supabase
+      .from("club_members")
+      .delete()
+      .eq("club_id", clubId)
+      .eq("user_id", userId);
+    if (error) throw error;
+  };
+  const deleteClub = async () => {
+    if (!clubId) return;
+    const { error } = await supabase.from("clubs").delete().eq("id", clubId);
+    if (error) throw error;
+  };
   return {
     club,
     members,
@@ -760,6 +774,8 @@ function useClubDetail(clubId, userId) {
     loading,
     addMovie,
     removeMovie,
+    leaveClub,
+    deleteClub,
     reload: load,
   };
 }

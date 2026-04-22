@@ -6,7 +6,7 @@ import { C, tmdb } from "../foundation";
 import {
   Film, Users, Link2, Eye, Star, Activity,
   ChevronLeft, Crown, Plus, X, Clock, Clapperboard,
-  Sparkles, Ticket, Check, ArrowRight,
+  Sparkles, Ticket, Check, ArrowRight, LogOut, Trash2, AlertTriangle,
 } from "lucide-react";
 import { Spinner, Btn } from "../ui";
 import { BackIcon, PlusIcon } from "../ui";
@@ -43,12 +43,12 @@ function WatchRateModal({ movie, existingRating, onClose, onSubmit }) {
   const display = hover || rating;
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 220, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }} onClick={onClose}>
+    <div style={{ position: "fixed", inset: 0, zIndex: 220, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "5vh 20px 20px", overflowY: "auto" }} onClick={onClose}>
       <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.8)", backdropFilter: "blur(8px)" }} />
       <div onClick={e => e.stopPropagation()} style={{
         position: "relative", background: `linear-gradient(135deg, ${C.bgCard}, #1a2d42)`,
         border: `1px solid rgba(201,168,76,0.3)`, borderRadius: 24, padding: 28,
-        width: "100%", maxWidth: 420, maxHeight: "calc(100dvh - 40px)", overflowY: "auto",
+        width: "100%", maxWidth: 420, maxHeight: "calc(100dvh - 10vh - 20px)", overflowY: "auto", margin: "0 auto",
         boxShadow: "0 24px 64px rgba(0,0,0,0.6), 0 0 0 1px rgba(201,168,76,0.1)",
       }}>
         {/* Header */}
@@ -168,9 +168,9 @@ function ActivityItem({ entry, onOpenMovie }) {
 // ─── Add Movie Modal ─────────────────────────────────────
 function AddMovieModal({ movieSearch, setMovieSearch, movieResults, movieSearchLoading, onAdd, onClose }) {
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }} onClick={onClose}>
+    <div style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "5vh 20px 20px", overflowY: "auto" }} onClick={onClose}>
       <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.8)", backdropFilter: "blur(8px)" }} />
-      <div style={{ position: "relative", background: `linear-gradient(135deg, ${C.bgCard}, #1a2d42)`, border: `1px solid rgba(201,168,76,0.3)`, borderRadius: 24, padding: 28, width: "100%", maxWidth: 500, maxHeight: "80vh", overflowY: "auto", boxShadow: "0 24px 64px rgba(0,0,0,0.6)" }} onClick={e => e.stopPropagation()}>
+      <div style={{ position: "relative", background: `linear-gradient(135deg, ${C.bgCard}, #1a2d42)`, border: `1px solid rgba(201,168,76,0.3)`, borderRadius: 24, padding: 28, width: "100%", maxWidth: 500, maxHeight: "calc(100dvh - 10vh - 20px)", overflowY: "auto", boxShadow: "0 24px 64px rgba(0,0,0,0.6)", margin: "0 auto" }} onClick={e => e.stopPropagation()}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
           <div>
             <h3 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 18, fontWeight: 800, color: C.text }}>Adicionar Filme</h3>
@@ -213,9 +213,9 @@ function AddMovieModal({ movieSearch, setMovieSearch, movieResults, movieSearchL
 // ─── Invite Modal ────────────────────────────────────────
 function InviteModal({ friendProfiles, onInvite, onCopyLink, onClose }) {
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }} onClick={onClose}>
+    <div style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "5vh 20px 20px", overflowY: "auto" }} onClick={onClose}>
       <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.8)", backdropFilter: "blur(8px)" }} />
-      <div style={{ position: "relative", background: `linear-gradient(135deg, ${C.bgCard}, #1a2d42)`, border: `1px solid rgba(201,168,76,0.3)`, borderRadius: 24, padding: 28, width: "100%", maxWidth: 500, maxHeight: "80vh", overflowY: "auto", boxShadow: "0 24px 64px rgba(0,0,0,0.6)" }} onClick={e => e.stopPropagation()}>
+      <div style={{ position: "relative", background: `linear-gradient(135deg, ${C.bgCard}, #1a2d42)`, border: `1px solid rgba(201,168,76,0.3)`, borderRadius: 24, padding: 28, width: "100%", maxWidth: 500, maxHeight: "calc(100dvh - 10vh - 20px)", overflowY: "auto", boxShadow: "0 24px 64px rgba(0,0,0,0.6)", margin: "0 auto" }} onClick={e => e.stopPropagation()}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
           <div>
             <h3 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 18, fontWeight: 800, color: C.text }}>Convidar Amigos</h3>
@@ -263,12 +263,49 @@ function InviteModal({ friendProfiles, onInvite, onCopyLink, onClose }) {
   );
 }
 
+// ─── Leave/Delete Club Confirm Modal ─────────────────────
+function LeaveConfirmModal({ isOwner, clubName, loading, onConfirm, onClose }) {
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 230, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "10vh 20px 20px", overflowY: "auto" }} onClick={onClose}>
+      <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.82)", backdropFilter: "blur(8px)" }} />
+      <div onClick={e => e.stopPropagation()} style={{
+        position: "relative", background: `linear-gradient(135deg, ${C.bgCard}, #1a2d42)`,
+        border: `1px solid rgba(239,68,68,0.32)`, borderRadius: 22, padding: 26,
+        width: "100%", maxWidth: 400, boxShadow: "0 24px 64px rgba(0,0,0,0.6)", margin: "0 auto",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+          <div style={{ width: 44, height: 44, borderRadius: 12, background: "rgba(239,68,68,0.12)", border: `1px solid rgba(239,68,68,0.3)`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <AlertTriangle size={20} style={{ color: "#ef4444" }} />
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <h3 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 17, fontWeight: 800, color: C.text, marginBottom: 2 }}>
+              {isOwner ? "Excluir club?" : "Sair do club?"}
+            </h3>
+            <p style={{ fontSize: 12, color: C.textMuted }}>{isOwner ? "Esta ação é permanente" : "Você poderá voltar via convite"}</p>
+          </div>
+        </div>
+        <p style={{ fontSize: 13, color: C.textMuted, lineHeight: 1.5, marginBottom: 22 }}>
+          {isOwner
+            ? <>Você é o dono de <strong style={{ color: C.text }}>{clubName}</strong>. Excluir vai remover o club, todos os filmes e o histórico de atividade para todos os membros.</>
+            : <>Você deixará de ver os filmes e a atividade de <strong style={{ color: C.text }}>{clubName}</strong>. Sua avaliação dos filmes não será apagada.</>}
+        </p>
+        <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+          <button onClick={onClose} disabled={loading} style={{ padding: "10px 18px", borderRadius: 12, background: "transparent", border: `1px solid ${C.border}`, color: C.textMuted, fontSize: 13, fontWeight: 600, cursor: "pointer", minHeight: "unset" }}>Cancelar</button>
+          <button onClick={onConfirm} disabled={loading} style={{ padding: "10px 20px", borderRadius: 12, background: "linear-gradient(135deg, #dc2626, #ef4444)", color: "#fff", fontSize: 13, fontWeight: 700, fontFamily: "'Outfit', sans-serif", border: "none", cursor: loading ? "wait" : "pointer", opacity: loading ? 0.7 : 1, minHeight: "unset", display: "flex", alignItems: "center", gap: 6, boxShadow: "0 4px 14px rgba(239,68,68,0.35)" }}>
+            {loading ? <><Spinner size={14} /> Aguarde...</> : isOwner ? <><Trash2 size={14} /> Excluir</> : <><LogOut size={14} /> Sair</>}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Movie Card do Club ──────────────────────────────────
 function ClubMovieCard({ mv, myRating, isMine, userId, onOpen, onWatch, onRemove }) {
   const watched = !!myRating;
   return (
-    <div style={{ position: "relative" }} className="movie-card-netflix">
-      <div onClick={() => onOpen(mv)} style={{ cursor: "pointer" }}>
+    <div style={{ position: "relative", display: "flex", flexDirection: "column", height: "100%" }} className="movie-card-netflix">
+      <div onClick={() => onOpen(mv)} style={{ cursor: "pointer", display: "flex", flexDirection: "column", flex: 1 }}>
         <div style={{ width: "100%", aspectRatio: "2/3", borderRadius: 12, overflow: "hidden", background: C.bgCard, border: `1px solid ${C.border}`, position: "relative" }}>
           {mv.poster_url
             ? <img src={mv.poster_url} alt={mv.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -287,11 +324,13 @@ function ClubMovieCard({ mv, myRating, isMine, userId, onOpen, onWatch, onRemove
           {/* Gradient overlay */}
           <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "40%", background: "linear-gradient(transparent, rgba(0,0,0,0.7))", pointerEvents: "none" }} />
         </div>
-        <p style={{ fontSize: 11, fontWeight: 500, color: C.text, marginTop: 6, lineHeight: 1.3, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{mv.title}</p>
+        <p style={{ fontSize: 11, fontWeight: 500, color: C.text, marginTop: 6, lineHeight: 1.3, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", minHeight: "calc(2 * 1.3em)" }}>{mv.title}</p>
       </div>
       {!isMine && (
-        <button onClick={e => { e.stopPropagation(); onWatch(mv); }} style={{ marginTop: 5, width: "100%", padding: "7px 6px", borderRadius: 9, background: watched ? "rgba(201,168,76,0.1)" : `linear-gradient(135deg, ${C.goldDim}, ${C.gold})`, color: watched ? C.gold : C.bgDeep, border: watched ? `1px solid rgba(201,168,76,0.3)` : "none", fontSize: 10, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 3, minHeight: "unset", minWidth: "unset", fontFamily: "'Outfit', sans-serif", transition: "all 0.18s" }}>
+        <button onClick={e => { e.stopPropagation(); onWatch(mv); }} style={{ marginTop: "auto", paddingTop: 5, width: "100%", border: "none", background: "transparent", padding: 0, cursor: "pointer", minHeight: "unset", minWidth: "unset" }}>
+          <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 3, marginTop: 5, padding: "7px 6px", borderRadius: 9, background: watched ? "rgba(201,168,76,0.1)" : `linear-gradient(135deg, ${C.goldDim}, ${C.gold})`, color: watched ? C.gold : C.bgDeep, border: watched ? `1px solid rgba(201,168,76,0.3)` : "1px solid transparent", fontSize: 10, fontWeight: 700, fontFamily: "'Outfit', sans-serif", transition: "all 0.18s" }}>
           <Eye size={11} /> {watched ? "Reavaliar" : "Marcar visto"}
+          </span>
         </button>
       )}
     </div>
@@ -302,9 +341,9 @@ function ClubMovieCard({ mv, myRating, isMine, userId, onOpen, onWatch, onRemove
 export function GroupPage({ group, setPage, setSelectedMovie, auth: authCtx }) {
   const userId = authCtx?.user?.id;
   const clubId = group?.id;
-  const { club, members, movies, loading, addMovie, removeMovie } = useClubDetail(clubId, userId);
+  const { club, members, movies, loading, addMovie, removeMovie, leaveClub, deleteClub } = useClubDetail(clubId, userId);
   const { friends } = useFriendships(userId);
-  const { inviteFriend } = useClubs(userId);
+  const { inviteFriend, reload: reloadClubs } = useClubs(userId);
   const { upsertRating, getRating } = useRatings(userId);
   const { activity, logActivity } = useClubActivity(clubId);
   const [showAddMovie, setShowAddMovie] = useState(false);
@@ -315,6 +354,8 @@ export function GroupPage({ group, setPage, setSelectedMovie, auth: authCtx }) {
   const [friendProfiles, setFriendProfiles] = useState([]);
   const [watchTarget, setWatchTarget] = useState(null);
   const [activeTab, setActiveTab] = useState("movies");
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
+  const [leaving, setLeaving] = useState(false);
   const debRef = useRef(null);
 
   // Stats
@@ -371,6 +412,29 @@ export function GroupPage({ group, setPage, setSelectedMovie, auth: authCtx }) {
     await upsertRating(watchTarget.tmdb_id, rating, null, watchTarget.title, watchTarget.poster_url);
     await logActivity({ userId, tmdbId: watchTarget.tmdb_id, title: watchTarget.title, posterUrl: watchTarget.poster_url, rating });
     toast.success(`"${watchTarget.title}" marcado como visto!`);
+  };
+
+  const isOwner = club?.created_by === userId;
+
+  const handleLeaveClub = async () => {
+    if (!clubId || !userId) return;
+    setLeaving(true);
+    try {
+      if (isOwner) {
+        await deleteClub();
+        toast.success("Club excluído");
+      } else {
+        await leaveClub();
+        toast.success("Você saiu do club");
+      }
+      setShowLeaveConfirm(false);
+      try { await reloadClubs(); } catch {}
+      setPage("groups");
+    } catch (e) {
+      toast.error(e?.message || "Erro ao sair do club");
+    } finally {
+      setLeaving(false);
+    }
   };
 
   const openMovieFromEntry = (entry) => {
@@ -484,6 +548,9 @@ export function GroupPage({ group, setPage, setSelectedMovie, auth: authCtx }) {
         </button>
         <button onClick={handleCopyInviteLink} style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 14px", borderRadius: 12, background: C.bgCard, color: C.textMuted, fontSize: 12, fontWeight: 600, border: `1px solid ${C.border}`, cursor: "pointer", minHeight: "unset", transition: "all 0.2s" }}>
           <Link2 size={13} /> Link
+        </button>
+        <button onClick={() => setShowLeaveConfirm(true)} style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 6, padding: "9px 14px", borderRadius: 12, background: "rgba(239,68,68,0.08)", color: "#ef4444", fontSize: 12, fontWeight: 600, border: `1px solid rgba(239,68,68,0.25)`, cursor: "pointer", minHeight: "unset", transition: "all 0.2s", fontFamily: "'Outfit', sans-serif" }}>
+          {isOwner ? <><Trash2 size={13} /> Excluir club</> : <><LogOut size={13} /> Sair do club</>}
         </button>
       </div>
     </div>
@@ -605,6 +672,7 @@ export function GroupPage({ group, setPage, setSelectedMovie, auth: authCtx }) {
         {showAddMovie && <AddMovieModal movieSearch={movieSearch} setMovieSearch={setMovieSearch} movieResults={movieResults} movieSearchLoading={movieSearchLoading} onAdd={handleAddMovie} onClose={() => { setShowAddMovie(false); setMovieSearch(""); setMovieResults([]); }} />}
         {showInvite && <InviteModal friendProfiles={friendProfiles} onInvite={handleInvite} onCopyLink={handleCopyInviteLink} onClose={() => setShowInvite(false)} />}
         {watchTarget && <WatchRateModal movie={watchTarget} existingRating={getRating(watchTarget.tmdb_id)} onClose={() => setWatchTarget(null)} onSubmit={handleConfirmWatch} />}
+        {showLeaveConfirm && <LeaveConfirmModal isOwner={isOwner} clubName={club?.name || "este club"} loading={leaving} onConfirm={handleLeaveClub} onClose={() => setShowLeaveConfirm(false)} />}
       </div>
     );
   }
@@ -718,6 +786,7 @@ export function GroupPage({ group, setPage, setSelectedMovie, auth: authCtx }) {
       {showAddMovie && <AddMovieModal movieSearch={movieSearch} setMovieSearch={setMovieSearch} movieResults={movieResults} movieSearchLoading={movieSearchLoading} onAdd={handleAddMovie} onClose={() => { setShowAddMovie(false); setMovieSearch(""); setMovieResults([]); }} />}
       {showInvite && <InviteModal friendProfiles={friendProfiles} onInvite={handleInvite} onCopyLink={handleCopyInviteLink} onClose={() => setShowInvite(false)} />}
       {watchTarget && <WatchRateModal movie={watchTarget} existingRating={getRating(watchTarget.tmdb_id)} onClose={() => setWatchTarget(null)} onSubmit={handleConfirmWatch} />}
+      {showLeaveConfirm && <LeaveConfirmModal isOwner={isOwner} clubName={club?.name || "este club"} loading={leaving} onConfirm={handleLeaveClub} onClose={() => setShowLeaveConfirm(false)} />}
     </div>
   );
 }
