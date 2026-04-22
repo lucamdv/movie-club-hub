@@ -108,7 +108,7 @@ export default function MovieClubApp() {
   const [selectedMovie, setSM] = useState(null);
   const [selectedGroup, setSG] = useState(null);
   const [viewProfileUserId, setViewProfileUserId] = useState(null);
-  const [apiStatus, setApiStatus] = useState({ tmdb: false, omdb: false, streaming: false });
+  const [apiStatus, setApiStatus] = useState({ tmdb: false, omdb: false });
   const authCtx = useAuth();
   const [authError, setAuthError] = useState("");
   const isMobile = useIsMobile();

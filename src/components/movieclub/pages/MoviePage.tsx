@@ -1032,7 +1032,6 @@ export function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx,
             <div style={{ marginBottom: 16 }}>
               <RatingsRow movie={m} />
             </div>
-            <div style={{ marginBottom: 16 }}>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
               <Btn
                 variant={inWatchlist ? "ghost" : "gold"}
