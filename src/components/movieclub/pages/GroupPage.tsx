@@ -377,6 +377,29 @@ export function GroupPage({ group, setPage, setSelectedMovie, auth: authCtx }) {
     toast.success(`"${watchTarget.title}" marcado como visto!`);
   };
 
+  const isOwner = club?.created_by === userId;
+
+  const handleLeaveClub = async () => {
+    if (!clubId || !userId) return;
+    setLeaving(true);
+    try {
+      if (isOwner) {
+        await deleteClub();
+        toast.success("Club excluído");
+      } else {
+        await leaveClub();
+        toast.success("Você saiu do club");
+      }
+      setShowLeaveConfirm(false);
+      try { await reloadClubs(); } catch {}
+      setPage("groups");
+    } catch (e) {
+      toast.error(e?.message || "Erro ao sair do club");
+    } finally {
+      setLeaving(false);
+    }
+  };
+
   const openMovieFromEntry = (entry) => {
     setSelectedMovie({ tmdbId: entry.tmdb_id, title: entry.title, poster: entry.poster_url });
     setPage("movie");
