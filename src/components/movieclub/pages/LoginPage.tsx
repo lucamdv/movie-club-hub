@@ -179,32 +179,9 @@ export function LoginPage({ onLogin, onSignup, error }) {
 
           <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "20px 0" }}>
             <div style={{ flex: 1, height: 1, background: C.border }} />
-            <span style={{ color: C.textDim, fontSize: 12, whiteSpace: "nowrap" }}>ou continue com</span>
             <div style={{ flex: 1, height: 1, background: C.border }} />
           </div>
 
-          <div style={{ display: "flex", gap: 10 }}>
-            {["Google", "Apple"].map((p) => (
-              <button
-                key={p}
-                onClick={onLogin}
-                style={{
-                  flex: 1,
-                  padding: "13px",
-                  borderRadius: 12,
-                  fontSize: 14,
-                  fontWeight: 600,
-                  background: "rgba(9,21,35,0.5)",
-                  color: C.textMuted,
-                  border: `1px solid ${C.border}`,
-                  transition: "all 0.2s",
-                  minHeight: "unset",
-                }}
-              >
-                {p}
-              </button>
-            ))}
-          </div>
         </div>
       </div>
 
