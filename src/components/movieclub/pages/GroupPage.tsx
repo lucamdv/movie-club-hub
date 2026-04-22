@@ -512,6 +512,9 @@ export function GroupPage({ group, setPage, setSelectedMovie, auth: authCtx }) {
         <button onClick={handleCopyInviteLink} style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 14px", borderRadius: 12, background: C.bgCard, color: C.textMuted, fontSize: 12, fontWeight: 600, border: `1px solid ${C.border}`, cursor: "pointer", minHeight: "unset", transition: "all 0.2s" }}>
           <Link2 size={13} /> Link
         </button>
+        <button onClick={() => setShowLeaveConfirm(true)} style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 6, padding: "9px 14px", borderRadius: 12, background: "rgba(239,68,68,0.08)", color: "#ef4444", fontSize: 12, fontWeight: 600, border: `1px solid rgba(239,68,68,0.25)`, cursor: "pointer", minHeight: "unset", transition: "all 0.2s", fontFamily: "'Outfit', sans-serif" }}>
+          {isOwner ? <><Trash2 size={13} /> Excluir club</> : <><LogOut size={13} /> Sair do club</>}
+        </button>
       </div>
     </div>
   );
