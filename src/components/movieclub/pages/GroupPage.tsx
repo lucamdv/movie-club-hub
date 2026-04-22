@@ -267,8 +267,8 @@ function InviteModal({ friendProfiles, onInvite, onCopyLink, onClose }) {
 function ClubMovieCard({ mv, myRating, isMine, userId, onOpen, onWatch, onRemove }) {
   const watched = !!myRating;
   return (
-    <div style={{ position: "relative" }} className="movie-card-netflix">
-      <div onClick={() => onOpen(mv)} style={{ cursor: "pointer" }}>
+    <div style={{ position: "relative", display: "flex", flexDirection: "column", height: "100%" }} className="movie-card-netflix">
+      <div onClick={() => onOpen(mv)} style={{ cursor: "pointer", display: "flex", flexDirection: "column", flex: 1 }}>
         <div style={{ width: "100%", aspectRatio: "2/3", borderRadius: 12, overflow: "hidden", background: C.bgCard, border: `1px solid ${C.border}`, position: "relative" }}>
           {mv.poster_url
             ? <img src={mv.poster_url} alt={mv.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -287,11 +287,13 @@ function ClubMovieCard({ mv, myRating, isMine, userId, onOpen, onWatch, onRemove
           {/* Gradient overlay */}
           <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "40%", background: "linear-gradient(transparent, rgba(0,0,0,0.7))", pointerEvents: "none" }} />
         </div>
-        <p style={{ fontSize: 11, fontWeight: 500, color: C.text, marginTop: 6, lineHeight: 1.3, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{mv.title}</p>
+        <p style={{ fontSize: 11, fontWeight: 500, color: C.text, marginTop: 6, lineHeight: 1.3, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", minHeight: "calc(2 * 1.3em)" }}>{mv.title}</p>
       </div>
       {!isMine && (
-        <button onClick={e => { e.stopPropagation(); onWatch(mv); }} style={{ marginTop: 5, width: "100%", padding: "7px 6px", borderRadius: 9, background: watched ? "rgba(201,168,76,0.1)" : `linear-gradient(135deg, ${C.goldDim}, ${C.gold})`, color: watched ? C.gold : C.bgDeep, border: watched ? `1px solid rgba(201,168,76,0.3)` : "none", fontSize: 10, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 3, minHeight: "unset", minWidth: "unset", fontFamily: "'Outfit', sans-serif", transition: "all 0.18s" }}>
+        <button onClick={e => { e.stopPropagation(); onWatch(mv); }} style={{ marginTop: "auto", paddingTop: 5, width: "100%", border: "none", background: "transparent", padding: 0, cursor: "pointer", minHeight: "unset", minWidth: "unset" }}>
+          <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 3, marginTop: 5, padding: "7px 6px", borderRadius: 9, background: watched ? "rgba(201,168,76,0.1)" : `linear-gradient(135deg, ${C.goldDim}, ${C.gold})`, color: watched ? C.gold : C.bgDeep, border: watched ? `1px solid rgba(201,168,76,0.3)` : "1px solid transparent", fontSize: 10, fontWeight: 700, fontFamily: "'Outfit', sans-serif", transition: "all 0.18s" }}>
           <Eye size={11} /> {watched ? "Reavaliar" : "Marcar visto"}
+          </span>
         </button>
       )}
     </div>
