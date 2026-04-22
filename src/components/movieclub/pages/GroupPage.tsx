@@ -168,9 +168,9 @@ function ActivityItem({ entry, onOpenMovie }) {
 // ─── Add Movie Modal ─────────────────────────────────────
 function AddMovieModal({ movieSearch, setMovieSearch, movieResults, movieSearchLoading, onAdd, onClose }) {
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }} onClick={onClose}>
+    <div style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "5vh 20px 20px", overflowY: "auto" }} onClick={onClose}>
       <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.8)", backdropFilter: "blur(8px)" }} />
-      <div style={{ position: "relative", background: `linear-gradient(135deg, ${C.bgCard}, #1a2d42)`, border: `1px solid rgba(201,168,76,0.3)`, borderRadius: 24, padding: 28, width: "100%", maxWidth: 500, maxHeight: "80vh", overflowY: "auto", boxShadow: "0 24px 64px rgba(0,0,0,0.6)" }} onClick={e => e.stopPropagation()}>
+      <div style={{ position: "relative", background: `linear-gradient(135deg, ${C.bgCard}, #1a2d42)`, border: `1px solid rgba(201,168,76,0.3)`, borderRadius: 24, padding: 28, width: "100%", maxWidth: 500, maxHeight: "calc(100dvh - 10vh - 20px)", overflowY: "auto", boxShadow: "0 24px 64px rgba(0,0,0,0.6)", margin: "0 auto" }} onClick={e => e.stopPropagation()}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
           <div>
             <h3 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 18, fontWeight: 800, color: C.text }}>Adicionar Filme</h3>
