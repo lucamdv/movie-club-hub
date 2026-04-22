@@ -43,7 +43,7 @@ export async function omdbGet(params: Record<string, string>) {
 
 export async function streamingGet(tmdbId: number, country = "br") {
   const key = getStreamingKey();
-  if (!key) return null;
+  if (!key) return { __error: "missing_key" };
   const url = `${STREAMING_BASE}/shows/movie/${tmdbId}?country=${country}`;
   const r = await fetch(url, {
     headers: {
@@ -51,6 +51,13 @@ export async function streamingGet(tmdbId: number, country = "br") {
       "x-rapidapi-host": "streaming-availability.p.rapidapi.com",
     },
   });
-  if (!r.ok) return null;
+  if (!r.ok) {
+    const body = await r.text().catch(() => "");
+    console.warn(`[streamingGet] tmdbId=${tmdbId} status=${r.status} body=${body.slice(0, 200)}`);
+    if (r.status === 401 || r.status === 403) return { __error: "unauthorized", status: r.status };
+    if (r.status === 404) return { __error: "not_found" };
+    if (r.status === 429) return { __error: "rate_limited" };
+    return { __error: "http", status: r.status };
+  }
   return r.json();
 }

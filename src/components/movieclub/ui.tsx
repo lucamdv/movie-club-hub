@@ -459,7 +459,7 @@ function FilmStripBg() {
   );
 }
 
-function StreamingBadges({ services, loading }) {
+function StreamingBadges({ services, loading, error }) {
   if (loading)
     return (
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -472,6 +472,32 @@ function StreamingBadges({ services, loading }) {
         ))}
       </div>
     );
+  if (!services?.length && error) {
+    const msg =
+      error === "missing_key"
+        ? "Serviço de streaming não configurado"
+        : error === "unauthorized"
+        ? "Chave da API de streaming inválida ou sem assinatura ativa"
+        : error === "rate_limited"
+        ? "Limite de consultas atingido — tente novamente em instantes"
+        : "Não foi possível consultar serviços de streaming";
+    return (
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          padding: "10px 14px",
+          borderRadius: 9,
+          background: "rgba(239,68,68,0.08)",
+          border: `1px dashed rgba(239,68,68,0.35)`,
+        }}
+      >
+        <Radio size={14} style={{ color: "#ef4444", flexShrink: 0 }} />
+        <p style={{ fontSize: 12, color: "#fca5a5", lineHeight: 1.4 }}>{msg}</p>
+      </div>
+    );
+  }
   if (!services?.length)
     return (
       <div

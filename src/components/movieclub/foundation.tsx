@@ -304,6 +304,8 @@ const STREAM_META = {
 
 function parseStreamingServices(raw) {
   if (!raw) return [];
+  // Server returned an error sentinel (e.g. unauthorized/missing_key) — propagate as empty list
+  if (raw && raw.__error) return [];
   const br =
     raw.streamingOptions?.br ||
     raw.streamingOptions?.us ||
