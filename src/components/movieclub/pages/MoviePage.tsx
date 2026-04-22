@@ -197,7 +197,7 @@ function RatingSheet({ movie, existingRating, onSave, onRemove, onClose }) {
 
 // ─── MoviePage ────────────────────────────────────────────
 export function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx, isMobile }) {
-  const { movie, loading, streamServices } = useMovieDetails(movieInit?.tmdbId || movieInit?.id);
+  const { movie, loading, streamServices, streamError } = useMovieDetails(movieInit?.tmdbId || movieInit?.id);
   const m = movie || movieInit;
   const [liked, setLiked] = useState(false);
   const [showRatingSheet, setShowRatingSheet] = useState(false);
