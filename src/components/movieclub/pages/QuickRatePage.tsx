@@ -231,11 +231,14 @@ function ModeSelect({ onStart, hasRatings }) {
           </span>
         </div>
 
-        <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 32, fontWeight: 900, color: C.text, marginBottom: 8, lineHeight: 1.1 }}>
+        <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 32, fontWeight: 900, color: C.text, marginBottom: 16, lineHeight: 1.1 }}>
           Avaliação Rápida
         </h1>
+        <h2 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 16, fontWeight: 450, color: C.text, marginBottom: 8, lineHeight: 1.1 }}>
+          Deslize para a direita para salvar e para esquerda para pular.
+        </h2>
         <p style={{ color: C.textMuted, fontSize: 14, lineHeight: 1.6, marginBottom: 36, maxWidth: 360, margin: "0 auto 36px" }}>
-          Descubra e avalie filmes em sessões rápidas. Deslize, curta, salve.
+          Descubra e avalie filmes em sessões rápidas. Deslize, curta, salve. 
         </p>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 14, maxWidth: 420, margin: "0 auto" }}>
