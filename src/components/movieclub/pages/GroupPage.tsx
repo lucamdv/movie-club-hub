@@ -43,12 +43,12 @@ function WatchRateModal({ movie, existingRating, onClose, onSubmit }) {
   const display = hover || rating;
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 220, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }} onClick={onClose}>
+    <div style={{ position: "fixed", inset: 0, zIndex: 220, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "5vh 20px 20px", overflowY: "auto" }} onClick={onClose}>
       <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.8)", backdropFilter: "blur(8px)" }} />
       <div onClick={e => e.stopPropagation()} style={{
         position: "relative", background: `linear-gradient(135deg, ${C.bgCard}, #1a2d42)`,
         border: `1px solid rgba(201,168,76,0.3)`, borderRadius: 24, padding: 28,
-        width: "100%", maxWidth: 420, maxHeight: "calc(100dvh - 40px)", overflowY: "auto",
+        width: "100%", maxWidth: 420, maxHeight: "calc(100dvh - 10vh - 20px)", overflowY: "auto", margin: "0 auto",
         boxShadow: "0 24px 64px rgba(0,0,0,0.6), 0 0 0 1px rgba(201,168,76,0.1)",
       }}>
         {/* Header */}
