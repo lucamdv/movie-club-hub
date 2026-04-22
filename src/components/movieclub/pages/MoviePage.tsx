@@ -17,7 +17,7 @@ import {
   ChevronLeft,
   X,
 } from "lucide-react";
-import { Spinner, StarRating, Avatar, Badge, Btn, Section, StreamingBadges, RatingsRow } from "../ui";
+import { Spinner, StarRating, Avatar, Badge, Btn, Section, RatingsRow } from "../ui";
 import { useMovieDetails, useRatings, useWatchlist } from "../hooks";
 
 // ─── Mobile Rating Sheet ──────────────────────────────────
@@ -197,7 +197,7 @@ function RatingSheet({ movie, existingRating, onSave, onRemove, onClose }) {
 
 // ─── MoviePage ────────────────────────────────────────────
 export function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx, isMobile }) {
-  const { movie, loading, streamServices, streamError } = useMovieDetails(movieInit?.tmdbId || movieInit?.id);
+  const { movie, loading } = useMovieDetails(movieInit?.tmdbId || movieInit?.id);
   const m = movie || movieInit;
   const [liked, setLiked] = useState(false);
   const [showRatingSheet, setShowRatingSheet] = useState(false);

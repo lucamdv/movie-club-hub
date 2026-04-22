@@ -456,54 +456,6 @@ function FilmStripBg() {
   );
 }
 
-            transition: "all 0.2s",
-            flexDirection: "column",
-            minWidth: 90,
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = `${s.color}30`;
-            e.currentTarget.style.transform = "translateY(-2px)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = `${s.color}18`;
-            e.currentTarget.style.transform = "";
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <span style={{ fontSize: 11, fontWeight: 900, lineHeight: 1 }}>
-              {s.icon}
-            </span>
-            <span style={{ fontSize: 12 }}>{s.name}</span>
-          </div>
-          <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-            <span style={{ fontSize: 10, opacity: 0.75, fontWeight: 500 }}>
-              {s.price || typeLabel[s.type] || s.type}
-            </span>
-            {s.quality && (
-              <span
-                style={{
-                  fontSize: 9,
-                  padding: "1px 5px",
-                  borderRadius: 3,
-                  background: `${s.color}30`,
-                  fontWeight: 700,
-                }}
-              >
-                {s.quality}
-              </span>
-            )}
-          </div>
-          {s.leaving && (
-            <span style={{ fontSize: 9, color: C.orange, opacity: 0.9 }}>
-              Sai em {s.leaving}
-            </span>
-          )}
-        </a>
-      ))}
-    </div>
-  );
-}
-
 function RatingsRow({ movie }) {
   const items = [
     movie.rating && {
@@ -1752,7 +1704,6 @@ export {
   TextInput,
   Section,
   FilmStripBg,
-  StreamingBadges,
   RatingsRow,
   MovieCard,
   MiniPoster,
