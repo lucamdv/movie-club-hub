@@ -164,7 +164,7 @@ function ActivityItem({ entry, onOpenMovie, onViewProfile }) {
         }}
       >
         {entry.profile?.avatar_url
-          ? <img src={entry.profile.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          ? <img src={resolveAvatarUrl(entry.profile.avatar_url)} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           : ini}
       </button>
 
