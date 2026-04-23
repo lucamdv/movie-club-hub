@@ -982,17 +982,8 @@
   }
 }
 
-/* Scroll snap mais suave no mobile */
-.carousel-row {
-  /* proximity (em vez de mandatory) evita que o navegador "force" o snap
-     horizontal quando o usuário está tentando scrollar verticalmente. */
-  scroll-snap-type: x proximity;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-x: contain;
-  touch-action: pan-x pan-y;
-}
+/* Scroll snap mais suave no mobile (regras canônicas estão acima) */
 .carousel-row > * {
-  scroll-snap-align: start;
   scroll-snap-stop: normal;
 }
 
