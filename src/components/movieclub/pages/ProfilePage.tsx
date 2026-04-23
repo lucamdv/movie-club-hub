@@ -836,7 +836,7 @@ function ProfileEditModalInner({ profile, user, onClose, onSave }) {
           >
             {avatarUrl ? (
               <img
-                src={avatarUrl}
+                src={resolveAvatarUrl(avatarUrl)}
                 alt="Avatar"
                 style={{ width: "100%", height: "100%", objectFit: "cover" }}
               />
