@@ -579,13 +579,14 @@
   scrollbar-width: none;
   /* Smooth iOS scrolling */
   -webkit-overflow-scrolling: touch;
-  /* Prevent vertical overscroll while horizontally swiping */
-  overscroll-behavior-y: none;
+  /* Apenas isolamos o overscroll horizontal — NUNCA bloqueamos vertical,
+     senão o scroll da página fica preso ao tocar no carrossel.
+     A direção do gesto (horizontal vs vertical) é decidida em JS
+     no componente Carousel via touch handlers. */
   overscroll-behavior-x: contain;
-  /* Permite que o navegador decida entre swipe horizontal (carrossel)
-     e swipe vertical (scroll da página) com base na direção dominante
-     do gesto inicial. Sem isso, o touch fica preso na horizontal. */
-  touch-action: pan-x pan-y;
+  /* Default permissivo: o JS troca dinamicamente para pan-x ou pan-y
+     conforme a direção dominante do gesto. */
+  touch-action: auto;
 }
 .carousel-row::-webkit-scrollbar {
   display: none;
