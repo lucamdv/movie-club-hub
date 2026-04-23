@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { C, tmdb } from "../foundation";
+import { C, tmdb, resolveAvatarUrl } from "../foundation";
 import {
   Film, Users, Link2, Eye, Star, Activity,
   ChevronLeft, Crown, Plus, X, Clock, Clapperboard,
@@ -134,7 +134,7 @@ function ActivityItem({ entry, onOpenMovie }) {
         fontSize: 11, fontWeight: 700, color: C.bgDeep,
       }}>
         {entry.profile?.avatar_url
-          ? <img src={entry.profile.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          ? <img src={resolveAvatarUrl(entry.profile.avatar_url)} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           : ini}
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
@@ -240,7 +240,7 @@ function InviteModal({ friendProfiles, onInvite, onCopyLink, onClose }) {
               return (
                 <div key={fp.user_id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", borderRadius: 12, background: "rgba(255,255,255,0.03)", border: `1px solid ${C.border}` }}>
                   <div style={{ width: 38, height: 38, borderRadius: "50%", overflow: "hidden", background: fp.avatar_url ? "transparent" : `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`, border: `2px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, color: C.bgDeep, flexShrink: 0 }}>
-                    {fp.avatar_url ? <img src={fp.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : ini}
+                    {fp.avatar_url ? <img src={resolveAvatarUrl(fp.avatar_url)} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : ini}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ fontSize: 14, fontWeight: 600, color: C.text }}>{fp.display_name || "Sem nome"}</p>
@@ -449,7 +449,7 @@ export function GroupPage({ group, setPage, setSelectedMovie, auth: authCtx }) {
     const ini = (member.profile?.display_name || "?").slice(0, 2).toUpperCase();
     return (
       <div title={member.profile?.display_name || "Membro"} style={{ width: size, height: size, borderRadius: "50%", overflow: "hidden", background: member.profile?.avatar_url ? "transparent" : `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`, border: `2px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: size * 0.28, fontWeight: 700, color: C.bgDeep, flexShrink: 0 }}>
-        {member.profile?.avatar_url ? <img src={member.profile.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : ini}
+        {member.profile?.avatar_url ? <img src={resolveAvatarUrl(member.profile.avatar_url)} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : ini}
       </div>
     );
   };
@@ -762,7 +762,7 @@ export function GroupPage({ group, setPage, setSelectedMovie, auth: authCtx }) {
                       return (
                         <div key={m.user_id} style={{ display: "flex", alignItems: "center", gap: 10 }}>
                           <div style={{ width: 34, height: 34, borderRadius: "50%", overflow: "hidden", background: m.profile?.avatar_url ? "transparent" : `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`, border: `2px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, color: C.bgDeep, flexShrink: 0 }}>
-                            {m.profile?.avatar_url ? <img src={m.profile.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : ini}
+                            {m.profile?.avatar_url ? <img src={resolveAvatarUrl(m.profile.avatar_url)} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : ini}
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{ display: "flex", alignItems: "center", gap: 5 }}>

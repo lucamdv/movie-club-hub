@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useState } from "react";
 import { toast } from "sonner";
-import { C } from "../foundation";
+import { C, resolveAvatarUrl } from "../foundation";
 import { Film, Link2, Sparkles, Users, ArrowRight, Ticket, Plus, X, ChevronRight, Crown, Calendar } from "lucide-react";
 import { Spinner, Btn, TextInput, MiniPoster } from "../ui";
 import { useClubs } from "../hooks";
@@ -370,7 +370,7 @@ function ClubCard({ club, userId, onClick, index }) {
               const ini = (m.profile?.display_name || "?").slice(0, 2).toUpperCase();
               return (
                 <div key={m.user_id} style={{ marginLeft: i > 0 ? -10 : 0, zIndex: 4 - i, width: 28, height: 28, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, color: C.bgDeep, background: m.profile?.avatar_url ? "transparent" : `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`, border: `2px solid ${C.bgCard}`, overflow: "hidden" }}>
-                  {m.profile?.avatar_url ? <img src={m.profile.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : ini}
+                  {m.profile?.avatar_url ? <img src={resolveAvatarUrl(m.profile.avatar_url)} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : ini}
                 </div>
               );
             })}

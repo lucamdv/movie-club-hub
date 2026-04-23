@@ -8,6 +8,7 @@ import Papa from "papaparse";
 import {
   C,
   MONKEY_AVATARS,
+  resolveAvatarUrl,
   tmdb,
   normalizeTmdb,
   TMDB_IMG,
@@ -835,7 +836,7 @@ function ProfileEditModalInner({ profile, user, onClose, onSave }) {
           >
             {avatarUrl ? (
               <img
-                src={avatarUrl}
+                src={resolveAvatarUrl(avatarUrl)}
                 alt="Avatar"
                 style={{ width: "100%", height: "100%", objectFit: "cover" }}
               />
@@ -887,15 +888,18 @@ function ProfileEditModalInner({ profile, user, onClose, onSave }) {
               {MONKEY_AVATARS.map((m) => (
                 <button
                   key={m.id}
-                  onClick={() => setAvatarUrl(m.src)}
+                  onClick={() => setAvatarUrl(`monkey:${m.id}`)}
                   style={{
                     padding: 8,
                     borderRadius: 14,
                     border:
-                      avatarUrl === m.src
+                      avatarUrl === `monkey:${m.id}` || avatarUrl === m.src
                         ? `2px solid ${C.gold}`
                         : `1px solid ${C.border}`,
-                    background: avatarUrl === m.src ? `${C.gold}15` : C.bgDeep,
+                    background:
+                      avatarUrl === `monkey:${m.id}` || avatarUrl === m.src
+                        ? `${C.gold}15`
+                        : C.bgDeep,
                     cursor: "pointer",
                     transition: "all 0.2s",
                     display: "flex",
@@ -1234,7 +1238,7 @@ export function ProfilePageMobile({
           >
             {displayProfile?.avatar_url ? (
               <img
-                src={displayProfile.avatar_url}
+                src={resolveAvatarUrl(displayProfile.avatar_url)}
                 alt=""
                 style={{ width: "100%", height: "100%", objectFit: "cover" }}
               />
@@ -1998,7 +2002,7 @@ export function ProfilePageDesktop(props) {
             >
               {profile?.avatar_url ? (
                 <img
-                  src={profile.avatar_url}
+                  src={resolveAvatarUrl(profile.avatar_url)}
                   alt="Avatar"
                   style={{ width: "100%", height: "100%", objectFit: "cover" }}
                 />

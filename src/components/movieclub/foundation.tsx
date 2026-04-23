@@ -83,6 +83,58 @@ const MONKEY_AVATARS = [
 ];
 
 // ─────────────────────────────────────────────
+//  AVATAR RESOLVER
+//  Avatares de macacos são imports com hash do Vite (ex.:
+//  /assets/monkey-gym-BxLPn4kV.png). Esses caminhos quebram a cada build,
+//  retornando 404. Esta função:
+//   1. Resolve tokens estáveis "monkey:<id>" para o import atual.
+//   2. Resolve caminhos legados "/assets/<basename>-<hash>.png" pelo basename,
+//      mapeando para o import atual.
+//   3. Deixa passar URLs http(s) e blobs sem mudança.
+// ─────────────────────────────────────────────
+const LEGACY_ASSET_MAP = {
+  "mascot-wizard": mascotWizard,
+  "mascot-speak": mascotSpeak,
+  "mascot-see": mascotSee,
+  "monkey-director": monkeyDirector,
+  "monkey-popcorn": monkeyPopcorn,
+  "monkey-detective": monkeyDetective,
+  "monkey-star": monkeyStar,
+  "monkey-astronaut": monkeyAstronaut,
+  "monkey-strong": monkeyStrong,
+  "monkey-shy": monkeyShy,
+  "monkey-gym": monkeyGym,
+  "monkey-ears": monkeyEars,
+  "monkey-flash": monkeyFlash,
+  "monkey-crew": monkeyCrew,
+  "monkey-search": monkeySearch,
+};
+
+const MONKEY_BY_ID = MONKEY_AVATARS.reduce((acc, m) => {
+  acc[m.id] = m.src;
+  return acc;
+}, {});
+
+function resolveAvatarUrl(url) {
+  if (!url || typeof url !== "string") return "";
+  // Token estável: monkey:<id>
+  if (url.startsWith("monkey:")) {
+    const id = url.slice("monkey:".length);
+    return MONKEY_BY_ID[id] || "";
+  }
+  // URL absoluta (Supabase Storage, gravatar, etc.) ou blob/data
+  if (/^(https?:|blob:|data:)/i.test(url)) return url;
+  // Caminho legado de asset com hash: /assets/<basename>-<hash>.<ext>
+  const m = url.match(/\/assets\/([a-z0-9-]+?)(?:-[A-Za-z0-9_-]{6,})?\.[a-z0-9]+(?:\?.*)?$/i);
+  if (m) {
+    const base = m[1];
+    if (LEGACY_ASSET_MAP[base]) return LEGACY_ASSET_MAP[base];
+  }
+  // Caminho relativo qualquer: devolve como está (pode funcionar em dev)
+  return url;
+}
+
+// ─────────────────────────────────────────────
 //  DESIGN TOKENS
 // ─────────────────────────────────────────────
 const C = {
@@ -517,7 +569,7 @@ function formatReleaseDateBR(dateStr) {
 }
 
 export {
-  MONKEY_AVATARS, C, apiCache, cachedFetch, TMDB_IMG, tmdb, omdb, streaming,
+  MONKEY_AVATARS, resolveAvatarUrl, C, apiCache, cachedFetch, TMDB_IMG, tmdb, omdb, streaming,
   normalizeTmdb, mergeOmdb, STREAM_META, parseStreamingServices,
   MOCK_USERS, MOCK_REVIEWS, MOCK_GROUPS,
   isUpcoming, formatReleaseDateBR,
