@@ -2002,7 +2002,7 @@ export function ProfilePageDesktop(props) {
             >
               {profile?.avatar_url ? (
                 <img
-                  src={profile.avatar_url}
+                  src={resolveAvatarUrl(profile.avatar_url)}
                   alt="Avatar"
                   style={{ width: "100%", height: "100%", objectFit: "cover" }}
                 />
