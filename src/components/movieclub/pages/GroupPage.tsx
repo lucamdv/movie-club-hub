@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { C, tmdb } from "../foundation";
+import { C, tmdb, resolveAvatarUrl } from "../foundation";
 import {
   Film, Users, Link2, Eye, Star, Activity,
   ChevronLeft, Crown, Plus, X, Clock, Clapperboard,

@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useState } from "react";
 import { toast } from "sonner";
-import { C } from "../foundation";
+import { C, resolveAvatarUrl } from "../foundation";
 import { Film, Link2, Sparkles, Users, ArrowRight, Ticket, Plus, X, ChevronRight, Crown, Calendar } from "lucide-react";
 import { Spinner, Btn, TextInput, MiniPoster } from "../ui";
 import { useClubs } from "../hooks";
