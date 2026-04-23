@@ -1238,7 +1238,7 @@ export function ProfilePageMobile({
           >
             {displayProfile?.avatar_url ? (
               <img
-                src={displayProfile.avatar_url}
+                src={resolveAvatarUrl(displayProfile.avatar_url)}
                 alt=""
                 style={{ width: "100%", height: "100%", objectFit: "cover" }}
               />
