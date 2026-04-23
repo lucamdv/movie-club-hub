@@ -8,6 +8,7 @@ import Papa from "papaparse";
 import {
   C,
   MONKEY_AVATARS,
+  resolveAvatarUrl,
   tmdb,
   normalizeTmdb,
   TMDB_IMG,
