@@ -888,15 +888,18 @@ function ProfileEditModalInner({ profile, user, onClose, onSave }) {
               {MONKEY_AVATARS.map((m) => (
                 <button
                   key={m.id}
-                  onClick={() => setAvatarUrl(m.src)}
+                  onClick={() => setAvatarUrl(`monkey:${m.id}`)}
                   style={{
                     padding: 8,
                     borderRadius: 14,
                     border:
-                      avatarUrl === m.src
+                      avatarUrl === `monkey:${m.id}` || avatarUrl === m.src
                         ? `2px solid ${C.gold}`
                         : `1px solid ${C.border}`,
-                    background: avatarUrl === m.src ? `${C.gold}15` : C.bgDeep,
+                    background:
+                      avatarUrl === `monkey:${m.id}` || avatarUrl === m.src
+                        ? `${C.gold}15`
+                        : C.bgDeep,
                     cursor: "pointer",
                     transition: "all 0.2s",
                     display: "flex",
