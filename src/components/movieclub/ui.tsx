@@ -1192,6 +1192,72 @@ function Carousel({ children, movies, onMovieClick }) {
     checkScroll();
   }, [itemsCount, checkScroll]);
 
+  // Gesture-aware: decide horizontal vs vertical based on initial touch direction.
+  // Quando o gesto é predominantemente vertical, desabilitamos o scroll horizontal
+  // do carrossel para que o navegador propague o scroll para a página (body).
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    let startX = 0;
+    let startY = 0;
+    let decided = false;
+    let axis = null; // 'x' | 'y' | null
+
+    const onTouchStart = (e) => {
+      const t = e.touches[0];
+      startX = t.clientX;
+      startY = t.clientY;
+      decided = false;
+      axis = null;
+      // Reset para permitir nova decisão a cada gesto
+      el.style.overflowX = "auto";
+      el.style.touchAction = "";
+      el.removeAttribute("data-gesture");
+    };
+
+    const onTouchMove = (e) => {
+      if (decided) return;
+      const t = e.touches[0];
+      const dx = Math.abs(t.clientX - startX);
+      const dy = Math.abs(t.clientY - startY);
+      // Threshold para evitar trocar de eixo em micro-movimentos
+      if (dx < 6 && dy < 6) return;
+      decided = true;
+      if (dy > dx) {
+        // Gesto vertical → libera scroll da página, congela o carrossel
+        axis = "y";
+        el.style.overflowX = "hidden";
+        el.style.touchAction = "pan-y";
+        el.setAttribute("data-gesture", "vertical");
+      } else {
+        axis = "x";
+        el.style.touchAction = "pan-x";
+        el.setAttribute("data-gesture", "horizontal");
+      }
+    };
+
+    const onTouchEnd = () => {
+      // Restaura defaults após o gesto para o próximo toque funcionar normalmente
+      decided = false;
+      axis = null;
+      el.style.overflowX = "auto";
+      el.style.touchAction = "";
+      el.removeAttribute("data-gesture");
+    };
+
+    el.addEventListener("touchstart", onTouchStart, { passive: true });
+    el.addEventListener("touchmove", onTouchMove, { passive: true });
+    el.addEventListener("touchend", onTouchEnd, { passive: true });
+    el.addEventListener("touchcancel", onTouchEnd, { passive: true });
+
+    return () => {
+      el.removeEventListener("touchstart", onTouchStart);
+      el.removeEventListener("touchmove", onTouchMove);
+      el.removeEventListener("touchend", onTouchEnd);
+      el.removeEventListener("touchcancel", onTouchEnd);
+    };
+  }, []);
+
   const scroll = (dir) => {
     if (!ref.current) return;
     const amount = ref.current.clientWidth * 0.75;
