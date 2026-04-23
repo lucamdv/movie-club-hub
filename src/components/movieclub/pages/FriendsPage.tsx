@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { C } from "../foundation";
+import { C, resolveAvatarUrl } from "../foundation";
 import {
   Search, Users, UserRound, UserPlus, UserCheck,
   Link2, ChevronRight, Handshake, Star, Film,
@@ -13,7 +13,7 @@ import { useFollows, useFriendships } from "../hooks";
 
 // ─── Avatar Component ─────────────────────────────────────
 function Avatar({ profile, size = 44, ringColor, badge }) {
-  const avatarUrl = profile?.avatar_url;
+  const avatarUrl = resolveAvatarUrl(profile?.avatar_url);
   const initials = (profile?.display_name || "?").slice(0, 2).toUpperCase();
   return (
     <div style={{ position: "relative", flexShrink: 0 }}>
