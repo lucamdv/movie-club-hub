@@ -449,7 +449,7 @@ export function GroupPage({ group, setPage, setSelectedMovie, auth: authCtx }) {
     const ini = (member.profile?.display_name || "?").slice(0, 2).toUpperCase();
     return (
       <div title={member.profile?.display_name || "Membro"} style={{ width: size, height: size, borderRadius: "50%", overflow: "hidden", background: member.profile?.avatar_url ? "transparent" : `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`, border: `2px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: size * 0.28, fontWeight: 700, color: C.bgDeep, flexShrink: 0 }}>
-        {member.profile?.avatar_url ? <img src={member.profile.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : ini}
+        {member.profile?.avatar_url ? <img src={resolveAvatarUrl(member.profile.avatar_url)} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : ini}
       </div>
     );
   };
