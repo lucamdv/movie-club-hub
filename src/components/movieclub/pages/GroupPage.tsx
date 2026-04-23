@@ -762,7 +762,7 @@ export function GroupPage({ group, setPage, setSelectedMovie, auth: authCtx }) {
                       return (
                         <div key={m.user_id} style={{ display: "flex", alignItems: "center", gap: 10 }}>
                           <div style={{ width: 34, height: 34, borderRadius: "50%", overflow: "hidden", background: m.profile?.avatar_url ? "transparent" : `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`, border: `2px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, color: C.bgDeep, flexShrink: 0 }}>
-                            {m.profile?.avatar_url ? <img src={m.profile.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : ini}
+                            {m.profile?.avatar_url ? <img src={resolveAvatarUrl(m.profile.avatar_url)} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : ini}
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
