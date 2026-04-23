@@ -134,7 +134,7 @@ function ActivityItem({ entry, onOpenMovie }) {
         fontSize: 11, fontWeight: 700, color: C.bgDeep,
       }}>
         {entry.profile?.avatar_url
-          ? <img src={entry.profile.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          ? <img src={resolveAvatarUrl(entry.profile.avatar_url)} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           : ini}
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
@@ -240,7 +240,7 @@ function InviteModal({ friendProfiles, onInvite, onCopyLink, onClose }) {
               return (
                 <div key={fp.user_id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", borderRadius: 12, background: "rgba(255,255,255,0.03)", border: `1px solid ${C.border}` }}>
                   <div style={{ width: 38, height: 38, borderRadius: "50%", overflow: "hidden", background: fp.avatar_url ? "transparent" : `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`, border: `2px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, color: C.bgDeep, flexShrink: 0 }}>
-                    {fp.avatar_url ? <img src={fp.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : ini}
+                    {fp.avatar_url ? <img src={resolveAvatarUrl(fp.avatar_url)} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : ini}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ fontSize: 14, fontWeight: 600, color: C.text }}>{fp.display_name || "Sem nome"}</p>
