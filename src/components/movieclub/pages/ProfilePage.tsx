@@ -1985,6 +1985,9 @@ export function ProfilePageDesktop(props) {
   const [viewMode, setViewMode] = useState("list");
   const [showImportModal, setShowImportModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [movieFilter, setMovieFilter] = useState("");
+  const [ratingSort, setRatingSort] = useState("recent");
+  const [watchlistSort, setWatchlistSort] = useState("recent");
 
   const {
     following: myFollowing,
@@ -2011,6 +2014,14 @@ export function ProfilePageDesktop(props) {
           ratings.reduce((s, r) => s + Number(r.rating), 0) / ratings.length
         ).toFixed(1)
       : "—";
+  const sortedRatings = useMemo(
+    () => getSortedProfileItems(ratings, movieFilter, ratingSort, "ratings"),
+    [ratings, movieFilter, ratingSort],
+  );
+  const sortedWatchlist = useMemo(
+    () => getSortedProfileItems(watchlistItems, movieFilter, watchlistSort, "watchlist"),
+    [watchlistItems, movieFilter, watchlistSort],
+  );
 
   const bannerPosters = ratings
     .filter((r) => r.poster_url)
