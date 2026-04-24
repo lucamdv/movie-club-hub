@@ -8,7 +8,7 @@ import {
   SkipForward, X, Check,
 } from "lucide-react";
 import { Spinner, Btn } from "../ui";
-import { useRatings, useWatchlist } from "../hooks";
+import { useRatings, useUserPreferences, useWatchlist } from "../hooks";
 
 // ─── Cinematic star rating ───────────────────────────────
 function CinematicStars({ value, onChange, size = 36 }) {
@@ -323,6 +323,7 @@ export function QuickRatePage({ setPage, setSelectedMovie, auth }) {
   const [direction, setDirection] = useState(null);
   const [sessionStats, setSessionStats] = useState({ rated: [], watchlistAdded: [], skipped: 0, startTime: null });
   const { ratings, upsertRating, getRating } = useRatings(auth?.user?.id);
+  const { preferences } = useUserPreferences(auth?.user?.id);
   const { add: addWl, remove: removeWl, isInList: inWl } = useWatchlist(auth?.user?.id);
   const recPageRef = useRef(0);
   const loadingMoreRef = useRef(false);
@@ -368,7 +369,11 @@ export function QuickRatePage({ setPage, setSelectedMovie, auth }) {
       for (const item of results) {
         if (!item?.res?.results) continue;
         for (const raw of item.res.results) {
+          const year = raw.release_date ? Number(raw.release_date.slice(0, 4)) : null;
+          const movieClubRating = raw.vote_average ? (Number(raw.vote_average) / 10) * 5 : 0;
           if (!raw.poster_path || ratedIds.has(raw.id)) continue;
+          if (preferences.recommendation_min_year && year && year < preferences.recommendation_min_year) continue;
+          if (movieClubRating < Number(preferences.recommendation_min_rating || 0)) continue;
           const inc = item.weight * (1 + (raw.vote_average || 0) / 10);
           const prev = scoreMap.get(raw.id);
           if (prev) prev.score += inc; else scoreMap.set(raw.id, { movie: raw, score: inc });
@@ -381,7 +386,7 @@ export function QuickRatePage({ setPage, setSelectedMovie, auth }) {
     } catch { toast.error("Erro ao carregar recomendações"); }
     setLoading(false);
     loadingMoreRef.current = false;
-  }, [ratings, loadRandom]);
+  }, [ratings, loadRandom, preferences.recommendation_min_year, preferences.recommendation_min_rating]);
 
   const startSession = (m) => {
     setMode(m); recPageRef.current = 0;

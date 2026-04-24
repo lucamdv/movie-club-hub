@@ -265,7 +265,7 @@ export default function MovieClubApp() {
           <GroupPage group={selectedGroup} setPage={setPage} setSelectedMovie={setSM} auth={authCtx} />
         )}
         {page === "search" && <SearchPage setPage={setPage} setSelectedMovie={setSM} isMobile={isMobile} />}
-        {page === "settings" && <SettingsPage apiStatus={apiStatus} />}
+        {page === "settings" && <SettingsPage apiStatus={apiStatus} auth={authCtx} isMobile={isMobile} />}
       </div>
 
       {/* PWA install banner — floats above bottom nav */}

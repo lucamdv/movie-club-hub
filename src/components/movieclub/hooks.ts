@@ -327,6 +327,7 @@ function useWatchlist(userId) {
 
 function useRecommendations(userId) {
   const { ratings } = useRatings(userId);
+  const { preferences } = useUserPreferences(userId);
   const [recs, setRecs] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -376,6 +377,10 @@ function useRecommendations(userId) {
         for (const item of results) {
           if (!item?.res?.results) continue;
           for (const raw of item.res.results) {
+            const year = raw.release_date ? Number(raw.release_date.slice(0, 4)) : null;
+            const movieClubRating = raw.vote_average ? (Number(raw.vote_average) / 10) * 5 : 0;
+            if (preferences.recommendation_min_year && year && year < preferences.recommendation_min_year) continue;
+            if (movieClubRating < Number(preferences.recommendation_min_rating || 0)) continue;
             const m = normalizeTmdb(raw);
             if (!m || ratedIds.has(m.id) || !m.poster) continue;
             const prev = scoreMap.get(m.id);
@@ -401,9 +406,47 @@ function useRecommendations(userId) {
     return () => {
       alive = false;
     };
-  }, [ratings]);
+  }, [ratings, preferences.recommendation_min_year, preferences.recommendation_min_rating]);
 
   return { recs, loading };
+}
+
+function useUserPreferences(userId) {
+  const defaults = { recommendation_min_year: null, recommendation_min_rating: 0 };
+  const [preferences, setPreferences] = useState(defaults);
+  const [loading, setLoading] = useState(false);
+
+  const load = useCallback(async () => {
+    if (!userId) return;
+    setLoading(true);
+    const { data } = await supabase
+      .from("user_preferences")
+      .select("recommendation_min_year,recommendation_min_rating")
+      .eq("user_id", userId)
+      .maybeSingle();
+    setPreferences({ ...defaults, ...(data || {}) });
+    setLoading(false);
+  }, [userId]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const savePreferences = async (next) => {
+    if (!userId) return;
+    const safe = {
+      recommendation_min_year: next.recommendation_min_year || null,
+      recommendation_min_rating: Math.max(0, Math.min(5, Number(next.recommendation_min_rating || 0))),
+    };
+    const { error } = await supabase.from("user_preferences").upsert(
+      { user_id: userId, ...safe },
+      { onConflict: "user_id" },
+    );
+    if (error) throw error;
+    setPreferences(safe);
+  };
+
+  return { preferences, loading, savePreferences, reload: load };
 }
 
 
@@ -835,6 +878,6 @@ function useClubActivity(clubId) {
 
 export {
   useMovieDetails, usePaginatedMovies, useAuth, useRatings, useWatchlist,
-  useRecommendations, useFollows, useFriendLinks, useFriendships,
+  useRecommendations, useUserPreferences, useFollows, useFriendLinks, useFriendships,
   useClubs, useClubDetail, useClubActivity,
 };
