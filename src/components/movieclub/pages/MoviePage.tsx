@@ -20,6 +20,58 @@ import {
 import { Spinner, StarRating, Avatar, Badge, Btn, Section, StreamingBadges, RatingsRow } from "../ui";
 import { useMovieDetails, useRatings, useWatchlist } from "../hooks";
 
+function getMovieClubRating(movie) {
+  if (!movie) return null;
+  const sources = [
+    movie.rating && { name: "TMDb", score: (Number(movie.rating) / 10) * 5 },
+    movie.imdbRating && { name: "IMDb", score: (Number(movie.imdbRating) / 10) * 5 },
+    movie.rottenTomatoes && { name: "Rotten Tomatoes", score: (parseInt(movie.rottenTomatoes, 10) / 100) * 5 },
+    movie.metacritic && { name: "Metacritic", score: (parseInt(movie.metacritic, 10) / 100) * 5 },
+  ].filter((s) => s && Number.isFinite(s.score));
+
+  if (!sources.length) return null;
+  const score = sources.reduce((sum, s) => sum + s.score, 0) / sources.length;
+  return { score: Math.max(0, Math.min(5, score)), sources };
+}
+
+function MovieClubScore({ movie, compact = false }) {
+  const result = getMovieClubRating(movie);
+  if (!result) return null;
+  const value = Number(result.score.toFixed(1));
+  return (
+    <div
+      style={{
+        display: "inline-flex",
+        alignItems: compact ? "flex-start" : "center",
+        flexDirection: compact ? "column" : "row",
+        gap: compact ? 5 : 12,
+        background: `linear-gradient(135deg, rgba(201,168,76,0.18), rgba(201,168,76,0.06))`,
+        border: `1px solid rgba(201,168,76,0.36)`,
+        borderRadius: compact ? 14 : 16,
+        padding: compact ? "10px 12px" : "12px 16px",
+        boxShadow: "0 12px 32px rgba(0,0,0,0.18)",
+        width: compact ? "100%" : "fit-content",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <StarIcon size={compact ? 18 : 22} fill={C.gold} stroke={C.gold} />
+        <span style={{ color: C.gold, fontFamily: "'Outfit', sans-serif", fontSize: compact ? 24 : 30, fontWeight: 900, lineHeight: 1 }}>
+          {value.toFixed(1)}
+        </span>
+        <span style={{ color: C.textMuted, fontSize: compact ? 12 : 13, fontWeight: 700 }}>/5</span>
+      </div>
+      <div>
+        <p style={{ color: C.text, fontSize: compact ? 12 : 13, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+          Nota MovieClub
+        </p>
+        <p style={{ color: C.textDim, fontSize: compact ? 10 : 11, marginTop: 2 }}>
+          Média ajustada de {result.sources.length} fonte{result.sources.length > 1 ? "s" : ""}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 // ─── Mobile Rating Sheet ──────────────────────────────────
 function RatingSheet({ movie, existingRating, onSave, onRemove, onClose }) {
   const [localRating, setLocalRating] = useState(existingRating ? Number(existingRating.rating) : 0);
