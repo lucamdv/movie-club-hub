@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -40,6 +40,8 @@ import {
   UserPlus,
   UserCheck,
   LogOut,
+  Search,
+  ArrowUpDown,
 } from "lucide-react";
 import {
   Spinner,
@@ -84,6 +86,129 @@ const GENRE_COLORS = {
   Documentário: "#10B981",
   Documentary: "#10B981",
 };
+
+const RATING_SORT_OPTIONS = [
+  { value: "recent", label: "Mais recentes" },
+  { value: "oldest", label: "Mais antigos" },
+  { value: "rating_desc", label: "Mais estrelas" },
+  { value: "rating_asc", label: "Menos estrelas" },
+  { value: "title_asc", label: "A-Z" },
+];
+
+const WATCHLIST_SORT_OPTIONS = [
+  { value: "recent", label: "Mais recentes" },
+  { value: "oldest", label: "Mais antigos" },
+  { value: "title_asc", label: "A-Z" },
+  { value: "title_desc", label: "Z-A" },
+];
+
+function getSortedProfileItems(items, query, sortMode, type = "ratings") {
+  const q = (query || "").trim().toLowerCase();
+  return [...(items || [])]
+    .filter((item) => !q || (item.title || "").toLowerCase().includes(q))
+    .sort((a, b) => {
+      if (sortMode === "rating_desc") return Number(b.rating || 0) - Number(a.rating || 0);
+      if (sortMode === "rating_asc") return Number(a.rating || 0) - Number(b.rating || 0);
+      if (sortMode === "title_asc") return (a.title || "").localeCompare(b.title || "", "pt-BR");
+      if (sortMode === "title_desc") return (b.title || "").localeCompare(a.title || "", "pt-BR");
+      const field = type === "ratings" ? "updated_at" : "created_at";
+      const dateA = new Date(a[field] || a.created_at || 0).getTime();
+      const dateB = new Date(b[field] || b.created_at || 0).getTime();
+      return sortMode === "oldest" ? dateA - dateB : dateB - dateA;
+    });
+}
+
+function ProfileLibraryControls({ query, setQuery, sortMode, setSortMode, options, total, shown, compact = false }) {
+  return (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: compact ? "1fr" : "minmax(220px, 1fr) auto",
+        gap: 10,
+        alignItems: "center",
+        width: "100%",
+        marginBottom: compact ? 12 : 18,
+      }}
+    >
+      <label
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          background: C.bgCard,
+          border: `1px solid ${C.border}`,
+          borderRadius: compact ? 10 : 12,
+          padding: compact ? "9px 11px" : "10px 12px",
+          minWidth: 0,
+        }}
+      >
+        <Search size={16} color={C.textMuted} />
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Filtrar filmes"
+          style={{
+            flex: 1,
+            minWidth: 0,
+            background: "transparent",
+            border: "none",
+            outline: "none",
+            color: C.text,
+            fontSize: compact ? 13 : 14,
+            fontFamily: "'DM Sans', sans-serif",
+          }}
+        />
+      </label>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          justifyContent: compact ? "space-between" : "flex-end",
+        }}
+      >
+        <label
+          style={{
+            flex: compact ? 1 : "unset",
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            background: C.bgCard,
+            border: `1px solid ${C.border}`,
+            borderRadius: compact ? 10 : 12,
+            padding: compact ? "9px 11px" : "10px 12px",
+          }}
+        >
+          <ArrowUpDown size={15} color={C.gold} />
+          <select
+            value={sortMode}
+            onChange={(e) => setSortMode(e.target.value)}
+            style={{
+              width: "100%",
+              background: "transparent",
+              border: "none",
+              outline: "none",
+              color: C.text,
+              fontSize: compact ? 12 : 13,
+              fontWeight: 700,
+              fontFamily: "'DM Sans', sans-serif",
+              appearance: "none",
+            }}
+          >
+            {options.map((opt) => (
+              <option key={opt.value} value={opt.value} style={{ background: C.bgCard, color: C.text }}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <span style={{ color: C.textMuted, fontSize: compact ? 11 : 12, whiteSpace: "nowrap" }}>
+          {shown}/{total}
+        </span>
+      </div>
+    </div>
+  );
+}
 
 function exportRatingsCSV(ratings, displayName = "user") {
   if (!ratings || ratings.length === 0) {
