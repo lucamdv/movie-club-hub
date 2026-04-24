@@ -479,10 +479,10 @@ export function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx,
             </div>
           </div>
 
-          {/* Ratings row */}
-          {(m.rating || m.imdbRating || m.rottenTomatoes) && (
+          {/* Nota oficial MovieClub */}
+          {getMovieClubRating(m) && (
             <div style={{ marginBottom: 14 }}>
-              <RatingsRow movie={m} />
+              <MovieClubScore movie={m} compact />
             </div>
           )}
 
@@ -846,6 +846,24 @@ export function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx,
             </div>
           )}
 
+          {(m.rating || m.imdbRating || m.rottenTomatoes || m.metacritic) && (
+            <div style={{ marginBottom: 14 }}>
+              <p
+                style={{
+                  fontSize: 12,
+                  fontWeight: 700,
+                  color: C.textMuted,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.06em",
+                  marginBottom: 12,
+                }}
+              >
+                Avaliações da crítica
+              </p>
+              <RatingsRow movie={m} />
+            </div>
+          )}
+
           {/* Reviews */}
           {reviews.length > 0 && (
             <div style={{ marginBottom: 14 }}>
@@ -1101,7 +1119,7 @@ export function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx,
               )}
             </div>
             <div style={{ marginBottom: 16 }}>
-              <RatingsRow movie={m} />
+              <MovieClubScore movie={m} />
             </div>
             <div style={{ marginBottom: 16 }}>
               <p
