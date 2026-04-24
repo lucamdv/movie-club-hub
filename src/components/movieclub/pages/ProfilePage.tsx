@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -40,6 +40,8 @@ import {
   UserPlus,
   UserCheck,
   LogOut,
+  Search,
+  ArrowUpDown,
 } from "lucide-react";
 import {
   Spinner,
@@ -84,6 +86,129 @@ const GENRE_COLORS = {
   Documentário: "#10B981",
   Documentary: "#10B981",
 };
+
+const RATING_SORT_OPTIONS = [
+  { value: "recent", label: "Mais recentes" },
+  { value: "oldest", label: "Mais antigos" },
+  { value: "rating_desc", label: "Mais estrelas" },
+  { value: "rating_asc", label: "Menos estrelas" },
+  { value: "title_asc", label: "A-Z" },
+];
+
+const WATCHLIST_SORT_OPTIONS = [
+  { value: "recent", label: "Mais recentes" },
+  { value: "oldest", label: "Mais antigos" },
+  { value: "title_asc", label: "A-Z" },
+  { value: "title_desc", label: "Z-A" },
+];
+
+function getSortedProfileItems(items, query, sortMode, type = "ratings") {
+  const q = (query || "").trim().toLowerCase();
+  return [...(items || [])]
+    .filter((item) => !q || (item.title || "").toLowerCase().includes(q))
+    .sort((a, b) => {
+      if (sortMode === "rating_desc") return Number(b.rating || 0) - Number(a.rating || 0);
+      if (sortMode === "rating_asc") return Number(a.rating || 0) - Number(b.rating || 0);
+      if (sortMode === "title_asc") return (a.title || "").localeCompare(b.title || "", "pt-BR");
+      if (sortMode === "title_desc") return (b.title || "").localeCompare(a.title || "", "pt-BR");
+      const field = type === "ratings" ? "updated_at" : "created_at";
+      const dateA = new Date(a[field] || a.created_at || 0).getTime();
+      const dateB = new Date(b[field] || b.created_at || 0).getTime();
+      return sortMode === "oldest" ? dateA - dateB : dateB - dateA;
+    });
+}
+
+function ProfileLibraryControls({ query, setQuery, sortMode, setSortMode, options, total, shown, compact = false }) {
+  return (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: compact ? "1fr" : "minmax(220px, 1fr) auto",
+        gap: 10,
+        alignItems: "center",
+        width: "100%",
+        marginBottom: compact ? 12 : 18,
+      }}
+    >
+      <label
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          background: C.bgCard,
+          border: `1px solid ${C.border}`,
+          borderRadius: compact ? 10 : 12,
+          padding: compact ? "9px 11px" : "10px 12px",
+          minWidth: 0,
+        }}
+      >
+        <Search size={16} color={C.textMuted} />
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Filtrar filmes"
+          style={{
+            flex: 1,
+            minWidth: 0,
+            background: "transparent",
+            border: "none",
+            outline: "none",
+            color: C.text,
+            fontSize: compact ? 13 : 14,
+            fontFamily: "'DM Sans', sans-serif",
+          }}
+        />
+      </label>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          justifyContent: compact ? "space-between" : "flex-end",
+        }}
+      >
+        <label
+          style={{
+            flex: compact ? 1 : "unset",
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            background: C.bgCard,
+            border: `1px solid ${C.border}`,
+            borderRadius: compact ? 10 : 12,
+            padding: compact ? "9px 11px" : "10px 12px",
+          }}
+        >
+          <ArrowUpDown size={15} color={C.gold} />
+          <select
+            value={sortMode}
+            onChange={(e) => setSortMode(e.target.value)}
+            style={{
+              width: "100%",
+              background: "transparent",
+              border: "none",
+              outline: "none",
+              color: C.text,
+              fontSize: compact ? 12 : 13,
+              fontWeight: 700,
+              fontFamily: "'DM Sans', sans-serif",
+              appearance: "none",
+            }}
+          >
+            {options.map((opt) => (
+              <option key={opt.value} value={opt.value} style={{ background: C.bgCard, color: C.text }}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <span style={{ color: C.textMuted, fontSize: compact ? 11 : 12, whiteSpace: "nowrap" }}>
+          {shown}/{total}
+        </span>
+      </div>
+    </div>
+  );
+}
 
 function exportRatingsCSV(ratings, displayName = "user") {
   if (!ratings || ratings.length === 0) {
@@ -1075,6 +1200,9 @@ export function ProfilePageMobile({
   const [showEditModal, setShowEditModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [movieFilter, setMovieFilter] = useState("");
+  const [ratingSort, setRatingSort] = useState("recent");
+  const [watchlistSort, setWatchlistSort] = useState("recent");
 
   const { follow, unfollow, isFollowing } = useFollows(currentUserId);
   const { followers: targetFollowers, following: targetFollowing } =
@@ -1096,6 +1224,14 @@ export function ProfilePageMobile({
           ratings.reduce((s, r) => s + Number(r.rating), 0) / ratings.length
         ).toFixed(1)
       : null;
+  const sortedRatings = useMemo(
+    () => getSortedProfileItems(ratings, movieFilter, ratingSort, "ratings"),
+    [ratings, movieFilter, ratingSort],
+  );
+  const sortedWatchlist = useMemo(
+    () => getSortedProfileItems(watchlistItems, movieFilter, watchlistSort, "watchlist"),
+    [watchlistItems, movieFilter, watchlistSort],
+  );
 
   const [favGenres, setFavGenres] = useState([]);
   useEffect(() => {
@@ -1474,6 +1610,21 @@ export function ProfilePageMobile({
         ))}
       </div>
 
+      {(tab === "ratings" ? ratings.length : watchlistItems.length) > 0 && (
+        <div style={{ padding: "12px 12px 0", background: C.bg }}>
+          <ProfileLibraryControls
+            query={movieFilter}
+            setQuery={setMovieFilter}
+            sortMode={tab === "ratings" ? ratingSort : watchlistSort}
+            setSortMode={tab === "ratings" ? setRatingSort : setWatchlistSort}
+            options={tab === "ratings" ? RATING_SORT_OPTIONS : WATCHLIST_SORT_OPTIONS}
+            total={tab === "ratings" ? ratings.length : watchlistItems.length}
+            shown={tab === "ratings" ? sortedRatings.length : sortedWatchlist.length}
+            compact
+          />
+        </div>
+      )}
+
       {/* ── Grid de pôsteres — 3 colunas IG style ── */}
       {tab === "ratings" &&
         (ratingsLoading ? (
@@ -1482,7 +1633,7 @@ export function ProfilePageMobile({
           >
             <Spinner size={28} />
           </div>
-        ) : ratings.length > 0 ? (
+        ) : sortedRatings.length > 0 ? (
           <div
             style={{
               display: "grid",
@@ -1490,7 +1641,7 @@ export function ProfilePageMobile({
               gap: 2,
             }}
           >
-            {ratings.map((r) => (
+            {sortedRatings.map((r) => (
               <div
                 key={r.id}
                 onClick={() => {
@@ -1581,7 +1732,7 @@ export function ProfilePageMobile({
           >
             <Spinner size={28} />
           </div>
-        ) : watchlistItems.length > 0 ? (
+        ) : sortedWatchlist.length > 0 ? (
           <div
             style={{
               display: "grid",
@@ -1589,7 +1740,7 @@ export function ProfilePageMobile({
               gap: 2,
             }}
           >
-            {watchlistItems.map((item) => (
+            {sortedWatchlist.map((item) => (
               <div
                 key={item.id}
                 style={{
@@ -1834,6 +1985,9 @@ export function ProfilePageDesktop(props) {
   const [viewMode, setViewMode] = useState("list");
   const [showImportModal, setShowImportModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [movieFilter, setMovieFilter] = useState("");
+  const [ratingSort, setRatingSort] = useState("recent");
+  const [watchlistSort, setWatchlistSort] = useState("recent");
 
   const {
     following: myFollowing,
@@ -1860,6 +2014,14 @@ export function ProfilePageDesktop(props) {
           ratings.reduce((s, r) => s + Number(r.rating), 0) / ratings.length
         ).toFixed(1)
       : "—";
+  const sortedRatings = useMemo(
+    () => getSortedProfileItems(ratings, movieFilter, ratingSort, "ratings"),
+    [ratings, movieFilter, ratingSort],
+  );
+  const sortedWatchlist = useMemo(
+    () => getSortedProfileItems(watchlistItems, movieFilter, watchlistSort, "watchlist"),
+    [watchlistItems, movieFilter, watchlistSort],
+  );
 
   const bannerPosters = ratings
     .filter((r) => r.poster_url)
@@ -2324,14 +2486,26 @@ export function ProfilePageDesktop(props) {
           />
         </div>
 
+        {(tab === "ratings" ? ratings.length : watchlistItems.length) > 0 && (
+          <ProfileLibraryControls
+            query={movieFilter}
+            setQuery={setMovieFilter}
+            sortMode={tab === "ratings" ? ratingSort : watchlistSort}
+            setSortMode={tab === "ratings" ? setRatingSort : setWatchlistSort}
+            options={tab === "ratings" ? RATING_SORT_OPTIONS : WATCHLIST_SORT_OPTIONS}
+            total={tab === "ratings" ? ratings.length : watchlistItems.length}
+            shown={tab === "ratings" ? sortedRatings.length : sortedWatchlist.length}
+          />
+        )}
+
         {/* Ratings Tab */}
         {tab === "ratings" &&
           (viewMode === "list" ? (
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               {ratingsLoading ? (
                 <Spinner />
-              ) : ratings.length > 0 ? (
-                ratings.map((r) => (
+              ) : sortedRatings.length > 0 ? (
+                sortedRatings.map((r) => (
                   <div
                     key={r.id}
                     style={{
@@ -2451,8 +2625,8 @@ export function ProfilePageDesktop(props) {
             >
               {ratingsLoading ? (
                 <Spinner />
-              ) : ratings.length > 0 ? (
-                ratings.map((r) => (
+              ) : sortedRatings.length > 0 ? (
+                sortedRatings.map((r) => (
                   <div
                     key={r.id}
                     className="movie-card-netflix"
@@ -2557,8 +2731,8 @@ export function ProfilePageDesktop(props) {
             >
               {wlLoading ? (
                 <Spinner />
-              ) : watchlistItems.length > 0 ? (
-                watchlistItems.map((item) => (
+              ) : sortedWatchlist.length > 0 ? (
+                sortedWatchlist.map((item) => (
                   <div
                     key={item.id}
                     style={{ position: "relative" }}
@@ -2679,8 +2853,8 @@ export function ProfilePageDesktop(props) {
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               {wlLoading ? (
                 <Spinner />
-              ) : watchlistItems.length > 0 ? (
-                watchlistItems.map((item) => (
+              ) : sortedWatchlist.length > 0 ? (
+                sortedWatchlist.map((item) => (
                   <div
                     key={item.id}
                     style={{
