@@ -1200,6 +1200,9 @@ export function ProfilePageMobile({
   const [showEditModal, setShowEditModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [movieFilter, setMovieFilter] = useState("");
+  const [ratingSort, setRatingSort] = useState("recent");
+  const [watchlistSort, setWatchlistSort] = useState("recent");
 
   const { follow, unfollow, isFollowing } = useFollows(currentUserId);
   const { followers: targetFollowers, following: targetFollowing } =
@@ -1221,6 +1224,14 @@ export function ProfilePageMobile({
           ratings.reduce((s, r) => s + Number(r.rating), 0) / ratings.length
         ).toFixed(1)
       : null;
+  const sortedRatings = useMemo(
+    () => getSortedProfileItems(ratings, movieFilter, ratingSort, "ratings"),
+    [ratings, movieFilter, ratingSort],
+  );
+  const sortedWatchlist = useMemo(
+    () => getSortedProfileItems(watchlistItems, movieFilter, watchlistSort, "watchlist"),
+    [watchlistItems, movieFilter, watchlistSort],
+  );
 
   const [favGenres, setFavGenres] = useState([]);
   useEffect(() => {
@@ -1599,6 +1610,21 @@ export function ProfilePageMobile({
         ))}
       </div>
 
+      {(tab === "ratings" ? ratings.length : watchlistItems.length) > 0 && (
+        <div style={{ padding: "12px 12px 0", background: C.bg }}>
+          <ProfileLibraryControls
+            query={movieFilter}
+            setQuery={setMovieFilter}
+            sortMode={tab === "ratings" ? ratingSort : watchlistSort}
+            setSortMode={tab === "ratings" ? setRatingSort : setWatchlistSort}
+            options={tab === "ratings" ? RATING_SORT_OPTIONS : WATCHLIST_SORT_OPTIONS}
+            total={tab === "ratings" ? ratings.length : watchlistItems.length}
+            shown={tab === "ratings" ? sortedRatings.length : sortedWatchlist.length}
+            compact
+          />
+        </div>
+      )}
+
       {/* ── Grid de pôsteres — 3 colunas IG style ── */}
       {tab === "ratings" &&
         (ratingsLoading ? (
@@ -1607,7 +1633,7 @@ export function ProfilePageMobile({
           >
             <Spinner size={28} />
           </div>
-        ) : ratings.length > 0 ? (
+        ) : sortedRatings.length > 0 ? (
           <div
             style={{
               display: "grid",
@@ -1615,7 +1641,7 @@ export function ProfilePageMobile({
               gap: 2,
             }}
           >
-            {ratings.map((r) => (
+            {sortedRatings.map((r) => (
               <div
                 key={r.id}
                 onClick={() => {
@@ -1706,7 +1732,7 @@ export function ProfilePageMobile({
           >
             <Spinner size={28} />
           </div>
-        ) : watchlistItems.length > 0 ? (
+        ) : sortedWatchlist.length > 0 ? (
           <div
             style={{
               display: "grid",
@@ -1714,7 +1740,7 @@ export function ProfilePageMobile({
               gap: 2,
             }}
           >
-            {watchlistItems.map((item) => (
+            {sortedWatchlist.map((item) => (
               <div
                 key={item.id}
                 style={{
