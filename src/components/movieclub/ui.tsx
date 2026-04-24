@@ -676,11 +676,25 @@ function RatingsRow({ movie }) {
   );
 }
 
+function getMovieClubRatingValue(movie) {
+  if (!movie) return null;
+  const scores = [
+    movie.rating && (Number(movie.rating) / 10) * 5,
+    movie.imdbRating && (Number(movie.imdbRating) / 10) * 5,
+    movie.rottenTomatoes && (parseInt(movie.rottenTomatoes, 10) / 100) * 5,
+    movie.metacritic && (parseInt(movie.metacritic, 10) / 100) * 5,
+  ].filter((score) => Number.isFinite(score));
+  if (!scores.length) return null;
+  const avg = scores.reduce((sum, score) => sum + score, 0) / scores.length;
+  return Math.max(0, Math.min(5, avg)).toFixed(1);
+}
+
 function MovieCard({ movie, size = "md", onClick }) {
   const w = size === "sm" ? 130 : size === "lg" ? 220 : 180;
   const h = Math.round(w * 1.5);
   const upcoming = isUpcoming(movie);
   const [imgLoaded, setImgLoaded] = useState(false);
+  const movieClubRating = getMovieClubRatingValue(movie);
 
   return (
     <div className="movie-card-netflix" onClick={onClick} style={{ width: w }}>
@@ -802,9 +816,9 @@ function MovieCard({ movie, size = "md", onClick }) {
             {movie.title}
           </p>
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            {!upcoming && movie.rating && (
+            {!upcoming && movieClubRating && (
               <span style={{ fontSize: 12, fontWeight: 700, color: C.gold }}>
-                ★ {movie.rating}
+                ★ {movieClubRating}
               </span>
             )}
             {movie.year && (
@@ -814,7 +828,7 @@ function MovieCard({ movie, size = "md", onClick }) {
             )}
           </div>
         </div>
-        {!upcoming && movie.rating && (
+        {!upcoming && movieClubRating && (
           <div
             style={{
               position: "absolute",
@@ -828,7 +842,7 @@ function MovieCard({ movie, size = "md", onClick }) {
               borderRadius: 6,
             }}
           >
-            ★ {movie.rating}
+            ★ {movieClubRating}
           </div>
         )}
       </div>
