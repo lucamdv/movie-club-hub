@@ -1803,6 +1803,7 @@ function HeroBanner({ movies, onSelect }) {
 //  HOME PAGE (Netflix layout)
 
 function Top10Card({ movie, rank, onClick }) {
+  const movieClubRating = getMovieClubRatingValue(movie);
   return (
     <div
       onClick={onClick}
@@ -1865,7 +1866,7 @@ function Top10Card({ movie, rank, onClick }) {
             <Film size={28} style={{ opacity: 0.3 }} />
           </div>
         )}
-        {movie.rating && (
+        {movieClubRating && (
           <div
             style={{
               position: "absolute",
@@ -1879,7 +1880,7 @@ function Top10Card({ movie, rank, onClick }) {
               borderRadius: 6,
             }}
           >
-            ★ {movie.rating}
+            ★ {movieClubRating}
           </div>
         )}
       </div>
