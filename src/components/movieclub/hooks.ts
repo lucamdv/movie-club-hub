@@ -878,6 +878,6 @@ function useClubActivity(clubId) {
 
 export {
   useMovieDetails, usePaginatedMovies, useAuth, useRatings, useWatchlist,
-  useRecommendations, useFollows, useFriendLinks, useFriendships,
+  useRecommendations, useUserPreferences, useFollows, useFriendLinks, useFriendships,
   useClubs, useClubDetail, useClubActivity,
 };
