@@ -1168,6 +1168,11 @@ export function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx,
             <Section title="Sinopse">
               <p style={{ color: C.textMuted, fontSize: 14, lineHeight: 1.8 }}>{m.plot || m.overview}</p>
             </Section>
+            {(m.rating || m.imdbRating || m.rottenTomatoes || m.metacritic) && (
+              <Section title="Avaliações da crítica">
+                <RatingsRow movie={m} />
+              </Section>
+            )}
             {m.cast?.length > 0 && (
               <Section title="Elenco Principal">
                 <div style={{ display: "flex", gap: 10, overflowX: "auto", paddingBottom: 8 }}>
