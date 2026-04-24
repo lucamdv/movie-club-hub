@@ -2486,14 +2486,26 @@ export function ProfilePageDesktop(props) {
           />
         </div>
 
+        {(tab === "ratings" ? ratings.length : watchlistItems.length) > 0 && (
+          <ProfileLibraryControls
+            query={movieFilter}
+            setQuery={setMovieFilter}
+            sortMode={tab === "ratings" ? ratingSort : watchlistSort}
+            setSortMode={tab === "ratings" ? setRatingSort : setWatchlistSort}
+            options={tab === "ratings" ? RATING_SORT_OPTIONS : WATCHLIST_SORT_OPTIONS}
+            total={tab === "ratings" ? ratings.length : watchlistItems.length}
+            shown={tab === "ratings" ? sortedRatings.length : sortedWatchlist.length}
+          />
+        )}
+
         {/* Ratings Tab */}
         {tab === "ratings" &&
           (viewMode === "list" ? (
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               {ratingsLoading ? (
                 <Spinner />
-              ) : ratings.length > 0 ? (
-                ratings.map((r) => (
+              ) : sortedRatings.length > 0 ? (
+                sortedRatings.map((r) => (
                   <div
                     key={r.id}
                     style={{
@@ -2613,8 +2625,8 @@ export function ProfilePageDesktop(props) {
             >
               {ratingsLoading ? (
                 <Spinner />
-              ) : ratings.length > 0 ? (
-                ratings.map((r) => (
+              ) : sortedRatings.length > 0 ? (
+                sortedRatings.map((r) => (
                   <div
                     key={r.id}
                     className="movie-card-netflix"
@@ -2719,8 +2731,8 @@ export function ProfilePageDesktop(props) {
             >
               {wlLoading ? (
                 <Spinner />
-              ) : watchlistItems.length > 0 ? (
-                watchlistItems.map((item) => (
+              ) : sortedWatchlist.length > 0 ? (
+                sortedWatchlist.map((item) => (
                   <div
                     key={item.id}
                     style={{ position: "relative" }}
@@ -2841,8 +2853,8 @@ export function ProfilePageDesktop(props) {
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               {wlLoading ? (
                 <Spinner />
-              ) : watchlistItems.length > 0 ? (
-                watchlistItems.map((item) => (
+              ) : sortedWatchlist.length > 0 ? (
+                sortedWatchlist.map((item) => (
                   <div
                     key={item.id}
                     style={{
