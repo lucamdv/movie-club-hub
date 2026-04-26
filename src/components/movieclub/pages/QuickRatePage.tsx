@@ -447,7 +447,13 @@ export function QuickRatePage({ setPage, setSelectedMovie, auth }) {
     return () => window.removeEventListener("keydown", fn);
   }, [idx, movies.length, mode]);
 
-  if (!mode) return <ModeSelect onStart={startSession} hasRatings={ratings.length > 0} />;
+  if (!mode) return (
+    <ModeSelect
+      onStart={startSession}
+      hasRatings={ratings.length > 0}
+      defaultMode={preferences.quick_rate_default_mode}
+    />
+  );
 
   if (mode === "summary") return (
     <SessionSummary
