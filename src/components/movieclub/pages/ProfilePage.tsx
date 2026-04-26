@@ -53,7 +53,7 @@ import {
   Section,
   ViewToolbar,
 } from "../ui";
-import { useRatings, useWatchlist, useFollows, useFriendships } from "../hooks";
+import { useRatings, useWatchlist, useFollows, useFriendships, useUserPreferences } from "../hooks";
 
 // ─── cachedFetch helper (same as foundation) ───
 async function cachedFetch(key, fetcher, ttlMs = 5 * 60 * 1000) {
