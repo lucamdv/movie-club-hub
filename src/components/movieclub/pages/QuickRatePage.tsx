@@ -8,7 +8,7 @@ import {
   SkipForward, X, Check,
 } from "lucide-react";
 import { Spinner, Btn } from "../ui";
-import { useRatings, useUserPreferences, useWatchlist } from "../hooks";
+import { useRatings, useUserPreferences, useWatchlist, applyPreferenceFilters } from "../hooks";
 
 // ─── Cinematic star rating ───────────────────────────────
 function CinematicStars({ value, onChange, size = 36 }) {
