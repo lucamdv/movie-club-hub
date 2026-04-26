@@ -444,13 +444,10 @@ function useRecommendations(userId) {
         const scoreMap = new Map(); // id -> { movie, score }
         for (const item of results) {
           if (!item?.res?.results) continue;
-          for (const raw of item.res.results) {
-            const year = raw.release_date ? Number(raw.release_date.slice(0, 4)) : null;
-            const movieClubRating = raw.vote_average ? (Number(raw.vote_average) / 10) * 5 : 0;
-            if (preferences.recommendation_min_year && year && year < preferences.recommendation_min_year) continue;
-            if (movieClubRating < Number(preferences.recommendation_min_rating || 0)) continue;
+          const filtered = applyPreferenceFilters(item.res.results, preferences, ratedIds);
+          for (const raw of filtered) {
             const m = normalizeTmdb(raw);
-            if (!m || ratedIds.has(m.id) || !m.poster) continue;
+            if (!m) continue;
             const prev = scoreMap.get(m.id);
             const inc = item.weight * (1 + (raw.vote_average || 0) / 10);
             if (prev) {
@@ -474,7 +471,16 @@ function useRecommendations(userId) {
     return () => {
       alive = false;
     };
-  }, [ratings, preferences.recommendation_min_year, preferences.recommendation_min_rating]);
+  }, [
+    ratings,
+    preferences.recommendation_min_year,
+    preferences.recommendation_min_rating,
+    preferences.recommendation_max_runtime,
+    preferences.hide_unrated_recommendations,
+    preferences.preferred_languages,
+    preferences.excluded_genres,
+    preferences.show_adult_content,
+  ]);
 
   return { recs, loading };
 }
