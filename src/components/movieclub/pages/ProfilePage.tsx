@@ -1889,6 +1889,14 @@ export function ProfilePageMobile({
                       setShowSettings(false);
                     },
                   },
+                  {
+                    icon: <SlidersHorizontal size={18} />,
+                    label: "Configurações do app",
+                    action: () => {
+                      setShowSettings(false);
+                      setPage("settings");
+                    },
+                  },
                 ].map(({ icon, label, action }) => (
                   <button
                     key={label}
