@@ -42,6 +42,7 @@ import {
   LogOut,
   Search,
   ArrowUpDown,
+  SlidersHorizontal,
 } from "lucide-react";
 import {
   Spinner,
