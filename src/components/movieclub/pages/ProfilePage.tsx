@@ -42,6 +42,7 @@ import {
   LogOut,
   Search,
   ArrowUpDown,
+  SlidersHorizontal,
 } from "lucide-react";
 import {
   Spinner,
@@ -1888,6 +1889,14 @@ export function ProfilePageMobile({
                       setShowSettings(false);
                     },
                   },
+                  {
+                    icon: <SlidersHorizontal size={18} />,
+                    label: "Configurações do app",
+                    action: () => {
+                      setShowSettings(false);
+                      setPage("settings");
+                    },
+                  },
                 ].map(({ icon, label, action }) => (
                   <button
                     key={label}
@@ -2406,6 +2415,13 @@ export function ProfilePageDesktop(props) {
                     onClick={() => exportRatingsCSV(ratings, displayName)}
                   >
                     <Download size={13} /> Exportar CSV
+                  </Btn>
+                  <Btn
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setPage("settings")}
+                  >
+                    <SlidersHorizontal size={13} /> Configurações
                   </Btn>
                   <Btn
                     variant="ghost"
