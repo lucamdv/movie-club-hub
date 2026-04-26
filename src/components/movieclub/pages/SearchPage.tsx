@@ -148,7 +148,7 @@ export function SearchPage({ setPage, setSelectedMovie, auth }) {
             Buscar <span style={{ color: C.gold }}>Filmes</span>
           </h1>
           <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-            <ViewToolbar viewMode={viewMode} setViewMode={setViewMode} perPage={perPage} setPerPage={setPerPage} />
+            <ViewToolbar viewMode={viewMode} setViewMode={handleSetViewMode} perPage={perPage} setPerPage={setPerPage} />
             <button
               onClick={() => setShowFilters(!showFilters)}
               style={{
