@@ -6,6 +6,7 @@ import {
   Spinner, MovieCard, Badge, PaginationBar, ViewToolbar,
   SearchSVG,
 } from "../ui";
+import { useUserPreferences } from "../hooks";
 
 const SORT_OPTIONS = [
   { value: "popularity.desc", label: "Mais Populares" },
@@ -30,7 +31,8 @@ const LANG_OPTIONS = [
   { value: "zh", label: "Chinês" },
 ];
 
-export function SearchPage({ setPage, setSelectedMovie }) {
+export function SearchPage({ setPage, setSelectedMovie, auth }) {
+  const { preferences } = useUserPreferences(auth?.user?.id);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [genres, setGenres] = useState([]);
@@ -41,7 +43,19 @@ export function SearchPage({ setPage, setSelectedMovie }) {
   const [ratingMin, setRatingMin] = useState("");
   const [lang, setLang] = useState("");
   const [showFilters, setShowFilters] = useState(false);
-  const [viewMode, setViewMode] = useState("grid");
+  const [viewMode, setViewMode] = useState(preferences?.default_view || "grid");
+  const userOverrodeViewRef = useRef(false);
+  useEffect(() => {
+    if (userOverrodeViewRef.current) return;
+    if (preferences?.default_view && preferences.default_view !== viewMode) {
+      setViewMode(preferences.default_view);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [preferences?.default_view]);
+  const handleSetViewMode = (v) => {
+    userOverrodeViewRef.current = true;
+    setViewMode(v);
+  };
   const [perPage, setPerPage] = useState(20);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
