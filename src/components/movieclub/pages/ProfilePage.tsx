@@ -2510,7 +2510,7 @@ export function ProfilePageDesktop(props) {
           </div>
           <ViewToolbar
             viewMode={viewMode}
-            setViewMode={setViewMode}
+            setViewMode={handleSetViewMode}
             showPerPage={false}
           />
         </div>
