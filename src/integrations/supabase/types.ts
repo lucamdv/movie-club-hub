@@ -319,26 +319,68 @@ export type Database = {
       }
       user_preferences: {
         Row: {
+          auto_play_trailers: boolean
+          compact_mode: boolean
           created_at: string
+          default_view: string
+          excluded_genres: string[]
+          hide_spoilers: boolean
+          hide_unrated_recommendations: boolean
           id: string
+          notify_club_activity: boolean
+          notify_friend_activity: boolean
+          preferred_languages: string[]
+          profile_visibility: string
+          quick_rate_default_mode: string
+          recommendation_max_runtime: number | null
           recommendation_min_rating: number
           recommendation_min_year: number | null
+          show_adult_content: boolean
+          streaming_region: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          auto_play_trailers?: boolean
+          compact_mode?: boolean
           created_at?: string
+          default_view?: string
+          excluded_genres?: string[]
+          hide_spoilers?: boolean
+          hide_unrated_recommendations?: boolean
           id?: string
+          notify_club_activity?: boolean
+          notify_friend_activity?: boolean
+          preferred_languages?: string[]
+          profile_visibility?: string
+          quick_rate_default_mode?: string
+          recommendation_max_runtime?: number | null
           recommendation_min_rating?: number
           recommendation_min_year?: number | null
+          show_adult_content?: boolean
+          streaming_region?: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          auto_play_trailers?: boolean
+          compact_mode?: boolean
           created_at?: string
+          default_view?: string
+          excluded_genres?: string[]
+          hide_spoilers?: boolean
+          hide_unrated_recommendations?: boolean
           id?: string
+          notify_club_activity?: boolean
+          notify_friend_activity?: boolean
+          preferred_languages?: string[]
+          profile_visibility?: string
+          quick_rate_default_mode?: string
+          recommendation_max_runtime?: number | null
           recommendation_min_rating?: number
           recommendation_min_year?: number | null
+          show_adult_content?: boolean
+          streaming_region?: string
           updated_at?: string
           user_id?: string
         }
