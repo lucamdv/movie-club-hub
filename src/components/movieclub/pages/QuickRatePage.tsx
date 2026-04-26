@@ -327,7 +327,7 @@ export function QuickRatePage({ setPage, setSelectedMovie, auth }) {
   const { add: addWl, remove: removeWl, isInList: inWl } = useWatchlist(auth?.user?.id);
   const recPageRef = useRef(0);
   const loadingMoreRef = useRef(false);
-  const ratedIds = useMemoRatedIds(ratings);
+  const ratedIdsSet = useMemo(() => new Set(ratings.map((r) => r.tmdb_id)), [ratings]);
 
   const loadRandom = useCallback(async (append = false) => {
     setLoading(true);
