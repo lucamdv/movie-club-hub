@@ -202,7 +202,7 @@ function SessionSummary({ stats, idx, onNewSession, onHome, onMovieClick }) {
 }
 
 // ─── Mode Selection Screen ────────────────────────────────
-function ModeSelect({ onStart, hasRatings }) {
+function ModeSelect({ onStart, hasRatings, defaultMode }) {
   return (
     <div style={{ minHeight: "100dvh", background: C.bg, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "20px" }}>
       {/* Background glow */}
@@ -270,9 +270,11 @@ function ModeSelect({ onStart, hasRatings }) {
               style={{
                 padding: 20, borderRadius: 18,
                 background: `linear-gradient(135deg, ${C.bgCard}, rgba(15,25,35,0.95))`,
-                border: `1px solid ${C.border}`,
+                border: `1px solid ${defaultMode === id ? C.gold : C.border}`,
+                boxShadow: defaultMode === id ? `0 0 0 1px ${C.gold}33, 0 8px 24px rgba(201,168,76,0.12)` : "none",
                 cursor: "pointer", textAlign: "left", transition: "all 0.25s",
                 display: "flex", gap: 18, alignItems: "center",
+                position: "relative",
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.borderColor = accentColor + "66";
@@ -280,11 +282,19 @@ function ModeSelect({ onStart, hasRatings }) {
                 e.currentTarget.style.boxShadow = `0 12px 32px rgba(0,0,0,0.3), 0 0 0 1px ${accentColor}22`;
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = C.border;
+                e.currentTarget.style.borderColor = defaultMode === id ? C.gold : C.border;
                 e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.boxShadow = "none";
+                e.currentTarget.style.boxShadow = defaultMode === id ? `0 0 0 1px ${C.gold}33, 0 8px 24px rgba(201,168,76,0.12)` : "none";
               }}
             >
+              {defaultMode === id && (
+                <span style={{
+                  position: "absolute", top: 10, right: 10,
+                  fontSize: 9, fontWeight: 800, padding: "3px 7px", borderRadius: 999,
+                  background: C.gold, color: C.bgDeep, letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                }}>Padrão</span>
+              )}
               <div style={{
                 width: 52, height: 52, borderRadius: 15, background: iconBg,
                 display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
