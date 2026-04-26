@@ -986,4 +986,5 @@ export {
   useMovieDetails, usePaginatedMovies, useAuth, useRatings, useWatchlist,
   useRecommendations, useUserPreferences, useFollows, useFriendLinks, useFriendships,
   useClubs, useClubDetail, useClubActivity,
+  applyPreferenceFilters,
 };
