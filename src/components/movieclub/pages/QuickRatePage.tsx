@@ -338,14 +338,15 @@ export function QuickRatePage({ setPage, setSelectedMovie, auth }) {
         tmdb.trending(Math.floor(Math.random() * 5) + 1),
       ]);
       const all = [...(pop?.results || []), ...(top?.results || []), ...(trend?.results || [])];
+      const filtered = applyPreferenceFilters(all, preferences, ratedIdsSet);
       const unique = []; const seen = new Set();
-      for (const m of all) { if (!seen.has(m.id) && m.poster_path) { seen.add(m.id); unique.push(m); } }
+      for (const m of filtered) { if (!seen.has(m.id)) { seen.add(m.id); unique.push(m); } }
       for (let i = unique.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [unique[i], unique[j]] = [unique[j], unique[i]]; }
       if (append) setMovies((prev) => [...prev, ...unique.filter((u) => !prev.some((p) => p.id === u.id))]);
       else { setMovies(unique); setIdx(0); }
     } catch { toast.error("Erro ao carregar filmes"); }
     setLoading(false);
-  }, []);
+  }, [preferences, ratedIdsSet]);
 
   const loadRecommended = useCallback(async (append = false) => {
     if (loadingMoreRef.current) return;
@@ -369,12 +370,8 @@ export function QuickRatePage({ setPage, setSelectedMovie, auth }) {
       const scoreMap = new Map();
       for (const item of results) {
         if (!item?.res?.results) continue;
-        for (const raw of item.res.results) {
-          const year = raw.release_date ? Number(raw.release_date.slice(0, 4)) : null;
-          const movieClubRating = raw.vote_average ? (Number(raw.vote_average) / 10) * 5 : 0;
-          if (!raw.poster_path || ratedIds.has(raw.id)) continue;
-          if (preferences.recommendation_min_year && year && year < preferences.recommendation_min_year) continue;
-          if (movieClubRating < Number(preferences.recommendation_min_rating || 0)) continue;
+        const filtered = applyPreferenceFilters(item.res.results, preferences, ratedIds);
+        for (const raw of filtered) {
           const inc = item.weight * (1 + (raw.vote_average || 0) / 10);
           const prev = scoreMap.get(raw.id);
           if (prev) prev.score += inc; else scoreMap.set(raw.id, { movie: raw, score: inc });
@@ -387,7 +384,7 @@ export function QuickRatePage({ setPage, setSelectedMovie, auth }) {
     } catch { toast.error("Erro ao carregar recomendações"); }
     setLoading(false);
     loadingMoreRef.current = false;
-  }, [ratings, loadRandom, preferences.recommendation_min_year, preferences.recommendation_min_rating]);
+  }, [ratings, loadRandom, preferences]);
 
   const startSession = (m) => {
     setMode(m); recPageRef.current = 0;
