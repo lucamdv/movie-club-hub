@@ -412,7 +412,24 @@ function useRecommendations(userId) {
 }
 
 function useUserPreferences(userId) {
-  const defaults = { recommendation_min_year: null, recommendation_min_rating: 0 };
+  const defaults = {
+    recommendation_min_year: null,
+    recommendation_min_rating: 0,
+    recommendation_max_runtime: null,
+    hide_unrated_recommendations: false,
+    preferred_languages: [],
+    excluded_genres: [],
+    default_view: "grid",
+    streaming_region: "BR",
+    quick_rate_default_mode: "random",
+    auto_play_trailers: true,
+    hide_spoilers: false,
+    compact_mode: false,
+    show_adult_content: false,
+    profile_visibility: "public",
+    notify_friend_activity: true,
+    notify_club_activity: true,
+  };
   const [preferences, setPreferences] = useState(defaults);
   const [loading, setLoading] = useState(false);
 
@@ -421,7 +438,7 @@ function useUserPreferences(userId) {
     setLoading(true);
     const { data } = await supabase
       .from("user_preferences")
-      .select("recommendation_min_year,recommendation_min_rating")
+      .select("*")
       .eq("user_id", userId)
       .maybeSingle();
     setPreferences({ ...defaults, ...(data || {}) });
@@ -434,16 +451,31 @@ function useUserPreferences(userId) {
 
   const savePreferences = async (next) => {
     if (!userId) return;
+    const merged = { ...preferences, ...next };
     const safe = {
-      recommendation_min_year: next.recommendation_min_year || null,
-      recommendation_min_rating: Math.max(0, Math.min(5, Number(next.recommendation_min_rating || 0))),
+      recommendation_min_year: merged.recommendation_min_year || null,
+      recommendation_min_rating: Math.max(0, Math.min(5, Number(merged.recommendation_min_rating || 0))),
+      recommendation_max_runtime: merged.recommendation_max_runtime ? Math.max(30, Math.min(600, Number(merged.recommendation_max_runtime))) : null,
+      hide_unrated_recommendations: !!merged.hide_unrated_recommendations,
+      preferred_languages: Array.isArray(merged.preferred_languages) ? merged.preferred_languages : [],
+      excluded_genres: Array.isArray(merged.excluded_genres) ? merged.excluded_genres : [],
+      default_view: merged.default_view === "list" ? "list" : "grid",
+      streaming_region: (merged.streaming_region || "BR").toUpperCase().slice(0, 2),
+      quick_rate_default_mode: merged.quick_rate_default_mode === "recommended" ? "recommended" : "random",
+      auto_play_trailers: !!merged.auto_play_trailers,
+      hide_spoilers: !!merged.hide_spoilers,
+      compact_mode: !!merged.compact_mode,
+      show_adult_content: !!merged.show_adult_content,
+      profile_visibility: ["public", "friends", "private"].includes(merged.profile_visibility) ? merged.profile_visibility : "public",
+      notify_friend_activity: !!merged.notify_friend_activity,
+      notify_club_activity: !!merged.notify_club_activity,
     };
     const { error } = await supabase.from("user_preferences").upsert(
       { user_id: userId, ...safe },
       { onConflict: "user_id" },
     );
     if (error) throw error;
-    setPreferences(safe);
+    setPreferences({ ...defaults, ...safe });
   };
 
   return { preferences, loading, savePreferences, reload: load };
