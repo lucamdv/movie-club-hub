@@ -2419,6 +2419,13 @@ export function ProfilePageDesktop(props) {
                   <Btn
                     variant="ghost"
                     size="sm"
+                    onClick={() => setPage("settings")}
+                  >
+                    <SlidersHorizontal size={13} /> Configurações
+                  </Btn>
+                  <Btn
+                    variant="ghost"
+                    size="sm"
                     onClick={() => authCtx?.signOut?.()}
                   >
                     Sair da conta
