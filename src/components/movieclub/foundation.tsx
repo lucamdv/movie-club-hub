@@ -49,7 +49,7 @@ import logoMain from "@/assets/logo-main.png";
 import mascotsNav from "@/assets/mascots-nav.png";
 import logoText from "@/assets/logo-text.png";
 import mascotWizard from "@/assets/mascot-wizard.png";
-import mascotSpeak from "@/assets/mascot-see.png";
+import mascotSpeak from "@/assets/mascot-speak.png";
 import mascotSee from "@/assets/mascot-see.png";
 import monkeyDirector from "@/assets/monkey-director.png";
 import monkeyPopcorn from "@/assets/monkey-popcorn.png";
@@ -63,6 +63,8 @@ import monkeyShy from "@/assets/monkey-shy.png";
 import monkeyFlash from "@/assets/monkey-flash.png";
 import monkeyCrew from "@/assets/monkey-crew.png";
 import monkeySearch from "@/assets/monkey-search.png";
+import monkeyGirl from "@/assets/monkey-girl.png";
+import monkeyMute from "@/assets/monkey-mute.png";
 
 const MONKEY_AVATARS = [
   { id: "mascot-wizard", src: mascotWizard, label: "Mágico" },
@@ -80,6 +82,8 @@ const MONKEY_AVATARS = [
   { id: "flash", src: monkeyFlash, label: "Rápido" },
   { id: "crew", src: monkeyCrew, label: "Equipe" },
   { id: "search", src: monkeySearch, label: "Curioso" },
+  { id: "girl", src: monkeyGirl, label: "Menina" },
+  { id: "mute", src: monkeyMute, label: "Mudo" },
 ];
 
 // ─────────────────────────────────────────────
@@ -108,6 +112,8 @@ const LEGACY_ASSET_MAP = {
   "monkey-flash": monkeyFlash,
   "monkey-crew": monkeyCrew,
   "monkey-search": monkeySearch,
+  "monkey-girl": monkeyGirl,
+  "monkey-mute": monkeyMute,
 };
 
 const MONKEY_BY_ID = MONKEY_AVATARS.reduce((acc, m) => {
@@ -612,7 +618,7 @@ export { default as JSZip } from "jszip";
 export { default as Papa } from "papaparse";
 export { logoMain, mascotsNav, logoText, mascotWizard, mascotSpeak, mascotSee,
   monkeyDirector, monkeyPopcorn, monkeyDetective, monkeyStar, monkeyAstronaut,
-  monkeyGym, monkeyEars, monkeyStrong, monkeyShy, monkeyFlash, monkeyCrew, monkeySearch };
+  monkeyGym, monkeyEars, monkeyStrong, monkeyShy, monkeyFlash, monkeyCrew, monkeySearch, monkeyGirl, monkeyMute};
 export { supabase };
 export { toast };
 export { useState, useEffect, useRef, useCallback, useMemo };

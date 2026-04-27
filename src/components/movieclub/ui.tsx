@@ -38,6 +38,8 @@ import {
   monkeyFlash,
   monkeyCrew,
   monkeySearch,
+  monkeyGirl,
+  monkeyMute,
 } from "./foundation";
 import {
   Film,
