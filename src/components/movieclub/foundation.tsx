@@ -281,6 +281,9 @@ function normalizeTmdb(raw) {
     overview: raw.overview,
     genre: raw.genres?.[0]?.name || "Outros",
     genres: raw.genres?.map((g) => g.name) || [],
+    genreIds: raw.genre_ids || raw.genres?.map((g) => g.id) || [],
+    originalLanguage: raw.original_language || null,
+    adult: raw.adult === true,
     rating: raw.vote_average ? +raw.vote_average.toFixed(1) : null,
     voteCount: raw.vote_count,
     popularity: raw.popularity,
@@ -568,11 +571,36 @@ function formatReleaseDateBR(dateStr) {
   });
 }
 
+// ─────────────────────────────────────────────
+//  TMDB GENRE MAP (PT label → numeric id)
+// ─────────────────────────────────────────────
+const GENRE_NAME_TO_ID = {
+  "Ação": 28,
+  "Aventura": 12,
+  "Animação": 16,
+  "Comédia": 35,
+  "Crime": 80,
+  "Documentário": 99,
+  "Drama": 18,
+  "Família": 10751,
+  "Fantasia": 14,
+  "História": 36,
+  "Terror": 27,
+  "Música": 10402,
+  "Mistério": 9648,
+  "Romance": 10749,
+  "Ficção Científica": 878,
+  "Cinema TV": 10770,
+  "Thriller": 53,
+  "Guerra": 10752,
+  "Faroeste": 37,
+};
+
 export {
   MONKEY_AVATARS, resolveAvatarUrl, C, apiCache, cachedFetch, TMDB_IMG, tmdb, omdb, streaming,
   normalizeTmdb, mergeOmdb, STREAM_META, parseStreamingServices,
   MOCK_USERS, MOCK_REVIEWS, MOCK_GROUPS,
-  isUpcoming, formatReleaseDateBR,
+  isUpcoming, formatReleaseDateBR, GENRE_NAME_TO_ID,
 };
 export {
   Film, ClipboardList, Star, User, Users, Search, Handshake, Pencil, Link2,

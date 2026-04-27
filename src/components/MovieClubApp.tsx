@@ -264,7 +264,7 @@ export default function MovieClubApp() {
         {page === "group" && (
           <GroupPage group={selectedGroup} setPage={setPage} setSelectedMovie={setSM} auth={authCtx} />
         )}
-        {page === "search" && <SearchPage setPage={setPage} setSelectedMovie={setSM} isMobile={isMobile} />}
+        {page === "search" && <SearchPage setPage={setPage} setSelectedMovie={setSM} isMobile={isMobile} auth={authCtx} />}
         {page === "settings" && <SettingsPage apiStatus={apiStatus} auth={authCtx} isMobile={isMobile} />}
       </div>
 

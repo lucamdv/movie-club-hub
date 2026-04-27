@@ -4,8 +4,76 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import {
   tmdb, omdb, streaming, normalizeTmdb, mergeOmdb,
-  parseStreamingServices,
+  parseStreamingServices, GENRE_NAME_TO_ID,
 } from "./foundation";
+
+// ─────────────────────────────────────────────
+//  PREFERENCES → FILTER HELPER
+//  Recebe um array bruto da TMDb (raw) e retorna apenas os filmes
+//  que respeitam todas as preferências do usuário.
+//  Trabalha sobre o objeto bruto da TMDb (snake_case) para evitar
+//  perder informação durante o normalize. Para itens já normalizados
+//  o helper continua funcionando porque também aceita as chaves do
+//  objeto normalizado (genreIds, originalLanguage, etc).
+// ─────────────────────────────────────────────
+function applyPreferenceFilters(rawList, preferences = {}, alreadyRatedIds = new Set()) {
+  if (!Array.isArray(rawList) || rawList.length === 0) return [];
+  const minYear = preferences.recommendation_min_year
+    ? Number(preferences.recommendation_min_year)
+    : null;
+  const minRating = Number(preferences.recommendation_min_rating || 0);
+  const maxRuntime = preferences.recommendation_max_runtime
+    ? Number(preferences.recommendation_max_runtime)
+    : null;
+  const hideUnrated = !!preferences.hide_unrated_recommendations;
+  const langs = Array.isArray(preferences.preferred_languages)
+    ? preferences.preferred_languages
+    : [];
+  const excludedGenreIds = (Array.isArray(preferences.excluded_genres)
+    ? preferences.excluded_genres
+    : []
+  )
+    .map((name) => GENRE_NAME_TO_ID[name])
+    .filter(Boolean);
+  const showAdult = !!preferences.show_adult_content;
+
+  return rawList.filter((raw) => {
+    if (!raw) return false;
+    const id = raw.id ?? raw.tmdbId;
+    const poster = raw.poster_path ?? raw.poster;
+    if (!poster) return false;
+    if (alreadyRatedIds && alreadyRatedIds.has?.(id)) return false;
+
+    const adult = raw.adult === true;
+    if (!showAdult && adult) return false;
+
+    const releaseDate = raw.release_date ?? raw.releaseDate;
+    const year = releaseDate ? Number(String(releaseDate).slice(0, 4)) : raw.year ?? null;
+    if (minYear && year && year < minYear) return false;
+
+    const voteAverage = Number(raw.vote_average ?? raw.rating ?? 0);
+    const voteCount = Number(raw.vote_count ?? raw.voteCount ?? 0);
+    const movieClubRating = (voteAverage / 10) * 5;
+    if (minRating > 0 && movieClubRating < minRating) return false;
+    if (hideUnrated && (voteAverage === 0 || voteCount < 50)) return false;
+
+    // runtime só está disponível em /movie/:id; quando ausente, não bloqueia
+    const runtime = raw.runtime ?? null;
+    if (maxRuntime && runtime && runtime > maxRuntime) return false;
+
+    if (langs.length) {
+      const lang = raw.original_language ?? raw.originalLanguage ?? null;
+      if (!lang || !langs.includes(lang)) return false;
+    }
+
+    if (excludedGenreIds.length) {
+      const ids = raw.genre_ids ?? raw.genreIds ?? [];
+      if (Array.isArray(ids) && ids.some((g) => excludedGenreIds.includes(g))) return false;
+    }
+
+    return true;
+  });
+}
 
 function useMovieDetails(tmdbId) {
   const [movie, setMovie] = useState(null);
@@ -376,13 +444,10 @@ function useRecommendations(userId) {
         const scoreMap = new Map(); // id -> { movie, score }
         for (const item of results) {
           if (!item?.res?.results) continue;
-          for (const raw of item.res.results) {
-            const year = raw.release_date ? Number(raw.release_date.slice(0, 4)) : null;
-            const movieClubRating = raw.vote_average ? (Number(raw.vote_average) / 10) * 5 : 0;
-            if (preferences.recommendation_min_year && year && year < preferences.recommendation_min_year) continue;
-            if (movieClubRating < Number(preferences.recommendation_min_rating || 0)) continue;
+          const filtered = applyPreferenceFilters(item.res.results, preferences, ratedIds);
+          for (const raw of filtered) {
             const m = normalizeTmdb(raw);
-            if (!m || ratedIds.has(m.id) || !m.poster) continue;
+            if (!m) continue;
             const prev = scoreMap.get(m.id);
             const inc = item.weight * (1 + (raw.vote_average || 0) / 10);
             if (prev) {
@@ -406,7 +471,16 @@ function useRecommendations(userId) {
     return () => {
       alive = false;
     };
-  }, [ratings, preferences.recommendation_min_year, preferences.recommendation_min_rating]);
+  }, [
+    ratings,
+    preferences.recommendation_min_year,
+    preferences.recommendation_min_rating,
+    preferences.recommendation_max_runtime,
+    preferences.hide_unrated_recommendations,
+    preferences.preferred_languages,
+    preferences.excluded_genres,
+    preferences.show_adult_content,
+  ]);
 
   return { recs, loading };
 }
@@ -912,4 +986,5 @@ export {
   useMovieDetails, usePaginatedMovies, useAuth, useRatings, useWatchlist,
   useRecommendations, useUserPreferences, useFollows, useFriendLinks, useFriendships,
   useClubs, useClubDetail, useClubActivity,
+  applyPreferenceFilters,
 };

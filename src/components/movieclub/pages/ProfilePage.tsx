@@ -53,7 +53,7 @@ import {
   Section,
   ViewToolbar,
 } from "../ui";
-import { useRatings, useWatchlist, useFollows, useFriendships } from "../hooks";
+import { useRatings, useWatchlist, useFollows, useFriendships, useUserPreferences } from "../hooks";
 
 // ─── cachedFetch helper (same as foundation) ───
 async function cachedFetch(key, fetcher, ttlMs = 5 * 60 * 1000) {
@@ -1989,9 +1989,22 @@ export function ProfilePageDesktop(props) {
     loading: wlLoading,
     remove: removeFromWl,
   } = useWatchlist(targetUserId);
+  const { preferences } = useUserPreferences(currentUserId);
 
   const [tab, setTab] = useState("ratings");
-  const [viewMode, setViewMode] = useState("list");
+  const [viewMode, setViewMode] = useState(preferences?.default_view || "list");
+  const userOverrodeViewRef = useRef(false);
+  useEffect(() => {
+    if (userOverrodeViewRef.current) return;
+    if (preferences?.default_view && preferences.default_view !== viewMode) {
+      setViewMode(preferences.default_view);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [preferences?.default_view]);
+  const handleSetViewMode = (v) => {
+    userOverrodeViewRef.current = true;
+    setViewMode(v);
+  };
   const [showImportModal, setShowImportModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [movieFilter, setMovieFilter] = useState("");
@@ -2497,7 +2510,7 @@ export function ProfilePageDesktop(props) {
           </div>
           <ViewToolbar
             viewMode={viewMode}
-            setViewMode={setViewMode}
+            setViewMode={handleSetViewMode}
             showPerPage={false}
           />
         </div>

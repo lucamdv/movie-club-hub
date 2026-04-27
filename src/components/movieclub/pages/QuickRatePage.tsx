@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { toast } from "sonner";
 import { C, tmdb } from "../foundation";
 import {
@@ -8,7 +8,7 @@ import {
   SkipForward, X, Check,
 } from "lucide-react";
 import { Spinner, Btn } from "../ui";
-import { useRatings, useUserPreferences, useWatchlist } from "../hooks";
+import { useRatings, useUserPreferences, useWatchlist, applyPreferenceFilters } from "../hooks";
 
 // ─── Cinematic star rating ───────────────────────────────
 function CinematicStars({ value, onChange, size = 36 }) {
@@ -202,7 +202,7 @@ function SessionSummary({ stats, idx, onNewSession, onHome, onMovieClick }) {
 }
 
 // ─── Mode Selection Screen ────────────────────────────────
-function ModeSelect({ onStart, hasRatings }) {
+function ModeSelect({ onStart, hasRatings, defaultMode }) {
   return (
     <div style={{ minHeight: "100dvh", background: C.bg, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "20px" }}>
       {/* Background glow */}
@@ -270,9 +270,11 @@ function ModeSelect({ onStart, hasRatings }) {
               style={{
                 padding: 20, borderRadius: 18,
                 background: `linear-gradient(135deg, ${C.bgCard}, rgba(15,25,35,0.95))`,
-                border: `1px solid ${C.border}`,
+                border: `1px solid ${defaultMode === id ? C.gold : C.border}`,
+                boxShadow: defaultMode === id ? `0 0 0 1px ${C.gold}33, 0 8px 24px rgba(201,168,76,0.12)` : "none",
                 cursor: "pointer", textAlign: "left", transition: "all 0.25s",
                 display: "flex", gap: 18, alignItems: "center",
+                position: "relative",
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.borderColor = accentColor + "66";
@@ -280,11 +282,19 @@ function ModeSelect({ onStart, hasRatings }) {
                 e.currentTarget.style.boxShadow = `0 12px 32px rgba(0,0,0,0.3), 0 0 0 1px ${accentColor}22`;
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = C.border;
+                e.currentTarget.style.borderColor = defaultMode === id ? C.gold : C.border;
                 e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.boxShadow = "none";
+                e.currentTarget.style.boxShadow = defaultMode === id ? `0 0 0 1px ${C.gold}33, 0 8px 24px rgba(201,168,76,0.12)` : "none";
               }}
             >
+              {defaultMode === id && (
+                <span style={{
+                  position: "absolute", top: 10, right: 10,
+                  fontSize: 9, fontWeight: 800, padding: "3px 7px", borderRadius: 999,
+                  background: C.gold, color: C.bgDeep, letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                }}>Padrão</span>
+              )}
               <div style={{
                 width: 52, height: 52, borderRadius: 15, background: iconBg,
                 display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
@@ -327,6 +337,7 @@ export function QuickRatePage({ setPage, setSelectedMovie, auth }) {
   const { add: addWl, remove: removeWl, isInList: inWl } = useWatchlist(auth?.user?.id);
   const recPageRef = useRef(0);
   const loadingMoreRef = useRef(false);
+  const ratedIdsSet = useMemo(() => new Set(ratings.map((r) => r.tmdb_id)), [ratings]);
 
   const loadRandom = useCallback(async (append = false) => {
     setLoading(true);
@@ -337,14 +348,15 @@ export function QuickRatePage({ setPage, setSelectedMovie, auth }) {
         tmdb.trending(Math.floor(Math.random() * 5) + 1),
       ]);
       const all = [...(pop?.results || []), ...(top?.results || []), ...(trend?.results || [])];
+      const filtered = applyPreferenceFilters(all, preferences, ratedIdsSet);
       const unique = []; const seen = new Set();
-      for (const m of all) { if (!seen.has(m.id) && m.poster_path) { seen.add(m.id); unique.push(m); } }
+      for (const m of filtered) { if (!seen.has(m.id)) { seen.add(m.id); unique.push(m); } }
       for (let i = unique.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [unique[i], unique[j]] = [unique[j], unique[i]]; }
       if (append) setMovies((prev) => [...prev, ...unique.filter((u) => !prev.some((p) => p.id === u.id))]);
       else { setMovies(unique); setIdx(0); }
     } catch { toast.error("Erro ao carregar filmes"); }
     setLoading(false);
-  }, []);
+  }, [preferences, ratedIdsSet]);
 
   const loadRecommended = useCallback(async (append = false) => {
     if (loadingMoreRef.current) return;
@@ -368,12 +380,8 @@ export function QuickRatePage({ setPage, setSelectedMovie, auth }) {
       const scoreMap = new Map();
       for (const item of results) {
         if (!item?.res?.results) continue;
-        for (const raw of item.res.results) {
-          const year = raw.release_date ? Number(raw.release_date.slice(0, 4)) : null;
-          const movieClubRating = raw.vote_average ? (Number(raw.vote_average) / 10) * 5 : 0;
-          if (!raw.poster_path || ratedIds.has(raw.id)) continue;
-          if (preferences.recommendation_min_year && year && year < preferences.recommendation_min_year) continue;
-          if (movieClubRating < Number(preferences.recommendation_min_rating || 0)) continue;
+        const filtered = applyPreferenceFilters(item.res.results, preferences, ratedIds);
+        for (const raw of filtered) {
           const inc = item.weight * (1 + (raw.vote_average || 0) / 10);
           const prev = scoreMap.get(raw.id);
           if (prev) prev.score += inc; else scoreMap.set(raw.id, { movie: raw, score: inc });
@@ -386,7 +394,7 @@ export function QuickRatePage({ setPage, setSelectedMovie, auth }) {
     } catch { toast.error("Erro ao carregar recomendações"); }
     setLoading(false);
     loadingMoreRef.current = false;
-  }, [ratings, loadRandom, preferences.recommendation_min_year, preferences.recommendation_min_rating]);
+  }, [ratings, loadRandom, preferences]);
 
   const startSession = (m) => {
     setMode(m); recPageRef.current = 0;
@@ -439,7 +447,13 @@ export function QuickRatePage({ setPage, setSelectedMovie, auth }) {
     return () => window.removeEventListener("keydown", fn);
   }, [idx, movies.length, mode]);
 
-  if (!mode) return <ModeSelect onStart={startSession} hasRatings={ratings.length > 0} />;
+  if (!mode) return (
+    <ModeSelect
+      onStart={startSession}
+      hasRatings={ratings.length > 0}
+      defaultMode={preferences.quick_rate_default_mode}
+    />
+  );
 
   if (mode === "summary") return (
     <SessionSummary
