@@ -58,6 +58,17 @@ const REGION_OPTIONS = [
 const CURRENT_YEAR = new Date().getFullYear();
 const MAX_YEAR = CURRENT_YEAR + 5;
 
+// Defaults aplicados ao limpar os filtros de recomendação
+const RECOMMENDATION_DEFAULTS = {
+  recommendation_min_year: null,
+  recommendation_min_rating: 0,
+  recommendation_max_runtime: null,
+  hide_unrated_recommendations: false,
+  preferred_languages: [],
+  excluded_genres: [],
+  show_adult_content: false,
+};
+
 // ─── Validation schema ────────────────────────────────────
 const recommendationSchema = z.object({
   recommendation_min_year: z
@@ -358,6 +369,21 @@ export function SettingsPage({ auth, isMobile }) {
 
   const handleReset = () => setForm(preferences);
 
+  // Verifica se algum filtro de recomendação está diferente do default
+  const recommendationsActive = useMemo(() => {
+    return Object.entries(RECOMMENDATION_DEFAULTS).some(([key, def]) => {
+      const cur = form?.[key];
+      if (Array.isArray(def)) return (cur || []).length > 0;
+      if (def === null) return cur !== null && cur !== undefined && cur !== "";
+      return cur !== def;
+    });
+  }, [form]);
+
+  const handleClearRecommendations = () => {
+    setForm((f) => ({ ...f, ...RECOMMENDATION_DEFAULTS }));
+    toast.success("Filtros de recomendação limpos. Clique em Salvar para confirmar.");
+  };
+
   return (
     <div style={{ paddingTop: isMobile ? 24 : 80, paddingBottom: 120 }}>
       <div style={{ maxWidth: 820, margin: "0 auto", padding: isMobile ? "0 16px" : "0 28px" }}>
@@ -399,12 +425,37 @@ export function SettingsPage({ auth, isMobile }) {
                 }}
               >
                 <Sparkles size={16} style={{ color: C.gold, marginTop: 2, flexShrink: 0 }} />
-                <div>
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{ color: C.gold, fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>
                     Pré-visualização do filtro
                   </p>
                   <p style={{ color: C.text, fontSize: 13, lineHeight: 1.55 }}>{previewText}</p>
                 </div>
+                <button
+                  type="button"
+                  onClick={handleClearRecommendations}
+                  disabled={!recommendationsActive || saving}
+                  title="Remover todos os filtros de recomendação"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 6,
+                    background: recommendationsActive ? `${C.gold}22` : "transparent",
+                    color: recommendationsActive ? C.gold : `${C.text}55`,
+                    border: `1px solid ${recommendationsActive ? `${C.gold}55` : `${C.text}22`}`,
+                    borderRadius: 999,
+                    padding: "6px 12px",
+                    fontSize: 12,
+                    fontWeight: 700,
+                    cursor: recommendationsActive && !saving ? "pointer" : "not-allowed",
+                    flexShrink: 0,
+                    whiteSpace: "nowrap",
+                    transition: "all 0.15s",
+                  }}
+                >
+                  <RotateCcw size={13} />
+                  Limpar filtros
+                </button>
               </div>
 
               {/* Cards colapsáveis */}
