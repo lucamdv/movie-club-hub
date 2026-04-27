@@ -287,6 +287,7 @@ function useAuth() {
 function useRatings(userId) {
   const [ratings, setRatings] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [pending, setPending] = useState(() => new Set());
 
   const load = useCallback(async () => {
     if (!userId) return;
