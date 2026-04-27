@@ -255,8 +255,8 @@ export function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx,
   const [showRatingSheet, setShowRatingSheet] = useState(false);
   const [showFullOverview, setShowFullOverview] = useState(false);
   const [castExpanded, setCastExpanded] = useState(false);
-  const { upsertRating, getRating, deleteRating } = useRatings(authCtx?.user?.id);
-  const { isInList, add: addToWatchlist, remove: removeFromWatchlist } = useWatchlist(authCtx?.user?.id);
+  const { upsertRating, getRating, deleteRating, isPending: isRatingPending } = useRatings(authCtx?.user?.id);
+  const { isInList, add: addToWatchlist, remove: removeFromWatchlist, isPending: isWlPending } = useWatchlist(authCtx?.user?.id);
   const existingRating = m ? getRating(m.tmdbId || m.id) : null;
   const inWatchlist = m ? isInList(m.tmdbId || m.id) : false;
 
