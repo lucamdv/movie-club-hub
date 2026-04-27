@@ -5,6 +5,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
+import { Toaster } from "sonner";
 
 import appCss from "../styles.css?url";
 
@@ -128,5 +129,26 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
-  return <Outlet />;
+  return (
+    <>
+      <Outlet />
+      <Toaster
+        position="top-center"
+        theme="dark"
+        richColors
+        closeButton
+        expand
+        duration={3500}
+        toastOptions={{
+          style: {
+            fontFamily: "'DM Sans', system-ui, sans-serif",
+            fontWeight: 600,
+            borderRadius: 14,
+            border: "1px solid rgba(201,168,76,0.25)",
+            boxShadow: "0 12px 40px rgba(0,0,0,0.45)",
+          },
+        }}
+      />
+    </>
+  );
 }

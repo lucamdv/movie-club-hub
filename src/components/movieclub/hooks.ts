@@ -374,18 +374,27 @@ function useWatchlist(userId) {
       },
       { onConflict: "user_id,tmdb_id" },
     );
-    if (error) throw error;
+    if (error) {
+      toast.error("Erro ao adicionar à watchlist");
+      throw error;
+    }
     await load();
+    toast.success(title ? `"${title}" adicionado à watchlist` : "Adicionado à watchlist");
   };
 
   const remove = async (tmdbId) => {
     if (!userId) return;
-    await supabase
+    const { error } = await supabase
       .from("watchlist")
       .delete()
       .eq("user_id", userId)
       .eq("tmdb_id", tmdbId);
+    if (error) {
+      toast.error("Erro ao remover da watchlist");
+      return;
+    }
     await load();
+    toast.success("Removido da watchlist");
   };
 
   const isInList = (tmdbId) => items.some((i) => i.tmdb_id === tmdbId);
@@ -579,9 +588,13 @@ function useFollows(userId) {
 
   const follow = async (targetId) => {
     if (!userId) return;
-    await supabase
+    const { error } = await supabase
       .from("follows")
       .insert({ follower_id: userId, following_id: targetId });
+    if (error) {
+      toast.error("Não foi possível seguir esse usuário");
+      return;
+    }
     await load();
     // Check mutual follow → auto-create friendship
     const { data: mutual } = await supabase
@@ -598,16 +611,23 @@ function useFollows(userId) {
           { user_a_id: a, user_b_id: b },
           { onConflict: "user_a_id,user_b_id" },
         );
+      toast.success("Vocês agora são amigos! 🤝");
+    } else {
+      toast.success("Você está seguindo esse usuário");
     }
   };
 
   const unfollow = async (targetId) => {
     if (!userId) return;
-    await supabase
+    const { error } = await supabase
       .from("follows")
       .delete()
       .eq("follower_id", userId)
       .eq("following_id", targetId);
+    if (error) {
+      toast.error("Não foi possível deixar de seguir");
+      return;
+    }
     await load();
     // Remove friendship if no longer mutual
     const [a, b] = [userId, targetId].sort();
@@ -616,6 +636,7 @@ function useFollows(userId) {
       .delete()
       .eq("user_a_id", a)
       .eq("user_b_id", b);
+    toast.success("Você deixou de seguir esse usuário");
   };
 
   const isFollowing = (targetId) =>

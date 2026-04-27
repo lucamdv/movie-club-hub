@@ -424,6 +424,7 @@ export function QuickRatePage({ setPage, setSelectedMovie, auth }) {
         if (exists) return { ...prev, rated: prev.rated.map((r) => r.id === current.id ? { ...r, stars } : r) };
         return { ...prev, rated: [...prev.rated, { id: current.id, title: current.title, poster: tmdb.poster(current.poster_path), stars }] };
       });
+      toast.success(`Avaliado: ${stars.toFixed(1)} ★`, { id: `rate-${current.id}`, duration: 1800 });
     } catch { toast.error("Erro ao avaliar"); }
   };
 
@@ -590,7 +591,6 @@ export function QuickRatePage({ setPage, setSelectedMovie, auth }) {
                   if (!inWl(current.id)) {
                     addWl(current.id, current.title, tmdb.poster(current.poster_path));
                     setSessionStats(p => ({ ...p, watchlistAdded: [...p.watchlistAdded, current.id] }));
-                    toast.success("Adicionado à watchlist!");
                   }
                   goNext();
                 } else setSwipeX(0);
@@ -682,11 +682,9 @@ export function QuickRatePage({ setPage, setSelectedMovie, auth }) {
                 if (inWl(current.id)) {
                   await removeWl(current.id);
                   setSessionStats(p => ({ ...p, watchlistAdded: p.watchlistAdded.filter(id => id !== current.id) }));
-                  toast.success("Removido da watchlist");
                 } else {
                   await addWl(current.id, current.title, tmdb.poster(current.poster_path));
                   setSessionStats(p => ({ ...p, watchlistAdded: [...p.watchlistAdded, current.id] }));
-                  toast.success("Adicionado à watchlist!");
                 }
               }}
               style={{
