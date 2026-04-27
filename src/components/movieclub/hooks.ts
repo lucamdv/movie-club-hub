@@ -306,29 +306,55 @@ function useRatings(userId) {
 
   const upsertRating = async (tmdbId, rating, review, title, posterUrl) => {
     if (!userId) return;
-    const { error } = await supabase.from("ratings").upsert(
-      {
-        user_id: userId,
-        tmdb_id: tmdbId,
-        rating,
-        review,
-        title,
-        poster_url: posterUrl,
-      },
-      { onConflict: "user_id,tmdb_id" },
-    );
-    if (error) throw error;
-    await load();
+    setPending((prev) => {
+      const next = new Set(prev);
+      next.add(tmdbId);
+      return next;
+    });
+    try {
+      const { error } = await supabase.from("ratings").upsert(
+        {
+          user_id: userId,
+          tmdb_id: tmdbId,
+          rating,
+          review,
+          title,
+          poster_url: posterUrl,
+        },
+        { onConflict: "user_id,tmdb_id" },
+      );
+      if (error) throw error;
+      await load();
+    } finally {
+      setPending((prev) => {
+        const next = new Set(prev);
+        next.delete(tmdbId);
+        return next;
+      });
+    }
   };
 
   const deleteRating = async (tmdbId) => {
     if (!userId) return;
-    await supabase
-      .from("ratings")
-      .delete()
-      .eq("user_id", userId)
-      .eq("tmdb_id", tmdbId);
-    await load();
+    setPending((prev) => {
+      const next = new Set(prev);
+      next.add(tmdbId);
+      return next;
+    });
+    try {
+      await supabase
+        .from("ratings")
+        .delete()
+        .eq("user_id", userId)
+        .eq("tmdb_id", tmdbId);
+      await load();
+    } finally {
+      setPending((prev) => {
+        const next = new Set(prev);
+        next.delete(tmdbId);
+        return next;
+      });
+    }
   };
 
   const getRating = (tmdbId) => ratings.find((r) => r.tmdb_id === tmdbId);
@@ -339,6 +365,8 @@ function useRatings(userId) {
     upsertRating,
     deleteRating,
     getRating,
+    pendingIds: pending,
+    isPending: (tmdbId) => pending.has(tmdbId),
     reload: load,
   };
 }
