@@ -1205,7 +1205,7 @@ export function ProfilePageMobile({
   const [ratingSort, setRatingSort] = useState("recent");
   const [watchlistSort, setWatchlistSort] = useState("recent");
 
-  const { follow, unfollow, isFollowing } = useFollows(currentUserId);
+  const { follow, unfollow, isFollowing, isPending: isFollowPending } = useFollows(currentUserId);
   const { followers: targetFollowers, following: targetFollowing } =
     useFollows(targetUserId);
   const { isFriend } = useFriendships(currentUserId);
