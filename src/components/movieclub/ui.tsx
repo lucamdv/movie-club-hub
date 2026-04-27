@@ -271,7 +271,9 @@ function Btn({
   size = "md",
   style: sx = {},
   disabled = false,
+  loading = false,
 }) {
+  const isDisabled = disabled || loading;
   const base = {
     display: "inline-flex",
     alignItems: "center",
@@ -281,8 +283,8 @@ function Btn({
     fontWeight: 600,
     padding: size === "sm" ? "6px 14px" : "10px 22px",
     transition: "all 0.18s",
-    opacity: disabled ? 0.5 : 1,
-    cursor: disabled ? "not-allowed" : "pointer",
+    opacity: isDisabled ? 0.55 : 1,
+    cursor: isDisabled ? "not-allowed" : "pointer",
   };
   const variants = {
     gold: {
@@ -302,19 +304,21 @@ function Btn({
   };
   return (
     <button
-      onClick={disabled ? undefined : onClick}
+      onClick={isDisabled ? undefined : onClick}
+      disabled={isDisabled}
       style={{ ...base, ...variants[variant], ...sx }}
       onMouseEnter={(e) => {
-        if (!disabled) {
+        if (!isDisabled) {
           e.currentTarget.style.opacity = "0.85";
           e.currentTarget.style.transform = "translateY(-1px)";
         }
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.opacity = "1";
+        e.currentTarget.style.opacity = isDisabled ? "0.55" : "1";
         e.currentTarget.style.transform = "";
       }}
     >
+      {loading ? <Spinner size={size === "sm" ? 12 : 14} /> : null}
       {children}
     </button>
   );
