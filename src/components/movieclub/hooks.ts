@@ -287,6 +287,7 @@ function useAuth() {
 function useRatings(userId) {
   const [ratings, setRatings] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [pending, setPending] = useState(() => new Set());
 
   const load = useCallback(async () => {
     if (!userId) return;
@@ -306,29 +307,55 @@ function useRatings(userId) {
 
   const upsertRating = async (tmdbId, rating, review, title, posterUrl) => {
     if (!userId) return;
-    const { error } = await supabase.from("ratings").upsert(
-      {
-        user_id: userId,
-        tmdb_id: tmdbId,
-        rating,
-        review,
-        title,
-        poster_url: posterUrl,
-      },
-      { onConflict: "user_id,tmdb_id" },
-    );
-    if (error) throw error;
-    await load();
+    setPending((prev) => {
+      const next = new Set(prev);
+      next.add(tmdbId);
+      return next;
+    });
+    try {
+      const { error } = await supabase.from("ratings").upsert(
+        {
+          user_id: userId,
+          tmdb_id: tmdbId,
+          rating,
+          review,
+          title,
+          poster_url: posterUrl,
+        },
+        { onConflict: "user_id,tmdb_id" },
+      );
+      if (error) throw error;
+      await load();
+    } finally {
+      setPending((prev) => {
+        const next = new Set(prev);
+        next.delete(tmdbId);
+        return next;
+      });
+    }
   };
 
   const deleteRating = async (tmdbId) => {
     if (!userId) return;
-    await supabase
-      .from("ratings")
-      .delete()
-      .eq("user_id", userId)
-      .eq("tmdb_id", tmdbId);
-    await load();
+    setPending((prev) => {
+      const next = new Set(prev);
+      next.add(tmdbId);
+      return next;
+    });
+    try {
+      await supabase
+        .from("ratings")
+        .delete()
+        .eq("user_id", userId)
+        .eq("tmdb_id", tmdbId);
+      await load();
+    } finally {
+      setPending((prev) => {
+        const next = new Set(prev);
+        next.delete(tmdbId);
+        return next;
+      });
+    }
   };
 
   const getRating = (tmdbId) => ratings.find((r) => r.tmdb_id === tmdbId);
@@ -339,6 +366,8 @@ function useRatings(userId) {
     upsertRating,
     deleteRating,
     getRating,
+    pendingIds: pending,
+    isPending: (tmdbId) => pending.has(tmdbId),
     reload: load,
   };
 }
@@ -346,6 +375,7 @@ function useRatings(userId) {
 function useWatchlist(userId) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [pending, setPending] = useState(() => new Set());
 
   const load = useCallback(async () => {
     if (!userId) return;
@@ -365,41 +395,78 @@ function useWatchlist(userId) {
 
   const add = async (tmdbId, title, posterUrl) => {
     if (!userId) return;
-    const { error } = await supabase.from("watchlist").upsert(
-      {
-        user_id: userId,
-        tmdb_id: tmdbId,
-        title,
-        poster_url: posterUrl,
-      },
-      { onConflict: "user_id,tmdb_id" },
-    );
-    if (error) {
-      toast.error("Erro ao adicionar à watchlist");
-      throw error;
+    if (pending.has(tmdbId)) return;
+    setPending((prev) => {
+      const next = new Set(prev);
+      next.add(tmdbId);
+      return next;
+    });
+    try {
+      const { error } = await supabase.from("watchlist").upsert(
+        {
+          user_id: userId,
+          tmdb_id: tmdbId,
+          title,
+          poster_url: posterUrl,
+        },
+        { onConflict: "user_id,tmdb_id" },
+      );
+      if (error) {
+        toast.error("Erro ao adicionar à watchlist");
+        throw error;
+      }
+      await load();
+      toast.success(title ? `"${title}" adicionado à watchlist` : "Adicionado à watchlist");
+    } finally {
+      setPending((prev) => {
+        const next = new Set(prev);
+        next.delete(tmdbId);
+        return next;
+      });
     }
-    await load();
-    toast.success(title ? `"${title}" adicionado à watchlist` : "Adicionado à watchlist");
   };
 
   const remove = async (tmdbId) => {
     if (!userId) return;
-    const { error } = await supabase
-      .from("watchlist")
-      .delete()
-      .eq("user_id", userId)
-      .eq("tmdb_id", tmdbId);
-    if (error) {
-      toast.error("Erro ao remover da watchlist");
-      return;
+    if (pending.has(tmdbId)) return;
+    setPending((prev) => {
+      const next = new Set(prev);
+      next.add(tmdbId);
+      return next;
+    });
+    try {
+      const { error } = await supabase
+        .from("watchlist")
+        .delete()
+        .eq("user_id", userId)
+        .eq("tmdb_id", tmdbId);
+      if (error) {
+        toast.error("Erro ao remover da watchlist");
+        return;
+      }
+      await load();
+      toast.success("Removido da watchlist");
+    } finally {
+      setPending((prev) => {
+        const next = new Set(prev);
+        next.delete(tmdbId);
+        return next;
+      });
     }
-    await load();
-    toast.success("Removido da watchlist");
   };
 
   const isInList = (tmdbId) => items.some((i) => i.tmdb_id === tmdbId);
 
-  return { items, loading, add, remove, isInList, reload: load };
+  return {
+    items,
+    loading,
+    add,
+    remove,
+    isInList,
+    pendingIds: pending,
+    isPending: (tmdbId) => pending.has(tmdbId),
+    reload: load,
+  };
 }
 
 function useRecommendations(userId) {
@@ -569,6 +636,7 @@ function useFollows(userId) {
   const [following, setFollowing] = useState([]);
   const [followers, setFollowers] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [pending, setPending] = useState(() => new Set());
 
   const load = useCallback(async () => {
     if (!userId) return;
@@ -588,55 +656,81 @@ function useFollows(userId) {
 
   const follow = async (targetId) => {
     if (!userId) return;
-    const { error } = await supabase
-      .from("follows")
-      .insert({ follower_id: userId, following_id: targetId });
-    if (error) {
-      toast.error("Não foi possível seguir esse usuário");
-      return;
-    }
-    await load();
-    // Check mutual follow → auto-create friendship
-    const { data: mutual } = await supabase
-      .from("follows")
-      .select("id")
-      .eq("follower_id", targetId)
-      .eq("following_id", userId)
-      .limit(1);
-    if (mutual && mutual.length > 0) {
-      const [a, b] = [userId, targetId].sort();
-      await supabase
-        .from("friendships")
-        .upsert(
-          { user_a_id: a, user_b_id: b },
-          { onConflict: "user_a_id,user_b_id" },
-        );
-      toast.success("Vocês agora são amigos! 🤝");
-    } else {
-      toast.success("Você está seguindo esse usuário");
+    if (pending.has(targetId)) return;
+    setPending((prev) => {
+      const next = new Set(prev);
+      next.add(targetId);
+      return next;
+    });
+    try {
+      const { error } = await supabase
+        .from("follows")
+        .insert({ follower_id: userId, following_id: targetId });
+      if (error) {
+        toast.error("Não foi possível seguir esse usuário");
+        return;
+      }
+      await load();
+      const { data: mutual } = await supabase
+        .from("follows")
+        .select("id")
+        .eq("follower_id", targetId)
+        .eq("following_id", userId)
+        .limit(1);
+      if (mutual && mutual.length > 0) {
+        const [a, b] = [userId, targetId].sort();
+        await supabase
+          .from("friendships")
+          .upsert(
+            { user_a_id: a, user_b_id: b },
+            { onConflict: "user_a_id,user_b_id" },
+          );
+        toast.success("Vocês agora são amigos! 🤝");
+      } else {
+        toast.success("Você está seguindo esse usuário");
+      }
+    } finally {
+      setPending((prev) => {
+        const next = new Set(prev);
+        next.delete(targetId);
+        return next;
+      });
     }
   };
 
   const unfollow = async (targetId) => {
     if (!userId) return;
-    const { error } = await supabase
-      .from("follows")
-      .delete()
-      .eq("follower_id", userId)
-      .eq("following_id", targetId);
-    if (error) {
-      toast.error("Não foi possível deixar de seguir");
-      return;
+    if (pending.has(targetId)) return;
+    setPending((prev) => {
+      const next = new Set(prev);
+      next.add(targetId);
+      return next;
+    });
+    try {
+      const { error } = await supabase
+        .from("follows")
+        .delete()
+        .eq("follower_id", userId)
+        .eq("following_id", targetId);
+      if (error) {
+        toast.error("Não foi possível deixar de seguir");
+        return;
+      }
+      await load();
+      const [a, b] = [userId, targetId].sort();
+      await supabase
+        .from("friendships")
+        .delete()
+        .eq("user_a_id", a)
+        .eq("user_b_id", b);
+      toast.success("Você deixou de seguir esse usuário");
+    } finally {
+      setPending((prev) => {
+        const next = new Set(prev);
+        next.delete(targetId);
+        return next;
+      });
     }
-    await load();
-    // Remove friendship if no longer mutual
-    const [a, b] = [userId, targetId].sort();
-    await supabase
-      .from("friendships")
-      .delete()
-      .eq("user_a_id", a)
-      .eq("user_b_id", b);
-    toast.success("Você deixou de seguir esse usuário");
   };
 
   const isFollowing = (targetId) =>
@@ -649,6 +743,8 @@ function useFollows(userId) {
     follow,
     unfollow,
     isFollowing,
+    pendingIds: pending,
+    isPending: (targetId) => pending.has(targetId),
     reload: load,
   };
 }

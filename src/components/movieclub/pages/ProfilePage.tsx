@@ -1205,7 +1205,7 @@ export function ProfilePageMobile({
   const [ratingSort, setRatingSort] = useState("recent");
   const [watchlistSort, setWatchlistSort] = useState("recent");
 
-  const { follow, unfollow, isFollowing } = useFollows(currentUserId);
+  const { follow, unfollow, isFollowing, isPending: isFollowPending } = useFollows(currentUserId);
   const { followers: targetFollowers, following: targetFollowing } =
     useFollows(targetUserId);
   const { isFriend } = useFriendships(currentUserId);
@@ -1487,9 +1487,11 @@ export function ProfilePageMobile({
             <>
               <button
                 onClick={() => {
+                  if (isFollowPending(viewUserId)) return;
                   if (isFollowing(viewUserId)) unfollow(viewUserId);
                   else follow(viewUserId);
                 }}
+                disabled={isFollowPending(viewUserId)}
                 style={{
                   flex: 1,
                   padding: "10px",
@@ -1508,9 +1510,15 @@ export function ProfilePageMobile({
                   justifyContent: "center",
                   gap: 6,
                   minHeight: "unset",
+                  opacity: isFollowPending(viewUserId) ? 0.65 : 1,
+                  cursor: isFollowPending(viewUserId) ? "wait" : "pointer",
                 }}
               >
-                {isFollowing(viewUserId) ? (
+                {isFollowPending(viewUserId) ? (
+                  <>
+                    <Spinner size={14} /> Aguarde…
+                  </>
+                ) : isFollowing(viewUserId) ? (
                   <>
                     <UserCheck size={16} /> Seguindo
                   </>
@@ -2016,6 +2024,7 @@ export function ProfilePageDesktop(props) {
     follow,
     unfollow,
     isFollowing,
+    isPending: isFollowPending,
   } = useFollows(currentUserId);
   const { followers: targetFollowers, following: targetFollowing } =
     useFollows(targetUserId);
@@ -2385,7 +2394,9 @@ export function ProfilePageDesktop(props) {
                   <Btn
                     variant={isFollowing(viewUserId) ? "ghost" : "gold"}
                     size="sm"
+                    loading={isFollowPending(viewUserId)}
                     onClick={() => {
+                      if (isFollowPending(viewUserId)) return;
                       if (isFollowing(viewUserId)) unfollow(viewUserId);
                       else follow(viewUserId);
                     }}

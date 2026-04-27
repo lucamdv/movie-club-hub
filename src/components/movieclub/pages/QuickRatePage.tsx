@@ -332,9 +332,9 @@ export function QuickRatePage({ setPage, setSelectedMovie, auth }) {
   const [animating, setAnimating] = useState(false);
   const [direction, setDirection] = useState(null);
   const [sessionStats, setSessionStats] = useState({ rated: [], watchlistAdded: [], skipped: 0, startTime: null });
-  const { ratings, upsertRating, getRating } = useRatings(auth?.user?.id);
+  const { ratings, upsertRating, getRating, isPending: isRatingPending } = useRatings(auth?.user?.id);
   const { preferences } = useUserPreferences(auth?.user?.id);
-  const { add: addWl, remove: removeWl, isInList: inWl } = useWatchlist(auth?.user?.id);
+  const { add: addWl, remove: removeWl, isInList: inWl, isPending: isWlPending } = useWatchlist(auth?.user?.id);
   const recPageRef = useRef(0);
   const loadingMoreRef = useRef(false);
   const ratedIdsSet = useMemo(() => new Set(ratings.map((r) => r.tmdb_id)), [ratings]);
@@ -679,6 +679,7 @@ export function QuickRatePage({ setPage, setSelectedMovie, auth }) {
             {/* Watchlist */}
             <button
               onClick={async () => {
+                if (isWlPending(current.id)) return;
                 if (inWl(current.id)) {
                   await removeWl(current.id);
                   setSessionStats(p => ({ ...p, watchlistAdded: p.watchlistAdded.filter(id => id !== current.id) }));
@@ -687,17 +688,25 @@ export function QuickRatePage({ setPage, setSelectedMovie, auth }) {
                   setSessionStats(p => ({ ...p, watchlistAdded: [...p.watchlistAdded, current.id] }));
                 }
               }}
+              disabled={isWlPending(current.id)}
               style={{
                 display: "flex", alignItems: "center", gap: 6, padding: "10px 18px",
                 borderRadius: 14,
                 background: inWl(current.id) ? "rgba(34,197,94,0.14)" : "rgba(255,255,255,0.06)",
                 border: `1px solid ${inWl(current.id) ? "rgba(34,197,94,0.4)" : C.border}`,
                 color: inWl(current.id) ? "#22C55E" : C.textMuted,
-                fontSize: 13, fontWeight: 600, cursor: "pointer", minHeight: "unset", transition: "all 0.18s",
+                fontSize: 13, fontWeight: 600,
+                cursor: isWlPending(current.id) ? "wait" : "pointer",
+                opacity: isWlPending(current.id) ? 0.65 : 1,
+                minHeight: "unset", transition: "all 0.18s",
               }}
             >
-              <Bookmark size={15} fill={inWl(current.id) ? "#22C55E" : "none"} />
-              {inWl(current.id) ? "Salvo" : "Salvar"}
+              {isWlPending(current.id) ? (
+                <Spinner size={14} />
+              ) : (
+                <Bookmark size={15} fill={inWl(current.id) ? "#22C55E" : "none"} />
+              )}
+              {isWlPending(current.id) ? "..." : inWl(current.id) ? "Salvo" : "Salvar"}
             </button>
 
             {/* Skip */}

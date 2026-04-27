@@ -42,10 +42,11 @@ function Avatar({ profile, size = 44, ringColor, badge }) {
 }
 
 // ─── User Card ────────────────────────────────────────────
-function UserCard({ profile, currentUserId, isFollowing, isFriend, onFollow, onUnfollow, onViewProfile }) {
+function UserCard({ profile, currentUserId, isFollowing, isFriend, isFollowPending, onFollow, onUnfollow, onViewProfile }) {
   const following = isFollowing(profile.user_id);
   const friend = isFriend(profile.user_id);
   const isMe = profile.user_id === currentUserId;
+  const pending = isFollowPending ? isFollowPending(profile.user_id) : false;
   const [hovered, setHovered] = useState(false);
 
   return (
@@ -95,8 +96,10 @@ function UserCard({ profile, currentUserId, isFollowing, isFriend, onFollow, onU
         <button
           onClick={(e) => {
             e.stopPropagation();
+            if (pending) return;
             following ? onUnfollow(profile.user_id) : onFollow(profile.user_id);
           }}
+          disabled={pending}
           style={{
             display: "flex", alignItems: "center", gap: 6,
             padding: following ? "8px 14px" : "8px 16px",
@@ -106,11 +109,18 @@ function UserCard({ profile, currentUserId, isFollowing, isFriend, onFollow, onU
               : `linear-gradient(135deg, ${C.goldDim}, ${C.gold})`,
             border: following ? `1px solid rgba(201,168,76,0.3)` : "none",
             color: following ? C.gold : C.bgDeep,
-            cursor: "pointer", minHeight: "unset", minWidth: "unset",
+            cursor: pending ? "wait" : "pointer", minHeight: "unset", minWidth: "unset",
+            opacity: pending ? 0.65 : 1,
             fontFamily: "'Outfit', sans-serif", transition: "all 0.18s",
           }}
         >
-          {following ? <><UserCheck size={13} /> Seguindo</> : <><UserPlus size={13} /> Seguir</>}
+          {pending ? (
+            <><Spinner size={12} /> {following ? "Saindo…" : "Seguindo…"}</>
+          ) : following ? (
+            <><UserCheck size={13} /> Seguindo</>
+          ) : (
+            <><UserPlus size={13} /> Seguir</>
+          )}
         </button>
       )}
     </div>
@@ -317,7 +327,7 @@ export function FriendsPage({ setPage, setSelectedMovie, auth: authCtx, onViewPr
   const [friendProfiles, setFriendProfiles] = useState([]);
   const debRef = useRef(null);
 
-  const { following, followers, follow, unfollow, isFollowing, loading: followsLoading } = useFollows(userId);
+  const { following, followers, follow, unfollow, isFollowing, isPending: isFollowPending, loading: followsLoading } = useFollows(userId);
   const { friends, isFriend } = useFriendships(userId);
   const followingIds = following.map(f => f.following_id);
 
@@ -364,7 +374,7 @@ export function FriendsPage({ setPage, setSelectedMovie, auth: authCtx, onViewPr
   ];
 
   const cardProps = (profile) => ({
-    profile, currentUserId: userId, isFollowing, isFriend,
+    profile, currentUserId: userId, isFollowing, isFriend, isFollowPending,
     onFollow: follow, onUnfollow: unfollow, onViewProfile,
   });
 

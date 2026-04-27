@@ -77,9 +77,11 @@ function RatingSheet({ movie, existingRating, onSave, onRemove, onClose }) {
   const [localRating, setLocalRating] = useState(existingRating ? Number(existingRating.rating) : 0);
   const [review, setReview] = useState(existingRating?.review || "");
   const [saving, setSaving] = useState(false);
+  const [removing, setRemoving] = useState(false);
+  const busy = saving || removing;
 
   const handleSave = async () => {
-    if (!localRating) return;
+    if (!localRating || busy) return;
     setSaving(true);
     try {
       await onSave(localRating, review);
@@ -201,9 +203,16 @@ function RatingSheet({ movie, existingRating, onSave, onRemove, onClose }) {
             {existingRating && (
               <button
                 onClick={async () => {
-                  await onRemove();
-                  onClose();
+                  if (busy) return;
+                  setRemoving(true);
+                  try {
+                    await onRemove();
+                    onClose();
+                  } catch {
+                    setRemoving(false);
+                  }
                 }}
+                disabled={busy}
                 style={{
                   padding: "12px 16px",
                   borderRadius: 12,
@@ -214,14 +223,18 @@ function RatingSheet({ movie, existingRating, onSave, onRemove, onClose }) {
                   fontWeight: 600,
                   minHeight: "unset",
                   minWidth: "unset",
+                  opacity: busy ? 0.6 : 1,
+                  cursor: busy ? "wait" : "pointer",
+                  display: "inline-flex", alignItems: "center", gap: 6,
                 }}
               >
-                Remover
+                {removing ? <Spinner size={13} /> : null}
+                {removing ? "Removendo…" : "Remover"}
               </button>
             )}
             <button
               onClick={handleSave}
-              disabled={!localRating || saving}
+              disabled={!localRating || busy}
               style={{
                 flex: 1,
                 padding: "14px",
@@ -234,10 +247,11 @@ function RatingSheet({ movie, existingRating, onSave, onRemove, onClose }) {
                 border: "none",
                 minHeight: "unset",
                 transition: "all 0.2s",
-                opacity: saving ? 0.7 : 1,
+                opacity: busy ? 0.7 : 1,
+                display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8,
               }}
             >
-              {saving ? "Salvando…" : existingRating ? "Atualizar" : "Avaliar"}
+              {saving ? <><Spinner size={14} /> Salvando…</> : existingRating ? "Atualizar" : "Avaliar"}
             </button>
           </div>
         </div>
@@ -255,8 +269,8 @@ export function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx,
   const [showRatingSheet, setShowRatingSheet] = useState(false);
   const [showFullOverview, setShowFullOverview] = useState(false);
   const [castExpanded, setCastExpanded] = useState(false);
-  const { upsertRating, getRating, deleteRating } = useRatings(authCtx?.user?.id);
-  const { isInList, add: addToWatchlist, remove: removeFromWatchlist } = useWatchlist(authCtx?.user?.id);
+  const { upsertRating, getRating, deleteRating, isPending: isRatingPending } = useRatings(authCtx?.user?.id);
+  const { isInList, add: addToWatchlist, remove: removeFromWatchlist, isPending: isWlPending } = useWatchlist(authCtx?.user?.id);
   const existingRating = m ? getRating(m.tmdbId || m.id) : null;
   const inWatchlist = m ? isInList(m.tmdbId || m.id) : false;
 
@@ -522,8 +536,10 @@ export function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx,
             <button
               onClick={() => {
                 const id = m.tmdbId || m.id;
+                if (isWlPending(id)) return;
                 inWatchlist ? removeFromWatchlist(id) : addToWatchlist(id, m.title, m.poster);
               }}
+              disabled={isWlPending(m.tmdbId || m.id)}
               style={{
                 flex: 1,
                 padding: "11px 4px",
@@ -541,10 +557,18 @@ export function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx,
                 minHeight: "unset",
                 transition: "all 0.2s",
                 whiteSpace: "nowrap",
+                opacity: isWlPending(m.tmdbId || m.id) ? 0.6 : 1,
+                cursor: isWlPending(m.tmdbId || m.id) ? "wait" : "pointer",
               }}
             >
-              {inWatchlist ? <BookmarkCheck size={17} /> : <Bookmark size={17} />}
-              {inWatchlist ? "Salvo" : "Salvar"}
+              {isWlPending(m.tmdbId || m.id) ? (
+                <Spinner size={15} />
+              ) : inWatchlist ? (
+                <BookmarkCheck size={17} />
+              ) : (
+                <Bookmark size={17} />
+              )}
+              {isWlPending(m.tmdbId || m.id) ? "..." : inWatchlist ? "Salvo" : "Salvar"}
             </button>
 
             {/* Curtir */}
@@ -1138,8 +1162,10 @@ export function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx,
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
               <Btn
                 variant={inWatchlist ? "ghost" : "gold"}
+                loading={isWlPending(m.tmdbId || m.id)}
                 onClick={() => {
                   const id = m.tmdbId || m.id;
+                  if (isWlPending(id)) return;
                   inWatchlist ? removeFromWatchlist(id) : addToWatchlist(id, m.title, m.poster);
                 }}
               >
