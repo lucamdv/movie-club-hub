@@ -332,9 +332,9 @@ export function QuickRatePage({ setPage, setSelectedMovie, auth }) {
   const [animating, setAnimating] = useState(false);
   const [direction, setDirection] = useState(null);
   const [sessionStats, setSessionStats] = useState({ rated: [], watchlistAdded: [], skipped: 0, startTime: null });
-  const { ratings, upsertRating, getRating } = useRatings(auth?.user?.id);
+  const { ratings, upsertRating, getRating, isPending: isRatingPending } = useRatings(auth?.user?.id);
   const { preferences } = useUserPreferences(auth?.user?.id);
-  const { add: addWl, remove: removeWl, isInList: inWl } = useWatchlist(auth?.user?.id);
+  const { add: addWl, remove: removeWl, isInList: inWl, isPending: isWlPending } = useWatchlist(auth?.user?.id);
   const recPageRef = useRef(0);
   const loadingMoreRef = useRef(false);
   const ratedIdsSet = useMemo(() => new Set(ratings.map((r) => r.tmdb_id)), [ratings]);
