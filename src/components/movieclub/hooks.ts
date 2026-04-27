@@ -374,18 +374,27 @@ function useWatchlist(userId) {
       },
       { onConflict: "user_id,tmdb_id" },
     );
-    if (error) throw error;
+    if (error) {
+      toast.error("Erro ao adicionar à watchlist");
+      throw error;
+    }
     await load();
+    toast.success(title ? `"${title}" adicionado à watchlist` : "Adicionado à watchlist");
   };
 
   const remove = async (tmdbId) => {
     if (!userId) return;
-    await supabase
+    const { error } = await supabase
       .from("watchlist")
       .delete()
       .eq("user_id", userId)
       .eq("tmdb_id", tmdbId);
+    if (error) {
+      toast.error("Erro ao remover da watchlist");
+      return;
+    }
     await load();
+    toast.success("Removido da watchlist");
   };
 
   const isInList = (tmdbId) => items.some((i) => i.tmdb_id === tmdbId);
