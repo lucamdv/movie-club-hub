@@ -425,12 +425,37 @@ export function SettingsPage({ auth, isMobile }) {
                 }}
               >
                 <Sparkles size={16} style={{ color: C.gold, marginTop: 2, flexShrink: 0 }} />
-                <div>
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{ color: C.gold, fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>
                     Pré-visualização do filtro
                   </p>
                   <p style={{ color: C.text, fontSize: 13, lineHeight: 1.55 }}>{previewText}</p>
                 </div>
+                <button
+                  type="button"
+                  onClick={handleClearRecommendations}
+                  disabled={!recommendationsActive || saving}
+                  title="Remover todos os filtros de recomendação"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 6,
+                    background: recommendationsActive ? `${C.gold}22` : "transparent",
+                    color: recommendationsActive ? C.gold : `${C.text}55`,
+                    border: `1px solid ${recommendationsActive ? `${C.gold}55` : `${C.text}22`}`,
+                    borderRadius: 999,
+                    padding: "6px 12px",
+                    fontSize: 12,
+                    fontWeight: 700,
+                    cursor: recommendationsActive && !saving ? "pointer" : "not-allowed",
+                    flexShrink: 0,
+                    whiteSpace: "nowrap",
+                    transition: "all 0.15s",
+                  }}
+                >
+                  <RotateCcw size={13} />
+                  Limpar filtros
+                </button>
               </div>
 
               {/* Cards colapsáveis */}
