@@ -317,7 +317,7 @@ export function FriendsPage({ setPage, setSelectedMovie, auth: authCtx, onViewPr
   const [friendProfiles, setFriendProfiles] = useState([]);
   const debRef = useRef(null);
 
-  const { following, followers, follow, unfollow, isFollowing, loading: followsLoading } = useFollows(userId);
+  const { following, followers, follow, unfollow, isFollowing, isPending: isFollowPending, loading: followsLoading } = useFollows(userId);
   const { friends, isFriend } = useFriendships(userId);
   const followingIds = following.map(f => f.following_id);
 
@@ -364,7 +364,7 @@ export function FriendsPage({ setPage, setSelectedMovie, auth: authCtx, onViewPr
   ];
 
   const cardProps = (profile) => ({
-    profile, currentUserId: userId, isFollowing, isFriend,
+    profile, currentUserId: userId, isFollowing, isFriend, isFollowPending,
     onFollow: follow, onUnfollow: unfollow, onViewProfile,
   });
 
