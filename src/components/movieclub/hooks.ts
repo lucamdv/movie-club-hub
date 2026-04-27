@@ -375,6 +375,7 @@ function useRatings(userId) {
 function useWatchlist(userId) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [pending, setPending] = useState(() => new Set());
 
   const load = useCallback(async () => {
     if (!userId) return;
@@ -394,41 +395,78 @@ function useWatchlist(userId) {
 
   const add = async (tmdbId, title, posterUrl) => {
     if (!userId) return;
-    const { error } = await supabase.from("watchlist").upsert(
-      {
-        user_id: userId,
-        tmdb_id: tmdbId,
-        title,
-        poster_url: posterUrl,
-      },
-      { onConflict: "user_id,tmdb_id" },
-    );
-    if (error) {
-      toast.error("Erro ao adicionar à watchlist");
-      throw error;
+    if (pending.has(tmdbId)) return;
+    setPending((prev) => {
+      const next = new Set(prev);
+      next.add(tmdbId);
+      return next;
+    });
+    try {
+      const { error } = await supabase.from("watchlist").upsert(
+        {
+          user_id: userId,
+          tmdb_id: tmdbId,
+          title,
+          poster_url: posterUrl,
+        },
+        { onConflict: "user_id,tmdb_id" },
+      );
+      if (error) {
+        toast.error("Erro ao adicionar à watchlist");
+        throw error;
+      }
+      await load();
+      toast.success(title ? `"${title}" adicionado à watchlist` : "Adicionado à watchlist");
+    } finally {
+      setPending((prev) => {
+        const next = new Set(prev);
+        next.delete(tmdbId);
+        return next;
+      });
     }
-    await load();
-    toast.success(title ? `"${title}" adicionado à watchlist` : "Adicionado à watchlist");
   };
 
   const remove = async (tmdbId) => {
     if (!userId) return;
-    const { error } = await supabase
-      .from("watchlist")
-      .delete()
-      .eq("user_id", userId)
-      .eq("tmdb_id", tmdbId);
-    if (error) {
-      toast.error("Erro ao remover da watchlist");
-      return;
+    if (pending.has(tmdbId)) return;
+    setPending((prev) => {
+      const next = new Set(prev);
+      next.add(tmdbId);
+      return next;
+    });
+    try {
+      const { error } = await supabase
+        .from("watchlist")
+        .delete()
+        .eq("user_id", userId)
+        .eq("tmdb_id", tmdbId);
+      if (error) {
+        toast.error("Erro ao remover da watchlist");
+        return;
+      }
+      await load();
+      toast.success("Removido da watchlist");
+    } finally {
+      setPending((prev) => {
+        const next = new Set(prev);
+        next.delete(tmdbId);
+        return next;
+      });
     }
-    await load();
-    toast.success("Removido da watchlist");
   };
 
   const isInList = (tmdbId) => items.some((i) => i.tmdb_id === tmdbId);
 
-  return { items, loading, add, remove, isInList, reload: load };
+  return {
+    items,
+    loading,
+    add,
+    remove,
+    isInList,
+    pendingIds: pending,
+    isPending: (tmdbId) => pending.has(tmdbId),
+    reload: load,
+  };
 }
 
 function useRecommendations(userId) {
