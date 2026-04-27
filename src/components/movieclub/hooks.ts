@@ -636,6 +636,7 @@ function useFollows(userId) {
   const [following, setFollowing] = useState([]);
   const [followers, setFollowers] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [pending, setPending] = useState(() => new Set());
 
   const load = useCallback(async () => {
     if (!userId) return;
@@ -655,55 +656,81 @@ function useFollows(userId) {
 
   const follow = async (targetId) => {
     if (!userId) return;
-    const { error } = await supabase
-      .from("follows")
-      .insert({ follower_id: userId, following_id: targetId });
-    if (error) {
-      toast.error("Não foi possível seguir esse usuário");
-      return;
-    }
-    await load();
-    // Check mutual follow → auto-create friendship
-    const { data: mutual } = await supabase
-      .from("follows")
-      .select("id")
-      .eq("follower_id", targetId)
-      .eq("following_id", userId)
-      .limit(1);
-    if (mutual && mutual.length > 0) {
-      const [a, b] = [userId, targetId].sort();
-      await supabase
-        .from("friendships")
-        .upsert(
-          { user_a_id: a, user_b_id: b },
-          { onConflict: "user_a_id,user_b_id" },
-        );
-      toast.success("Vocês agora são amigos! 🤝");
-    } else {
-      toast.success("Você está seguindo esse usuário");
+    if (pending.has(targetId)) return;
+    setPending((prev) => {
+      const next = new Set(prev);
+      next.add(targetId);
+      return next;
+    });
+    try {
+      const { error } = await supabase
+        .from("follows")
+        .insert({ follower_id: userId, following_id: targetId });
+      if (error) {
+        toast.error("Não foi possível seguir esse usuário");
+        return;
+      }
+      await load();
+      const { data: mutual } = await supabase
+        .from("follows")
+        .select("id")
+        .eq("follower_id", targetId)
+        .eq("following_id", userId)
+        .limit(1);
+      if (mutual && mutual.length > 0) {
+        const [a, b] = [userId, targetId].sort();
+        await supabase
+          .from("friendships")
+          .upsert(
+            { user_a_id: a, user_b_id: b },
+            { onConflict: "user_a_id,user_b_id" },
+          );
+        toast.success("Vocês agora são amigos! 🤝");
+      } else {
+        toast.success("Você está seguindo esse usuário");
+      }
+    } finally {
+      setPending((prev) => {
+        const next = new Set(prev);
+        next.delete(targetId);
+        return next;
+      });
     }
   };
 
   const unfollow = async (targetId) => {
     if (!userId) return;
-    const { error } = await supabase
-      .from("follows")
-      .delete()
-      .eq("follower_id", userId)
-      .eq("following_id", targetId);
-    if (error) {
-      toast.error("Não foi possível deixar de seguir");
-      return;
+    if (pending.has(targetId)) return;
+    setPending((prev) => {
+      const next = new Set(prev);
+      next.add(targetId);
+      return next;
+    });
+    try {
+      const { error } = await supabase
+        .from("follows")
+        .delete()
+        .eq("follower_id", userId)
+        .eq("following_id", targetId);
+      if (error) {
+        toast.error("Não foi possível deixar de seguir");
+        return;
+      }
+      await load();
+      const [a, b] = [userId, targetId].sort();
+      await supabase
+        .from("friendships")
+        .delete()
+        .eq("user_a_id", a)
+        .eq("user_b_id", b);
+      toast.success("Você deixou de seguir esse usuário");
+    } finally {
+      setPending((prev) => {
+        const next = new Set(prev);
+        next.delete(targetId);
+        return next;
+      });
     }
-    await load();
-    // Remove friendship if no longer mutual
-    const [a, b] = [userId, targetId].sort();
-    await supabase
-      .from("friendships")
-      .delete()
-      .eq("user_a_id", a)
-      .eq("user_b_id", b);
-    toast.success("Você deixou de seguir esse usuário");
   };
 
   const isFollowing = (targetId) =>
@@ -716,6 +743,8 @@ function useFollows(userId) {
     follow,
     unfollow,
     isFollowing,
+    pendingIds: pending,
+    isPending: (targetId) => pending.has(targetId),
     reload: load,
   };
 }
