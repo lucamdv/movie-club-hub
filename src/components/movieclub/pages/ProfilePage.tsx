@@ -2394,7 +2394,9 @@ export function ProfilePageDesktop(props) {
                   <Btn
                     variant={isFollowing(viewUserId) ? "ghost" : "gold"}
                     size="sm"
+                    loading={isFollowPending(viewUserId)}
                     onClick={() => {
+                      if (isFollowPending(viewUserId)) return;
                       if (isFollowing(viewUserId)) unfollow(viewUserId);
                       else follow(viewUserId);
                     }}
