@@ -681,11 +681,9 @@ export function QuickRatePage({ setPage, setSelectedMovie, auth }) {
                 if (inWl(current.id)) {
                   await removeWl(current.id);
                   setSessionStats(p => ({ ...p, watchlistAdded: p.watchlistAdded.filter(id => id !== current.id) }));
-                  toast.success("Removido da watchlist");
                 } else {
                   await addWl(current.id, current.title, tmdb.poster(current.poster_path));
                   setSessionStats(p => ({ ...p, watchlistAdded: [...p.watchlistAdded, current.id] }));
-                  toast.success("Adicionado à watchlist!");
                 }
               }}
               style={{
