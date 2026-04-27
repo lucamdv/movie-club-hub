@@ -522,8 +522,10 @@ export function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx,
             <button
               onClick={() => {
                 const id = m.tmdbId || m.id;
+                if (isWlPending(id)) return;
                 inWatchlist ? removeFromWatchlist(id) : addToWatchlist(id, m.title, m.poster);
               }}
+              disabled={isWlPending(m.tmdbId || m.id)}
               style={{
                 flex: 1,
                 padding: "11px 4px",
@@ -541,10 +543,18 @@ export function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx,
                 minHeight: "unset",
                 transition: "all 0.2s",
                 whiteSpace: "nowrap",
+                opacity: isWlPending(m.tmdbId || m.id) ? 0.6 : 1,
+                cursor: isWlPending(m.tmdbId || m.id) ? "wait" : "pointer",
               }}
             >
-              {inWatchlist ? <BookmarkCheck size={17} /> : <Bookmark size={17} />}
-              {inWatchlist ? "Salvo" : "Salvar"}
+              {isWlPending(m.tmdbId || m.id) ? (
+                <Spinner size={15} />
+              ) : inWatchlist ? (
+                <BookmarkCheck size={17} />
+              ) : (
+                <Bookmark size={17} />
+              )}
+              {isWlPending(m.tmdbId || m.id) ? "..." : inWatchlist ? "Salvo" : "Salvar"}
             </button>
 
             {/* Curtir */}
