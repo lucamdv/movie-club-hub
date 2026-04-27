@@ -369,6 +369,21 @@ export function SettingsPage({ auth, isMobile }) {
 
   const handleReset = () => setForm(preferences);
 
+  // Verifica se algum filtro de recomendação está diferente do default
+  const recommendationsActive = useMemo(() => {
+    return Object.entries(RECOMMENDATION_DEFAULTS).some(([key, def]) => {
+      const cur = form?.[key];
+      if (Array.isArray(def)) return (cur || []).length > 0;
+      if (def === null) return cur !== null && cur !== undefined && cur !== "";
+      return cur !== def;
+    });
+  }, [form]);
+
+  const handleClearRecommendations = () => {
+    setForm((f) => ({ ...f, ...RECOMMENDATION_DEFAULTS }));
+    toast.success("Filtros de recomendação limpos. Clique em Salvar para confirmar.");
+  };
+
   return (
     <div style={{ paddingTop: isMobile ? 24 : 80, paddingBottom: 120 }}>
       <div style={{ maxWidth: 820, margin: "0 auto", padding: isMobile ? "0 16px" : "0 28px" }}>
