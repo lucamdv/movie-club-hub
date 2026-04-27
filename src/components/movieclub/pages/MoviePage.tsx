@@ -1148,8 +1148,10 @@ export function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx,
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
               <Btn
                 variant={inWatchlist ? "ghost" : "gold"}
+                loading={isWlPending(m.tmdbId || m.id)}
                 onClick={() => {
                   const id = m.tmdbId || m.id;
+                  if (isWlPending(id)) return;
                   inWatchlist ? removeFromWatchlist(id) : addToWatchlist(id, m.title, m.poster);
                 }}
               >
