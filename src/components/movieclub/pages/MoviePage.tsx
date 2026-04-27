@@ -77,9 +77,11 @@ function RatingSheet({ movie, existingRating, onSave, onRemove, onClose }) {
   const [localRating, setLocalRating] = useState(existingRating ? Number(existingRating.rating) : 0);
   const [review, setReview] = useState(existingRating?.review || "");
   const [saving, setSaving] = useState(false);
+  const [removing, setRemoving] = useState(false);
+  const busy = saving || removing;
 
   const handleSave = async () => {
-    if (!localRating) return;
+    if (!localRating || busy) return;
     setSaving(true);
     try {
       await onSave(localRating, review);
@@ -201,9 +203,16 @@ function RatingSheet({ movie, existingRating, onSave, onRemove, onClose }) {
             {existingRating && (
               <button
                 onClick={async () => {
-                  await onRemove();
-                  onClose();
+                  if (busy) return;
+                  setRemoving(true);
+                  try {
+                    await onRemove();
+                    onClose();
+                  } catch {
+                    setRemoving(false);
+                  }
                 }}
+                disabled={busy}
                 style={{
                   padding: "12px 16px",
                   borderRadius: 12,
@@ -214,14 +223,18 @@ function RatingSheet({ movie, existingRating, onSave, onRemove, onClose }) {
                   fontWeight: 600,
                   minHeight: "unset",
                   minWidth: "unset",
+                  opacity: busy ? 0.6 : 1,
+                  cursor: busy ? "wait" : "pointer",
+                  display: "inline-flex", alignItems: "center", gap: 6,
                 }}
               >
-                Remover
+                {removing ? <Spinner size={13} /> : null}
+                {removing ? "Removendo…" : "Remover"}
               </button>
             )}
             <button
               onClick={handleSave}
-              disabled={!localRating || saving}
+              disabled={!localRating || busy}
               style={{
                 flex: 1,
                 padding: "14px",
@@ -234,10 +247,11 @@ function RatingSheet({ movie, existingRating, onSave, onRemove, onClose }) {
                 border: "none",
                 minHeight: "unset",
                 transition: "all 0.2s",
-                opacity: saving ? 0.7 : 1,
+                opacity: busy ? 0.7 : 1,
+                display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8,
               }}
             >
-              {saving ? "Salvando…" : existingRating ? "Atualizar" : "Avaliar"}
+              {saving ? <><Spinner size={14} /> Salvando…</> : existingRating ? "Atualizar" : "Avaliar"}
             </button>
           </div>
         </div>
