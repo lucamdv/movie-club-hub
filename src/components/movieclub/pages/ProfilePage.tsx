@@ -2016,6 +2016,7 @@ export function ProfilePageDesktop(props) {
     follow,
     unfollow,
     isFollowing,
+    isPending: isFollowPending,
   } = useFollows(currentUserId);
   const { followers: targetFollowers, following: targetFollowing } =
     useFollows(targetUserId);
