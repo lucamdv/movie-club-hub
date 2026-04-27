@@ -590,7 +590,6 @@ export function QuickRatePage({ setPage, setSelectedMovie, auth }) {
                   if (!inWl(current.id)) {
                     addWl(current.id, current.title, tmdb.poster(current.poster_path));
                     setSessionStats(p => ({ ...p, watchlistAdded: [...p.watchlistAdded, current.id] }));
-                    toast.success("Adicionado à watchlist!");
                   }
                   goNext();
                 } else setSwipeX(0);
