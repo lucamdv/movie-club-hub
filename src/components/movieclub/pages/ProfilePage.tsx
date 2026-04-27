@@ -1487,9 +1487,11 @@ export function ProfilePageMobile({
             <>
               <button
                 onClick={() => {
+                  if (isFollowPending(viewUserId)) return;
                   if (isFollowing(viewUserId)) unfollow(viewUserId);
                   else follow(viewUserId);
                 }}
+                disabled={isFollowPending(viewUserId)}
                 style={{
                   flex: 1,
                   padding: "10px",
@@ -1508,9 +1510,15 @@ export function ProfilePageMobile({
                   justifyContent: "center",
                   gap: 6,
                   minHeight: "unset",
+                  opacity: isFollowPending(viewUserId) ? 0.65 : 1,
+                  cursor: isFollowPending(viewUserId) ? "wait" : "pointer",
                 }}
               >
-                {isFollowing(viewUserId) ? (
+                {isFollowPending(viewUserId) ? (
+                  <>
+                    <Spinner size={14} /> Aguarde…
+                  </>
+                ) : isFollowing(viewUserId) ? (
                   <>
                     <UserCheck size={16} /> Seguindo
                   </>
