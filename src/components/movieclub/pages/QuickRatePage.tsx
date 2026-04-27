@@ -424,6 +424,7 @@ export function QuickRatePage({ setPage, setSelectedMovie, auth }) {
         if (exists) return { ...prev, rated: prev.rated.map((r) => r.id === current.id ? { ...r, stars } : r) };
         return { ...prev, rated: [...prev.rated, { id: current.id, title: current.title, poster: tmdb.poster(current.poster_path), stars }] };
       });
+      toast.success(`Avaliado: ${stars.toFixed(1)} ★`, { id: `rate-${current.id}`, duration: 1800 });
     } catch { toast.error("Erro ao avaliar"); }
   };
 
