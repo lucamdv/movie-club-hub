@@ -58,6 +58,17 @@ const REGION_OPTIONS = [
 const CURRENT_YEAR = new Date().getFullYear();
 const MAX_YEAR = CURRENT_YEAR + 5;
 
+// Defaults aplicados ao limpar os filtros de recomendação
+const RECOMMENDATION_DEFAULTS = {
+  recommendation_min_year: null,
+  recommendation_min_rating: 0,
+  recommendation_max_runtime: null,
+  hide_unrated_recommendations: false,
+  preferred_languages: [],
+  excluded_genres: [],
+  show_adult_content: false,
+};
+
 // ─── Validation schema ────────────────────────────────────
 const recommendationSchema = z.object({
   recommendation_min_year: z
