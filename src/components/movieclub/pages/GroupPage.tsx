@@ -11,6 +11,7 @@ import {
 import { Spinner, Btn } from "../ui";
 import { BackIcon, PlusIcon } from "../ui";
 import { useClubDetail, useClubs, useFriendships, useRatings, useClubActivity } from "../hooks";
+import { useBodyScrollLock } from "@/hooks/use-body-scroll-lock";
 import mascotDirector from "@/assets/monkey-director.png";
 import monkeyPopcorn from "@/assets/monkey-popcorn.png";
 
@@ -31,6 +32,7 @@ function WatchRateModal({ movie, existingRating, onClose, onSubmit }) {
   const [rating, setRating] = useState(existingRating?.rating ? Number(existingRating.rating) : 0);
   const [hover, setHover] = useState(0);
   const [saving, setSaving] = useState(false);
+  useBodyScrollLock(true);
 
   const handleSubmit = async () => {
     if (!rating || rating < 0.5) { toast.error("Escolha uma nota antes de confirmar"); return; }
@@ -43,16 +45,10 @@ function WatchRateModal({ movie, existingRating, onClose, onSubmit }) {
   const display = hover || rating;
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 220, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "5vh 20px 20px", overflowY: "auto" }} onClick={onClose}>
-      <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.8)", backdropFilter: "blur(8px)" }} />
-      <div onClick={e => e.stopPropagation()} style={{
-        position: "relative", background: `linear-gradient(135deg, ${C.bgCard}, #1a2d42)`,
-        border: `1px solid rgba(201,168,76,0.3)`, borderRadius: 24, padding: 28,
-        width: "100%", maxWidth: 420, maxHeight: "calc(100dvh - 10vh - 20px)", overflowY: "auto", margin: "0 auto",
-        boxShadow: "0 24px 64px rgba(0,0,0,0.6), 0 0 0 1px rgba(201,168,76,0.1)",
-      }}>
+    <div className="mc-modal-overlay" onClick={onClose}>
+      <div className="mc-modal-panel mc-modal-panel--narrow" onClick={e => e.stopPropagation()}>
         {/* Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 22 }}>
+        <div className="mc-modal-header">
           <div>
             <h3 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 18, fontWeight: 800, color: C.text, marginBottom: 2 }}>
               Marcar como visto
@@ -62,6 +58,7 @@ function WatchRateModal({ movie, existingRating, onClose, onSubmit }) {
           <button onClick={onClose} style={{ width: 34, height: 34, borderRadius: "50%", background: "rgba(255,255,255,0.06)", border: `1px solid ${C.border}`, color: C.textMuted, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", minHeight: "unset", minWidth: "unset" }}>✕</button>
         </div>
 
+        <div className="mc-modal-body">
         {/* Movie info */}
         <div style={{ display: "flex", gap: 14, marginBottom: 24, padding: "14px 16px", borderRadius: 14, background: "rgba(255,255,255,0.03)", border: `1px solid ${C.border}` }}>
           <div style={{ width: 56, height: 84, borderRadius: 10, overflow: "hidden", background: C.bgDeep, flexShrink: 0, border: `1px solid ${C.border}` }}>
@@ -100,11 +97,12 @@ function WatchRateModal({ movie, existingRating, onClose, onSubmit }) {
             );
           })}
         </div>
-        <p style={{ textAlign: "center", color: display ? C.gold : C.textMuted, fontSize: 14, fontWeight: 600, marginBottom: 24, fontFamily: "'Outfit', sans-serif" }}>
+        <p style={{ textAlign: "center", color: display ? C.gold : C.textMuted, fontSize: 14, fontWeight: 600, marginBottom: 8, fontFamily: "'Outfit', sans-serif" }}>
           {display ? `${display.toFixed(1)} / 5.0` : "Selecione uma nota"}
         </p>
+        </div>
 
-        <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+        <div className="mc-modal-footer">
           <button onClick={onClose} style={{ padding: "10px 18px", borderRadius: 12, background: "transparent", border: `1px solid ${C.border}`, color: C.textMuted, fontSize: 13, fontWeight: 600, cursor: "pointer", minHeight: "unset" }}>Cancelar</button>
           <button onClick={handleSubmit} disabled={saving || !rating} style={{ padding: "10px 22px", borderRadius: 12, background: rating ? `linear-gradient(135deg, ${C.goldDim}, ${C.gold})` : C.bgCard, color: rating ? C.bgDeep : C.textDim, fontSize: 13, fontWeight: 700, fontFamily: "'Outfit', sans-serif", border: "none", cursor: rating ? "pointer" : "not-allowed", opacity: saving ? 0.7 : 1, minHeight: "unset", display: "flex", alignItems: "center", gap: 6 }}>
             {saving ? <><Spinner size={14} /> Salvando...</> : <><Check size={14} /> {existingRating ? "Atualizar" : "Confirmar"}</>}
