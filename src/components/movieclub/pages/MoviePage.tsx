@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { Spinner, StarRating, Avatar, Badge, Btn, Section, StreamingBadges, RatingsRow } from "../ui";
 import { useMovieDetails, useRatings, useWatchlist } from "../hooks";
+import { useBodyScrollLock } from "@/hooks/use-body-scroll-lock";
 
 function getMovieClubRating(movie) {
   if (!movie) return null;
@@ -79,6 +80,7 @@ function RatingSheet({ movie, existingRating, onSave, onRemove, onClose }) {
   const [saving, setSaving] = useState(false);
   const [removing, setRemoving] = useState(false);
   const busy = saving || removing;
+  useBodyScrollLock(true);
 
   const handleSave = async () => {
     if (!localRating || busy) return;
