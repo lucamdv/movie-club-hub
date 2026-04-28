@@ -1204,6 +1204,7 @@ export function ProfilePageMobile({
   const [showEditModal, setShowEditModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  useBodyScrollLock(showSettings);
   const [movieFilter, setMovieFilter] = useState("");
   const [ratingSort, setRatingSort] = useState("recent");
   const [watchlistSort, setWatchlistSort] = useState("recent");
