@@ -165,17 +165,18 @@ function ActivityItem({ entry, onOpenMovie }) {
 
 // ─── Add Movie Modal ─────────────────────────────────────
 function AddMovieModal({ movieSearch, setMovieSearch, movieResults, movieSearchLoading, onAdd, onClose }) {
+  useBodyScrollLock(true);
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "5vh 20px 20px", overflowY: "auto" }} onClick={onClose}>
-      <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.8)", backdropFilter: "blur(8px)" }} />
-      <div style={{ position: "relative", background: `linear-gradient(135deg, ${C.bgCard}, #1a2d42)`, border: `1px solid rgba(201,168,76,0.3)`, borderRadius: 24, padding: 28, width: "100%", maxWidth: 500, maxHeight: "calc(100dvh - 10vh - 20px)", overflowY: "auto", boxShadow: "0 24px 64px rgba(0,0,0,0.6)", margin: "0 auto" }} onClick={e => e.stopPropagation()}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+    <div className="mc-modal-overlay" onClick={onClose}>
+      <div className="mc-modal-panel" onClick={e => e.stopPropagation()}>
+        <div className="mc-modal-header">
           <div>
             <h3 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 18, fontWeight: 800, color: C.text }}>Adicionar Filme</h3>
             <p style={{ fontSize: 12, color: C.textMuted, marginTop: 2 }}>Busque e adicione à curadoria</p>
           </div>
           <button onClick={onClose} style={{ width: 34, height: 34, borderRadius: "50%", background: "rgba(255,255,255,0.06)", border: `1px solid ${C.border}`, color: C.textMuted, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", minHeight: "unset", minWidth: "unset" }}>✕</button>
         </div>
+        <div className="mc-modal-body">
         <div style={{ position: "relative", marginBottom: 16 }}>
           <input value={movieSearch} onChange={e => setMovieSearch(e.target.value)} placeholder="Buscar filme..." autoFocus style={{ width: "100%", padding: "12px 16px", borderRadius: 12, background: "rgba(9,21,35,0.7)", border: `1px solid ${C.border}`, color: C.text, fontSize: 14, outline: "none" }} onFocus={e => (e.target.style.borderColor = C.gold)} onBlur={e => (e.target.style.borderColor = C.border)} />
           {movieSearchLoading && <div style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)" }}><Spinner size={16} /></div>}
@@ -203,6 +204,7 @@ function AddMovieModal({ movieSearch, setMovieSearch, movieResults, movieSearchL
             )}
           </div>
         )}
+        </div>
       </div>
     </div>
   );
@@ -210,17 +212,18 @@ function AddMovieModal({ movieSearch, setMovieSearch, movieResults, movieSearchL
 
 // ─── Invite Modal ────────────────────────────────────────
 function InviteModal({ friendProfiles, onInvite, onCopyLink, onClose }) {
+  useBodyScrollLock(true);
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "5vh 20px 20px", overflowY: "auto" }} onClick={onClose}>
-      <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.8)", backdropFilter: "blur(8px)" }} />
-      <div style={{ position: "relative", background: `linear-gradient(135deg, ${C.bgCard}, #1a2d42)`, border: `1px solid rgba(201,168,76,0.3)`, borderRadius: 24, padding: 28, width: "100%", maxWidth: 500, maxHeight: "calc(100dvh - 10vh - 20px)", overflowY: "auto", boxShadow: "0 24px 64px rgba(0,0,0,0.6)", margin: "0 auto" }} onClick={e => e.stopPropagation()}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+    <div className="mc-modal-overlay" onClick={onClose}>
+      <div className="mc-modal-panel" onClick={e => e.stopPropagation()}>
+        <div className="mc-modal-header">
           <div>
             <h3 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 18, fontWeight: 800, color: C.text }}>Convidar Amigos</h3>
             <p style={{ fontSize: 12, color: C.textMuted, marginTop: 2 }}>Expanda a curadoria do seu club</p>
           </div>
           <button onClick={onClose} style={{ width: 34, height: 34, borderRadius: "50%", background: "rgba(255,255,255,0.06)", border: `1px solid ${C.border}`, color: C.textMuted, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", minHeight: "unset", minWidth: "unset" }}>✕</button>
         </div>
+        <div className="mc-modal-body">
         <button onClick={onCopyLink} style={{ width: "100%", display: "flex", alignItems: "center", gap: 12, padding: "14px 16px", borderRadius: 14, background: `linear-gradient(135deg, rgba(201,168,76,0.12), rgba(201,168,76,0.06))`, border: `1px solid rgba(201,168,76,0.3)`, cursor: "pointer", marginBottom: 16, minHeight: "unset" }}>
           <div style={{ width: 36, height: 36, borderRadius: 10, background: `rgba(201,168,76,0.15)`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
             <Link2 size={16} style={{ color: C.gold }} />
@@ -256,6 +259,7 @@ function InviteModal({ friendProfiles, onInvite, onCopyLink, onClose }) {
             <p style={{ fontSize: 11, marginTop: 4 }}>Adicione amigos primeiro na aba Social</p>
           </div>
         )}
+        </div>
       </div>
     </div>
   );
@@ -263,15 +267,12 @@ function InviteModal({ friendProfiles, onInvite, onCopyLink, onClose }) {
 
 // ─── Leave/Delete Club Confirm Modal ─────────────────────
 function LeaveConfirmModal({ isOwner, clubName, loading, onConfirm, onClose }) {
+  useBodyScrollLock(true);
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 230, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "10vh 20px 20px", overflowY: "auto" }} onClick={onClose}>
-      <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.82)", backdropFilter: "blur(8px)" }} />
-      <div onClick={e => e.stopPropagation()} style={{
-        position: "relative", background: `linear-gradient(135deg, ${C.bgCard}, #1a2d42)`,
-        border: `1px solid rgba(239,68,68,0.32)`, borderRadius: 22, padding: 26,
-        width: "100%", maxWidth: 400, boxShadow: "0 24px 64px rgba(0,0,0,0.6)", margin: "0 auto",
-      }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+    <div className="mc-modal-overlay" onClick={onClose}>
+      <div className="mc-modal-panel mc-modal-panel--narrow mc-modal-panel--danger" onClick={e => e.stopPropagation()}>
+        <div className="mc-modal-header" style={{ borderBottomColor: "rgba(239,68,68,0.18)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1 }}>
           <div style={{ width: 44, height: 44, borderRadius: 12, background: "rgba(239,68,68,0.12)", border: `1px solid rgba(239,68,68,0.3)`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
             <AlertTriangle size={20} style={{ color: "#ef4444" }} />
           </div>
@@ -281,13 +282,17 @@ function LeaveConfirmModal({ isOwner, clubName, loading, onConfirm, onClose }) {
             </h3>
             <p style={{ fontSize: 12, color: C.textMuted }}>{isOwner ? "Esta ação é permanente" : "Você poderá voltar via convite"}</p>
           </div>
+          </div>
+          <button onClick={onClose} disabled={loading} style={{ width: 34, height: 34, borderRadius: "50%", background: "rgba(255,255,255,0.06)", border: `1px solid ${C.border}`, color: C.textMuted, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", minHeight: "unset", minWidth: "unset", flexShrink: 0 }}>✕</button>
         </div>
-        <p style={{ fontSize: 13, color: C.textMuted, lineHeight: 1.5, marginBottom: 22 }}>
+        <div className="mc-modal-body">
+        <p style={{ fontSize: 13, color: C.textMuted, lineHeight: 1.5 }}>
           {isOwner
             ? <>Você é o dono de <strong style={{ color: C.text }}>{clubName}</strong>. Excluir vai remover o club, todos os filmes e o histórico de atividade para todos os membros.</>
             : <>Você deixará de ver os filmes e a atividade de <strong style={{ color: C.text }}>{clubName}</strong>. Sua avaliação dos filmes não será apagada.</>}
         </p>
-        <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+        </div>
+        <div className="mc-modal-footer">
           <button onClick={onClose} disabled={loading} style={{ padding: "10px 18px", borderRadius: 12, background: "transparent", border: `1px solid ${C.border}`, color: C.textMuted, fontSize: 13, fontWeight: 600, cursor: "pointer", minHeight: "unset" }}>Cancelar</button>
           <button onClick={onConfirm} disabled={loading} style={{ padding: "10px 20px", borderRadius: 12, background: "linear-gradient(135deg, #dc2626, #ef4444)", color: "#fff", fontSize: 13, fontWeight: 700, fontFamily: "'Outfit', sans-serif", border: "none", cursor: loading ? "wait" : "pointer", opacity: loading ? 0.7 : 1, minHeight: "unset", display: "flex", alignItems: "center", gap: 6, boxShadow: "0 4px 14px rgba(239,68,68,0.35)" }}>
             {loading ? <><Spinner size={14} /> Aguarde...</> : isOwner ? <><Trash2 size={14} /> Excluir</> : <><LogOut size={14} /> Sair</>}
