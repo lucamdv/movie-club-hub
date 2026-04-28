@@ -18,6 +18,7 @@ import {
   apiCache,
 } from "../foundation";
 import { tmdbProxy } from "@/lib/movie-api.functions";
+import { useBodyScrollLock } from "@/hooks/use-body-scroll-lock";
 import {
   Film,
   ClipboardList,
@@ -252,6 +253,7 @@ function ImportDataModal(props) {
 
 function ImportDataModalInner({ userId, onClose }) {
   const [step, setStep] = useState("select_platform");
+  useBodyScrollLock(true);
   const [progress, setProgress] = useState({
     total: 0,
     matched: 0,
@@ -816,6 +818,7 @@ function ProfileEditModal(props) {
 
 function ProfileEditModalInner({ profile, user, onClose, onSave }) {
   const [displayName, setDisplayName] = useState(profile?.display_name || "");
+  useBodyScrollLock(true);
   const [username, setUsername] = useState(profile?.username || "");
   const [bio, setBio] = useState(profile?.bio || "");
   const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url || "");
