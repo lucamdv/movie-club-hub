@@ -1165,13 +1165,6 @@
    GENERAL MOBILE TWEAKS
 ═══════════════════════════════════════════════════════════ */
 @media (max-width: 767px) {
-  /* Evitar que modais e overlays causem scroll horizontal */
-  body.modal-open {
-    overflow: hidden;
-    position: fixed;
-    width: 100%;
-  }
-
   /* Melhora espaçamento de cards em listas */
   .card-list-item {
     padding: 14px 16px !important;
@@ -1183,6 +1176,117 @@
     padding: 1px 6px !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   MODAL SYSTEM — responsive overlay + panel
+   - Mobile: full-screen sheet, scroll interno, sem barras duplas
+   - Desktop: card centralizado tradicional
+   - z-index acima da bottom-nav (que fica em ~120)
+═══════════════════════════════════════════════════════════ */
+.mc-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  overscroll-behavior: contain;
+  /* Empilhamento sem padding no mobile -> ocupa tela inteira */
+  padding: 0;
+}
+
+.mc-modal-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #122033, #1a2d42);
+  border: 1px solid rgba(201, 168, 76, 0.28);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
+  width: 100%;
+  max-width: 520px;
+  /* Em mobile ocupa toda a viewport (100dvh evita salto da barra do iOS) */
+  min-height: 100dvh;
+  max-height: 100dvh;
+  border-radius: 0;
+  overflow: hidden; /* o scroll fica no body interno */
+}
+
+.mc-modal-panel--narrow {
+  max-width: 420px;
+}
+
+.mc-modal-panel--danger {
+  border-color: rgba(239, 68, 68, 0.32);
+}
+
+.mc-modal-header {
+  flex-shrink: 0;
+  padding: 18px 22px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  /* Respeita o notch no topo no mobile */
+  padding-top: calc(18px + var(--safe-top, 0px));
+}
+
+.mc-modal-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding: 20px 22px;
+}
+
+.mc-modal-footer {
+  flex-shrink: 0;
+  padding: 14px 22px;
+  padding-bottom: calc(14px + var(--safe-bottom, 0px));
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(9, 21, 35, 0.5);
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+/* Desktop: vira card flutuante centralizado */
+@media (min-width: 768px) {
+  .mc-modal-overlay {
+    align-items: center;
+    padding: 5vh 24px;
+  }
+  .mc-modal-panel {
+    min-height: 0;
+    max-height: min(85vh, 760px);
+    border-radius: 22px;
+  }
+  .mc-modal-header {
+    padding-top: 18px;
+    border-radius: 22px 22px 0 0;
+  }
+  .mc-modal-footer {
+    padding-bottom: 14px;
+    border-radius: 0 0 22px 22px;
+  }
+}
+
+/* Quando qualquer modal/sheet está aberto, escondemos a bottom-nav no
+   mobile para evitar a "barra dupla" e o efeito de navbar sumindo
+   junto com o teclado virtual. O modal usa z-index 400, acima dos
+   ~120 da nav, mas escondê-la garante zero conflito de gestos. */
+body.modal-open .bottom-nav {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Sheet base (mobile): garante z-index acima da bottom-nav */
+.bottom-sheet-overlay { z-index: 400 !important; }
+.bottom-sheet { z-index: 401 !important; }
 
 /* ═══════════════════════════════════════════════════════════
    WATCH BUTTON — hover state
