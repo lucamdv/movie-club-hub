@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { useState, useEffect, useRef, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { C, tmdb, resolveAvatarUrl } from "../foundation";
@@ -44,7 +45,8 @@ function WatchRateModal({ movie, existingRating, onClose, onSubmit }) {
 
   const display = hover || rating;
 
-  return (
+  if (typeof document === "undefined") return null;
+  return createPortal(
     <div className="mc-modal-overlay" onClick={onClose}>
       <div className="mc-modal-panel mc-modal-panel--narrow" onClick={e => e.stopPropagation()}>
         {/* Header */}
@@ -109,7 +111,8 @@ function WatchRateModal({ movie, existingRating, onClose, onSubmit }) {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
@@ -166,7 +169,8 @@ function ActivityItem({ entry, onOpenMovie }) {
 // ─── Add Movie Modal ─────────────────────────────────────
 function AddMovieModal({ movieSearch, setMovieSearch, movieResults, movieSearchLoading, onAdd, onClose }) {
   useBodyScrollLock(true);
-  return (
+  if (typeof document === "undefined") return null;
+  return createPortal(
     <div className="mc-modal-overlay" onClick={onClose}>
       <div className="mc-modal-panel" onClick={e => e.stopPropagation()}>
         <div className="mc-modal-header">
@@ -206,14 +210,16 @@ function AddMovieModal({ movieSearch, setMovieSearch, movieResults, movieSearchL
         )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
 // ─── Invite Modal ────────────────────────────────────────
 function InviteModal({ friendProfiles, onInvite, onCopyLink, onClose }) {
   useBodyScrollLock(true);
-  return (
+  if (typeof document === "undefined") return null;
+  return createPortal(
     <div className="mc-modal-overlay" onClick={onClose}>
       <div className="mc-modal-panel" onClick={e => e.stopPropagation()}>
         <div className="mc-modal-header">
@@ -261,14 +267,16 @@ function InviteModal({ friendProfiles, onInvite, onCopyLink, onClose }) {
         )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
 // ─── Leave/Delete Club Confirm Modal ─────────────────────
 function LeaveConfirmModal({ isOwner, clubName, loading, onConfirm, onClose }) {
   useBodyScrollLock(true);
-  return (
+  if (typeof document === "undefined") return null;
+  return createPortal(
     <div className="mc-modal-overlay" onClick={onClose}>
       <div className="mc-modal-panel mc-modal-panel--narrow mc-modal-panel--danger" onClick={e => e.stopPropagation()}>
         <div className="mc-modal-header" style={{ borderBottomColor: "rgba(239,68,68,0.18)" }}>
@@ -299,7 +307,8 @@ function LeaveConfirmModal({ isOwner, clubName, loading, onConfirm, onClose }) {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
