@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { useState, useEffect, useRef, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { C, tmdb, resolveAvatarUrl } from "../foundation";
@@ -44,7 +45,8 @@ function WatchRateModal({ movie, existingRating, onClose, onSubmit }) {
 
   const display = hover || rating;
 
-  return (
+  if (typeof document === "undefined") return null;
+  return createPortal(
     <div className="mc-modal-overlay" onClick={onClose}>
       <div className="mc-modal-panel mc-modal-panel--narrow" onClick={e => e.stopPropagation()}>
         {/* Header */}
@@ -109,7 +111,8 @@ function WatchRateModal({ movie, existingRating, onClose, onSubmit }) {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
