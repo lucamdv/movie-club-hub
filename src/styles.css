@@ -1185,15 +1185,20 @@
 ═══════════════════════════════════════════════════════════ */
 .mc-modal-overlay {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 100dvh;
   z-index: 1000;
   display: flex;
-  align-items: stretch;
+  align-items: flex-start;
   justify-content: center;
   background: rgba(0, 0, 0, 0.78);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   overscroll-behavior: contain;
+  overflow: hidden;
   /* Empilhamento sem padding no mobile -> ocupa tela inteira */
   padding: 0;
 }
@@ -1207,8 +1212,8 @@
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
   width: 100%;
   max-width: 520px;
-  /* Em mobile ocupa toda a viewport (100dvh evita salto da barra do iOS) */
-  min-height: 100dvh;
+  /* Em mobile ocupa exatamente a viewport visível */
+  height: 100dvh;
   max-height: 100dvh;
   border-radius: 0;
   overflow: hidden; /* o scroll fica no body interno */
@@ -1261,7 +1266,7 @@
     padding: 5vh 24px;
   }
   .mc-modal-panel {
-    min-height: 0;
+    height: auto;
     max-height: min(85vh, 760px);
     border-radius: 22px;
   }
