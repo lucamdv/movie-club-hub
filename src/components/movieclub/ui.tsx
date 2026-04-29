@@ -221,6 +221,8 @@ function StarRating({
 }
 
 function Avatar({ user, size = 40 }) {
+  const initials = user?.initials || (user?.name ? user.name.slice(0, 2).toUpperCase() : "?");
+  const img = user?.avatar || user?.avatar_url;
   return (
     <div
       style={{
@@ -236,9 +238,14 @@ function Avatar({ user, size = 40 }) {
         color: "#fff",
         flexShrink: 0,
         border: `2px solid ${C.border}`,
+        overflow: "hidden",
       }}
     >
-      {user?.initials || "?"}
+      {img ? (
+        <img src={img} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+      ) : (
+        initials
+      )}
     </div>
   );
 }

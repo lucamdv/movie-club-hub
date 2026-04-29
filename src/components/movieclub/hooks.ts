@@ -1103,5 +1103,66 @@ export {
   useMovieDetails, usePaginatedMovies, useAuth, useRatings, useWatchlist,
   useRecommendations, useUserPreferences, useFollows, useFriendLinks, useFriendships,
   useClubs, useClubDetail, useClubActivity,
+  useMovieReviews,
   applyPreferenceFilters,
 };
+
+// ─────────────────────────────────────────────
+//  useMovieReviews — reviews públicos de um filme
+//  Busca todos os ratings (com texto de review) feitos para um tmdbId
+//  e enriquece com perfis dos autores. Atualiza em tempo real via Realtime.
+// ─────────────────────────────────────────────
+function useMovieReviews(tmdbId, currentUserId) {
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const load = useCallback(async () => {
+    if (!tmdbId) { setReviews([]); return; }
+    setLoading(true);
+    try {
+      const { data: rs, error } = await supabase
+        .from("ratings")
+        .select("id, user_id, rating, review, created_at, updated_at")
+        .eq("tmdb_id", Number(tmdbId))
+        .not("review", "is", null)
+        .neq("review", "")
+        .order("updated_at", { ascending: false })
+        .limit(100);
+      if (error) throw error;
+      const list = rs || [];
+      const userIds = Array.from(new Set(list.map((r) => r.user_id)));
+      let profileMap = {};
+      if (userIds.length) {
+        const { data: profs } = await supabase
+          .from("profiles")
+          .select("user_id, display_name, username, avatar_url")
+          .in("user_id", userIds);
+        (profs || []).forEach((p) => { profileMap[p.user_id] = p; });
+      }
+      setReviews(list.map((r) => ({ ...r, profile: profileMap[r.user_id] || null })));
+    } catch (e) {
+      console.error("useMovieReviews load error", e);
+      setReviews([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [tmdbId]);
+
+  useEffect(() => { load(); }, [load]);
+
+  // Realtime: re-carrega quando qualquer rating desse filme mudar
+  useEffect(() => {
+    if (!tmdbId) return;
+    const channel = supabase
+      .channel(`reviews-${tmdbId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "ratings", filter: `tmdb_id=eq.${Number(tmdbId)}` },
+        () => { load(); },
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [tmdbId, load]);
+
+  return { reviews, loading, reload: load };
+}
