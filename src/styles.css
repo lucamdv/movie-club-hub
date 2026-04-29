@@ -1186,7 +1186,7 @@
 .mc-modal-overlay {
   position: fixed;
   inset: 0;
-  z-index: 400;
+  z-index: 1000;
   display: flex;
   align-items: stretch;
   justify-content: center;
@@ -1275,18 +1275,19 @@
   }
 }
 
-/* Quando qualquer modal/sheet está aberto, escondemos a bottom-nav no
-   mobile para evitar a "barra dupla" e o efeito de navbar sumindo
-   junto com o teclado virtual. O modal usa z-index 400, acima dos
-   ~120 da nav, mas escondê-la garante zero conflito de gestos. */
-body.modal-open .bottom-nav {
+/* Quando qualquer modal/sheet está aberto, escondemos a bottom-nav E a
+   top-bar no mobile para evitar "barra dupla", sobreposição da topbar
+   sobre o header do modal (botão de fechar) e o efeito de navbar sumindo
+   junto com o teclado virtual. */
+body.modal-open .bottom-nav,
+body.modal-open .top-bar {
   visibility: hidden;
   pointer-events: none;
 }
 
-/* Sheet base (mobile): garante z-index acima da bottom-nav */
-.bottom-sheet-overlay { z-index: 400 !important; }
-.bottom-sheet { z-index: 401 !important; }
+/* Sheet base (mobile): garante z-index acima de tudo */
+.bottom-sheet-overlay { z-index: 1000 !important; }
+.bottom-sheet { z-index: 1001 !important; }
 
 /* ═══════════════════════════════════════════════════════════
    WATCH BUTTON — hover state
