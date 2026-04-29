@@ -18,7 +18,8 @@ import {
   X,
 } from "lucide-react";
 import { Spinner, StarRating, Avatar, Badge, Btn, Section, StreamingBadges, RatingsRow } from "../ui";
-import { useMovieDetails, useRatings, useWatchlist } from "../hooks";
+import { useMovieDetails, useRatings, useWatchlist, useMovieReviews } from "../hooks";
+import { resolveAvatarUrl } from "../foundation";
 import { useBodyScrollLock } from "@/hooks/use-body-scroll-lock";
 
 function getMovieClubRating(movie) {
@@ -273,6 +274,7 @@ export function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx,
   const [castExpanded, setCastExpanded] = useState(false);
   const { upsertRating, getRating, deleteRating, isPending: isRatingPending } = useRatings(authCtx?.user?.id);
   const { isInList, add: addToWatchlist, remove: removeFromWatchlist, isPending: isWlPending } = useWatchlist(authCtx?.user?.id);
+  const { reviews: dbReviews } = useMovieReviews(m?.tmdbId || m?.id, authCtx?.user?.id);
   const existingRating = m ? getRating(m.tmdbId || m.id) : null;
   const inWatchlist = m ? isInList(m.tmdbId || m.id) : false;
 
@@ -295,9 +297,17 @@ export function MoviePage({ movieInit, setPage, setSelectedMovie, auth: authCtx,
     );
   if (!m) return null;
 
-  const reviews = MOCK_REVIEWS.filter((r) => r.movieTmdbId === m.tmdbId).map((r) => ({
-    ...r,
-    user: MOCK_USERS.find((u) => u.id === r.userId),
+  const reviews = (dbReviews || []).map((r) => ({
+    id: r.id,
+    rating: Number(r.rating) || 0,
+    text: r.review || "",
+    date: new Date(r.updated_at || r.created_at).toLocaleDateString("pt-BR"),
+    user: {
+      id: r.user_id,
+      name: r.profile?.display_name || r.profile?.username || "Usuário",
+      username: r.profile?.username,
+      avatar: r.profile?.avatar_url ? resolveAvatarUrl(r.profile.avatar_url) : null,
+    },
   }));
 
   // ── MOBILE LAYOUT ─────────────────────────────────────
