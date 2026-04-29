@@ -711,7 +711,7 @@
 .bottom-sheet-overlay {
   position: fixed;
   inset: 0;
-  z-index: 300;
+  z-index: 1000;
   background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
@@ -722,12 +722,12 @@
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: 301;
+  z-index: 1001;
   background: #162130;
   border-top: 1px solid #1e3347;
   border-radius: 24px 24px 0 0;
   padding: 0 20px calc(20px + var(--safe-bottom));
-  max-height: calc(100dvh - var(--safe-top) - 24px);
+  max-height: calc(100dvh - 24px);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
